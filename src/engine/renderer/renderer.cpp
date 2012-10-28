@@ -41,7 +41,7 @@ void Renderer::setAmbientLight(const float r, const float g, const float b, cons
 
 void Renderer::initLighting() const {
     // enable lighting for legacy lights
-//     glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
+//     glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR); // 1.4
 
     set<Light*>::const_iterator it = m_lights.begin();
     for (size_t i = 0; i < m_lights.size(); ++i) {
@@ -88,10 +88,9 @@ void Renderer::loadTexture(unsigned int& textureId,
                            void* pixels) {
     GLenum textureFormatGL;
 
-    glGenTextures(1, &textureId);
-    glBindTexture(GL_TEXTURE_2D, textureId);
+    glGenTextures(1, &textureId); // 1.1
+    glBindTexture(GL_TEXTURE_2D, textureId); // 1.1
 
-    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -113,12 +112,13 @@ void Renderer::loadTexture(unsigned int& textureId,
         cerr << "Error: invalid texture_format_t: " << textureFormat << endl;
         textureFormatGL = GL_RGBA;
     }
+    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE); // 1.4 (1.1 GL_GENERATE_MIPMAP_EXT)
 //     gluBuild2DMipmaps(GL_TEXTURE_2D, bytesPerPixel, width, height, textureFormatGL, GL_UNSIGNED_BYTE, pixels);
     glTexImage2D(GL_TEXTURE_2D, 0, bytesPerPixel, width, height, 0, textureFormatGL, GL_UNSIGNED_BYTE, pixels);
 }
 
 void Renderer::deleteTexture(const size_t textureId) {
-    glDeleteTextures(1, &textureId);
+    glDeleteTextures(1, &textureId); // 1.1
 }
 
 void Renderer::draw() const {
@@ -163,17 +163,17 @@ void Renderer::draw() const {
 
             // set textures
             if (mtl.getTextureMap(MATERIAL_DIFFUSE_MAP) != 0)
-                glBindTexture(GL_TEXTURE_2D, mtl.getTextureMap(MATERIAL_DIFFUSE_MAP)->getId());
+                glBindTexture(GL_TEXTURE_2D, mtl.getTextureMap(MATERIAL_DIFFUSE_MAP)->getId()); // 1.1
             else
-                glBindTexture(GL_TEXTURE_2D, 0);
-            glTexCoordPointer(2, GL_FLOAT, 0, mesh.getUvCoordsPtr());
+                glBindTexture(GL_TEXTURE_2D, 0); // 1,1
+            glTexCoordPointer(2, GL_FLOAT, 0, mesh.getUvCoordsPtr()); // 1.1 (1.0 glTexCoordPointerEXT)
 
             // draw mesh
-            glVertexPointer(3, GL_FLOAT, 0, mesh.getVerticesPtr());
-            glNormalPointer(GL_FLOAT, 0, mesh.getNormalsPtr());
-            glDrawElements(GL_TRIANGLES, mesh.getTotalIndices(), GL_UNSIGNED_INT, mesh.getIndicesPtr());
+            glVertexPointer(3, GL_FLOAT, 0, mesh.getVerticesPtr()); // 1.1 (1.0 glVertexPointerEXT)
+            glNormalPointer(GL_FLOAT, 0, mesh.getNormalsPtr()); // 1.1 (1.0 glNormalPointerEXT)
+            glDrawElements(GL_TRIANGLES, mesh.getIndicesSize(), GL_UNSIGNED_INT, mesh.getIndicesPtr()); // 1.1 (1.0 glDrawArraysEXT)
         }
-        glPopMatrix();
+        glPopMatrix(); // 1,0
     }
 }
 
@@ -207,8 +207,15 @@ Renderer::Renderer():
     m_lights(),
     m_model()
 {
+    double openGLVersion;
+    double shaderLanguageVersion;
     GLint integer;
 
+    stringstream ss;
+    ss << glGetString(GL_SHADING_LANGUAGE_VERSION) << " " << glGetString(GL_VERSION);
+    ss >> shaderLanguageVersion >> openGLVersion;
+
+    // general information
     cout << "OpenGL version: " << glGetString(GL_VERSION) << endl;
     cout << "Shader language version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
     cout << "Vendor: " << glGetString(GL_VENDOR) << endl;
@@ -218,11 +225,48 @@ Renderer::Renderer():
     cout << integer << " extensions" << endl;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &integer);
     cout << "Max texture size: " << integer << endl;
-    //     GLint maxElements = 0;
-//     glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &maxElements);
-//     cout << "Vertex limit: " << maxElements << endl;
-//     glGetIntegerv(GL_MAX_ELEMENTS_INDICES, &maxElements);
-//     cout << "Index limit: " << maxElements << endl;
+    glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &integer);
+    cout << "Max vertices: " << integer << endl;
+    glGetIntegerv(GL_MAX_ELEMENTS_INDICES, &integer);
+    cout << "Max indices: " << integer << endl;
+
+    // capabilities and extensions
+    if (openGLVersion >= 4.3) {
+    }
+    else if (openGLVersion >= 4.2) {
+    }
+    else if (openGLVersion >= 4.1) {
+    }
+    else if (openGLVersion >= 4.0) {
+    }
+    else if (openGLVersion >= 3.3) {
+    }
+    else if (openGLVersion >= 3.2) {
+    }
+    else if (openGLVersion >= 3.1) {
+    }
+    else if (openGLVersion >= 3.0) {
+    }
+    else if (openGLVersion >= 2.1) {
+    }
+    else if (openGLVersion >= 2.0) {
+    }
+    else if (openGLVersion >= 1.5) {
+    }
+    else if (openGLVersion >= 1.4) {
+    }
+    else if (openGLVersion >= 1.3) {
+    }
+    else if (openGLVersion >= 1.2) {
+    }
+    else if (openGLVersion >= 1.1) {
+        // vertex arrays
+    }
+    else if (openGLVersion >= 1.0) {
+        // EXT_vertex_array
+    }
+    else
+        cerr << "Error: unsupported OpenGL version: " << openGLVersion << endl;
 }
 
 Renderer::Renderer(const Renderer& rhs):
@@ -256,9 +300,9 @@ void Renderer::initialize() {
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
     // enable arrays for Vertex Array (legacy)
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_NORMAL_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glEnableClientState(GL_VERTEX_ARRAY); // 1.1
+    glEnableClientState(GL_NORMAL_ARRAY); // 1.1
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY); // 1.1
 }
 
 void Renderer::deinitialize() {
