@@ -91,12 +91,11 @@ void Renderer::loadTexture(unsigned int& textureId,
     glGenTextures(1, &textureId);
     glBindTexture(GL_TEXTURE_2D, textureId);
 
-    glPixelStorei(GL_UNPACK_ALIGNMENT, bytesPerPixel);
+    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     switch (textureFormat) {
     case TEXTURE_FORMAT_RGBA:
         textureFormatGL = GL_RGBA;
@@ -114,8 +113,8 @@ void Renderer::loadTexture(unsigned int& textureId,
         cerr << "Error: invalid texture_format_t: " << textureFormat << endl;
         textureFormatGL = GL_RGBA;
     }
-    gluBuild2DMipmaps(GL_TEXTURE_2D, bytesPerPixel, width, height, textureFormatGL, GL_UNSIGNED_BYTE, pixels);
-//     glTexImage2D(GL_TEXTURE_2D, 0, bytesPerPixel, width, height, 0, textureFormatGL, GL_UNSIGNED_BYTE, pixels);
+//     gluBuild2DMipmaps(GL_TEXTURE_2D, bytesPerPixel, width, height, textureFormatGL, GL_UNSIGNED_BYTE, pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, bytesPerPixel, width, height, 0, textureFormatGL, GL_UNSIGNED_BYTE, pixels);
 }
 
 void Renderer::deleteTexture(const size_t textureId) {

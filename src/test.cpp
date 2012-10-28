@@ -132,7 +132,7 @@ void Game::loadScene() {
 //     cameraBody->addSphere(1);
 
     Entity* light1 = root->addChild("light1");
-    light1->setPositionAbs(5, 5, 0);
+    light1->setPositionAbs(5, 5, 5);
     Light* light1Cmp = new Light(light1);
     light1Cmp->setDiffuse(1.0, 1.0, 1.0);
 
