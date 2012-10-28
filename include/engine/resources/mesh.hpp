@@ -32,18 +32,22 @@ public:
 
     Mesh();
 
+    float getVertex(const size_t i) const;
     const std::vector<float>& getVertices() const;
     const float* getVerticesPtr() const;
-    size_t getTotalVertices() const;
+    size_t getVerticesSize() const;
+    float getNormal(const size_t i) const;
     const std::vector<float>& getNormals() const;
     const float* getNormalsPtr() const;
-    size_t getTotalNormals() const;
-    const std::vector<unsigned int>& getIndices() const;
-    const unsigned int* getIndicesPtr() const;
-    size_t getTotalIndices() const;
+    size_t getNormalsSize() const;
+    float getUvCoord(const size_t i) const;
     const std::vector<float>& getUvCoords() const;
     const float* getUvCoordsPtr() const;
-    size_t getTotalUvCoords() const;
+    size_t getUvCoordsSize() const;
+    unsigned int getIndex(const size_t i) const;
+    const std::vector<unsigned int>& getIndices() const;
+    const unsigned int* getIndicesPtr() const;
+    size_t getIndicesSize() const;
     const Material& getMaterial() const;
 
     Material& material();
@@ -52,21 +56,25 @@ public:
     void setVertices(const float* vertices, const size_t size);
     void setNormals(const std::vector<float>& normals);
     void setNormals(const float* normals, const size_t size);
-    void setIndices(const std::vector<unsigned int>& indices);
-    void setIndices(const unsigned int* indices, const size_t size);
     void setUvCoords(const std::vector<float>& uvCoords);
     void setUvCoords(const float* uvCoords, const size_t size);
+    void setIndices(const std::vector<unsigned int>& indices);
+    void setIndices(const unsigned int* indices, const size_t size);
     void setMaterial(const Material& material);
 
 private:
     std::vector<float> m_vertices;
     std::vector<float> m_normals;
-    std::vector<unsigned int> m_indices;
     std::vector<float> m_uvCoords;
+    std::vector<unsigned int> m_indices;
     Material m_material;
 };
 
 
+
+inline float Mesh::getVertex(const size_t i) const {
+    return m_vertices[i];
+}
 
 inline const std::vector< float >& Mesh::getVertices() const {
     return m_vertices;
@@ -76,8 +84,12 @@ inline const float* Mesh::getVerticesPtr() const {
     return &m_vertices[0];
 }
 
-inline size_t Mesh::getTotalVertices() const {
+inline size_t Mesh::getVerticesSize() const {
     return m_vertices.size();
+}
+
+inline float Mesh::getNormal(const size_t i) const {
+    return m_normals[i];
 }
 
 inline const std::vector< float >& Mesh::getNormals() const {
@@ -88,20 +100,12 @@ inline const float* Mesh::getNormalsPtr() const {
     return &m_normals[0];
 }
 
-inline size_t Mesh::getTotalNormals() const {
+inline size_t Mesh::getNormalsSize() const {
     return m_normals.size();
 }
 
-inline const std::vector< unsigned int >& Mesh::getIndices() const {
-    return m_indices;
-}
-
-inline const unsigned int* Mesh::getIndicesPtr() const {
-    return &m_indices[0];
-}
-
-inline size_t Mesh::getTotalIndices() const {
-    return m_indices.size();
+inline float Mesh::getUvCoord(const size_t i) const {
+    return m_uvCoords[i];
 }
 
 inline const std::vector< float >& Mesh::getUvCoords() const {
@@ -112,8 +116,24 @@ inline const float* Mesh::getUvCoordsPtr() const {
     return &m_uvCoords[0];
 }
 
-inline size_t Mesh::getTotalUvCoords() const {
+inline size_t Mesh::getUvCoordsSize() const {
     return m_uvCoords.size();
+}
+
+inline unsigned int Mesh::getIndex(const size_t i) const {
+    return m_indices[i];
+}
+
+inline const std::vector< unsigned int >& Mesh::getIndices() const {
+    return m_indices;
+}
+
+inline const unsigned int* Mesh::getIndicesPtr() const {
+    return &m_indices[0];
+}
+
+inline size_t Mesh::getIndicesSize() const {
+    return m_indices.size();
 }
 
 inline const Material& Mesh::getMaterial() const {

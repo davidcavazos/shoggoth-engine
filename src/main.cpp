@@ -2,12 +2,12 @@
 
 #include <iostream>
 #include <cstdlib>
-#include "test.hpp"
+#include "demo.hpp"
 
 using namespace std;
 
 int main(int, char**) {
-    Game game("game", "root");
+    Demo game("game", "root");
     game.loadScene();
     game.bindInputs();
     game.runGameLoop();

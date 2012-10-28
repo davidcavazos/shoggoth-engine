@@ -244,22 +244,22 @@ bool ModelLoader::writeBinary(const std::string& fileName, Model& model) {
     // write body
     for (size_t n = 0; n < model.m_meshes.size(); ++n) {
         // vertices
-        size = model.mesh(n).getTotalVertices();
+        size = model.mesh(n).getVerticesSize();
         file.write(reinterpret_cast<char*>(&size), sizeof(size_t));
         file.write(reinterpret_cast<char*>(&model.mesh(n).m_vertices[0]), size * sizeof(float));
 
         // normals
-        size = model.mesh(n).getTotalNormals();
+        size = model.mesh(n).getNormalsSize();
         file.write(reinterpret_cast<char*>(&size), sizeof(size_t));
         file.write(reinterpret_cast<char*>(&model.mesh(n).m_normals[0]), size * sizeof(float));
 
         // indices
-        size = model.mesh(n).getTotalIndices();
+        size = model.mesh(n).getIndicesSize();
         file.write(reinterpret_cast<char*>(&size), sizeof(size_t));
         file.write(reinterpret_cast<char*>(&model.mesh(n).m_indices[0]), size * sizeof(unsigned int));
 
         // uv maps
-        size = model.mesh(n).getTotalUvCoords();
+        size = model.mesh(n).getUvCoordsSize();
         file.write(reinterpret_cast<char*>(&size), sizeof(size_t));
         file.write(reinterpret_cast<char*>(&model.mesh(n).m_uvCoords[0]), size * sizeof(float));
 

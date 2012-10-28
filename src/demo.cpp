@@ -18,7 +18,7 @@
 */
 
 
-#include "test.hpp"
+#include "demo.hpp"
 
 #include <iostream>
 #include <string>
@@ -45,20 +45,20 @@ const double FIRE_SPEED = 50.0;
 const double MISSILE_SIZE = 0.5;
 
 
-Game::Game(const string& objectName, const string& rootNodeName):
+Demo::Demo(const string& objectName, const string& rootNodeName):
     CommandObject(objectName),
     m_isRunning(false),
     m_sceneManager(rootNodeName)
 {
-    registerCommand("quit", boost::bind(&Game::quit, this, _1));
-    registerCommand("run", boost::bind(&Game::runCommand, this, _1));
-    registerCommand("print-entity", boost::bind(&Game::printEntity, this, _1));
-    registerCommand("on-mouse-motion", boost::bind(&Game::onMouseMotion, this, _1));
-    registerCommand("fire-cube", boost::bind(&Game::fireCube, this, _1));
-    registerCommand("fire-sphere", boost::bind(&Game::fireSphere, this, _1));
+    registerCommand("quit", boost::bind(&Demo::quit, this, _1));
+    registerCommand("run", boost::bind(&Demo::runCommand, this, _1));
+    registerCommand("print-entity", boost::bind(&Demo::printEntity, this, _1));
+    registerCommand("on-mouse-motion", boost::bind(&Demo::onMouseMotion, this, _1));
+    registerCommand("fire-cube", boost::bind(&Demo::fireCube, this, _1));
+    registerCommand("fire-sphere", boost::bind(&Demo::fireSphere, this, _1));
 
     Device* device = DeviceManager::create();
-    device->setTitle("Shoggoth Engine");
+    device->setTitle("Shoggoth Engine Demo");
     device->setResolution(800, 500);
 //     device->setFullscreen();
 
@@ -67,14 +67,14 @@ Game::Game(const string& objectName, const string& rootNodeName):
     PhysicsManager::create();
 }
 
-Game::~Game() {
+Demo::~Demo() {
     PhysicsManager::shutdown();
     RenderManager::shutdown();
     ResourceManager::shutdown();
     DeviceManager::shutdown();
 }
 
-void Game::loadScene() {
+void Demo::loadScene() {
     cout << "Loading scene..." << endl;
 
     Entity* root = m_sceneManager.getRootPtr();
@@ -152,7 +152,7 @@ void Game::loadScene() {
 //     cout << ResourceManager::listsToString() << endl;
 }
 
-void Game::bindInputs() {
+void Demo::bindInputs() {
     cout << "Binding inputs..." << endl;
     InputManager& inputs = DeviceManager::getDevice().getInputManager();
     inputs.bindInput(INPUT_KEY_RELEASE, "game quit", SDLK_ESCAPE);
@@ -174,7 +174,7 @@ void Game::bindInputs() {
     inputs.bindInput(INPUT_MOUSE_BUTTON_RELEASE, "game fire-sphere", 3);
 }
 
-void Game::runGameLoop() {
+void Demo::runGameLoop() {
     Uint32 startTime;
     Uint32 deltaTime;
 
@@ -197,7 +197,7 @@ void Game::runGameLoop() {
 
         stringstream ss;
         deltaTime = SDL_GetTicks() - startTime;
-        ss << "Shoggoth Engine - CPU:" << setw(3) << deltaTime << " ms - ";
+        ss << "Shoggoth Engine Demo - CPU:" << setw(3) << deltaTime << " ms - ";
 
         startTime = SDL_GetTicks();
         renderer->draw();
@@ -211,11 +211,11 @@ void Game::runGameLoop() {
     }
 }
 
-void Game::quit(const string&) {
+void Demo::quit(const string&) {
     m_isRunning = false;
 }
 
-void Game::runCommand(const string& arg) {
+void Demo::runCommand(const string& arg) {
     string cmd;
 
     fstream file(arg.c_str(), ios::in);
@@ -229,13 +229,13 @@ void Game::runCommand(const string& arg) {
     file.close();
 }
 
-void Game::printEntity(const string& arg) {
+void Demo::printEntity(const string& arg) {
     Entity* entity;
     if (m_sceneManager.findEntity(arg, entity))
         cout << *entity << endl;
 }
 
-void Game::onMouseMotion(const string&) {
+void Demo::onMouseMotion(const string&) {
     static Command moveXCmd("camera yaw-global");
     static Command moveYCmd("camera pitch");
 
@@ -253,7 +253,7 @@ void Game::onMouseMotion(const string&) {
     Terminal::pushCommand(moveYCmd);
 }
 
-void Game::fireCube(const std::string&) {
+void Demo::fireCube(const std::string&) {
     Entity* camera;
     if (m_sceneManager.findEntity("camera", camera)) {
         static size_t n = 0;
@@ -275,7 +275,7 @@ void Game::fireCube(const std::string&) {
     }
 }
 
-void Game::fireSphere(const std::string&) {
+void Demo::fireSphere(const std::string&) {
     Entity* camera;
     if (m_sceneManager.findEntity("camera", camera)) {
         static size_t n = 0;

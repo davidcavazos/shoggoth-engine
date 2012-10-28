@@ -315,8 +315,8 @@ void RigidBody::addConvexHull(const string& fileName) {
         Model* model = ResourceManager::getResources().generateModelFromFile(fileName);
         vector<float> points;
         for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
-            points.reserve(points.size() + model->mesh(n).getTotalVertices());
-            for (size_t i = 0; i < model->mesh(n).getTotalVertices(); ++i)
+            points.reserve(points.size() + model->mesh(n).getVerticesSize());
+            for (size_t i = 0; i < model->mesh(n).getVerticesSize(); ++i)
                 points.push_back(model->mesh(n).getVertices()[i]);
         }
         btConvexShape* originalConvexShape = new btConvexHullShape(&points[0], points.size(), sizeof(float) * 3);
@@ -354,10 +354,10 @@ void RigidBody::addConcaveHull(const string& fileName) {
         btTriangleIndexVertexArray* triangles = new btTriangleIndexVertexArray();
         for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
             btIndexedMesh indexedMesh;
-            indexedMesh.m_numTriangles = model->mesh(n).getTotalIndices() / 3;
+            indexedMesh.m_numTriangles = model->mesh(n).getIndicesSize() / 3;
             indexedMesh.m_triangleIndexBase = (const unsigned char*)model->mesh(n).getIndicesPtr();
             indexedMesh.m_triangleIndexStride = sizeof(unsigned int);
-            indexedMesh.m_numVertices = model->mesh(n).getTotalVertices();
+            indexedMesh.m_numVertices = model->mesh(n).getVerticesSize();
             indexedMesh.m_vertexBase = (const unsigned char*)model->mesh(n).getVerticesPtr();
             indexedMesh.m_vertexStride = sizeof(float);
             triangles->addIndexedMesh(indexedMesh);

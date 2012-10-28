@@ -18,12 +18,32 @@
 */
 
 
-#include "engine/resources/mesh.hpp"
+#ifndef GAME_HPP
+#define GAME_HPP
 
-Mesh::Mesh():
-    m_vertices(),
-    m_normals(),
-    m_uvCoords(),
-    m_indices(),
-    m_material()
-{}
+#include "engine/kernel/scenemanager.hpp"
+
+class Device;
+
+class Demo: public CommandObject {
+public:
+    Demo(const std::string& objectName, const std::string& rootNodeName);
+    ~Demo();
+
+    void loadScene();
+    void bindInputs();
+    void runGameLoop();
+
+private:
+    bool m_isRunning;
+    SceneManager m_sceneManager;
+
+    void quit(const std::string&);
+    void runCommand(const std::string& arg);
+    void printEntity(const std::string& arg);
+    void onMouseMotion(const std::string&);
+    void fireCube(const std::string&);
+    void fireSphere(const std::string&);
+};
+
+#endif // GAME_HPP

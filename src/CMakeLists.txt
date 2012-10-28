@@ -2,7 +2,7 @@ set(EXE_NAME marble-madness-3d)
 
 # Target
 set(SRC_FILES
-    test.cpp
+    demo.cpp
     main.cpp
 )
 set(LIBRARIES
