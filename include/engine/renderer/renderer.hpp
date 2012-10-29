@@ -23,7 +23,6 @@
 
 #include <string>
 #include <set>
-#include "engine/resources/texture.hpp"
 
 class Vector3;
 class Quaternion;
@@ -31,6 +30,8 @@ class RenderManager;
 class Camera;
 class Light;
 class RenderableMesh;
+class Mesh;
+class Texture;
 
 class Renderer {
 public:
@@ -41,13 +42,10 @@ public:
 
     void setAmbientLight(const float r, const float g, const float b, const float a = 1.0f);
     void initLighting() const;
-    void loadTexture(unsigned int& textureId,
-                     const size_t bytesPerPixel,
-                     const size_t width,
-                     const size_t height,
-                     const texture_format_t& textureFormat,
-                     void* pixels);
-    void deleteTexture(const size_t textureId);
+    void uploadModel(unsigned int& meshId, unsigned int& indicesId, const Mesh& mesh);
+    void deleteModel(const unsigned int meshId, const unsigned int indicesId);
+    void uploadTexture(unsigned int& textureId, const Texture& texture);
+    void deleteTexture(const unsigned int textureId);
     void draw() const;
     std::string listsToString() const;
 

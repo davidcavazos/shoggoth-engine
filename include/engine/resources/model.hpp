@@ -41,6 +41,8 @@ public:
     void setIdentifier(const std::string& identifier);
     void setTotalMeshes(const size_t totalMeshes);
 
+    void uploadToGPU();
+
 private:
     std::string m_identifier;
     std::vector<Mesh> m_meshes;

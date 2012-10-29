@@ -66,6 +66,7 @@ Model* Resources::generateBox(const string& identifier, const double lengthX, co
     model->mesh(0).setNormals(normals, 72);
     model->mesh(0).setIndices(indices, 36);
     registerModel(model);
+    model->uploadToGPU();
     return model;
 }
 
@@ -78,6 +79,7 @@ Model* Resources::generateModelFromFile(const std::string& fileName) {
     model = new Model(fileName);
     ModelLoader::load(fileName, *model);
     registerModel(model);
+    model->uploadToGPU();
     return model;
 }
 

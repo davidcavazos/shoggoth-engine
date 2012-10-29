@@ -78,8 +78,7 @@ void Texture::load(const string& fileName) {
         cerr << "Warning: image is not truecolor: " << fileName << endl;
     }
 
-    RenderManager::getRenderer().loadTexture(m_textureId, m_bytesPerPixel, m_width,
-                                             m_height, m_textureFormat, m_pixels);
+    RenderManager::getRenderer().uploadTexture(m_textureId, *this);
     SDL_FreeSurface(img);
 }
 

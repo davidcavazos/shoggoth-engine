@@ -31,23 +31,30 @@ public:
     friend class ModelLoader;
 
     Mesh();
+    ~Mesh();
 
+    unsigned int getMeshId() const;
+    unsigned int getIndicesId() const;
     float getVertex(const size_t i) const;
     const std::vector<float>& getVertices() const;
     const float* getVerticesPtr() const;
     size_t getVerticesSize() const;
+    size_t getVerticesBytes() const;
     float getNormal(const size_t i) const;
     const std::vector<float>& getNormals() const;
     const float* getNormalsPtr() const;
     size_t getNormalsSize() const;
+    size_t getNormalsBytes() const;
     float getUvCoord(const size_t i) const;
     const std::vector<float>& getUvCoords() const;
     const float* getUvCoordsPtr() const;
     size_t getUvCoordsSize() const;
+    size_t getUvCoordsBytes() const;
     unsigned int getIndex(const size_t i) const;
     const std::vector<unsigned int>& getIndices() const;
     const unsigned int* getIndicesPtr() const;
     size_t getIndicesSize() const;
+    size_t getIndicesBytes() const;
     const Material& getMaterial() const;
 
     Material& material();
@@ -62,7 +69,11 @@ public:
     void setIndices(const unsigned int* indices, const size_t size);
     void setMaterial(const Material& material);
 
+    void uploadToGPU();
+
 private:
+    unsigned int m_meshId;
+    unsigned int m_indicesId;
     std::vector<float> m_vertices;
     std::vector<float> m_normals;
     std::vector<float> m_uvCoords;
@@ -71,6 +82,14 @@ private:
 };
 
 
+
+inline unsigned int Mesh::getMeshId() const {
+    return m_meshId;
+}
+
+inline unsigned int Mesh::getIndicesId() const {
+    return m_indicesId;
+}
 
 inline float Mesh::getVertex(const size_t i) const {
     return m_vertices[i];
@@ -86,6 +105,10 @@ inline const float* Mesh::getVerticesPtr() const {
 
 inline size_t Mesh::getVerticesSize() const {
     return m_vertices.size();
+}
+
+inline size_t Mesh::getVerticesBytes() const {
+    return m_vertices.size() * sizeof(float);
 }
 
 inline float Mesh::getNormal(const size_t i) const {
@@ -104,6 +127,10 @@ inline size_t Mesh::getNormalsSize() const {
     return m_normals.size();
 }
 
+inline size_t Mesh::getNormalsBytes() const {
+    return m_normals.size() * sizeof(float);
+}
+
 inline float Mesh::getUvCoord(const size_t i) const {
     return m_uvCoords[i];
 }
@@ -120,6 +147,10 @@ inline size_t Mesh::getUvCoordsSize() const {
     return m_uvCoords.size();
 }
 
+inline size_t Mesh::getUvCoordsBytes() const {
+    return m_uvCoords.size() * sizeof(float);
+}
+
 inline unsigned int Mesh::getIndex(const size_t i) const {
     return m_indices[i];
 }
@@ -134,6 +165,10 @@ inline const unsigned int* Mesh::getIndicesPtr() const {
 
 inline size_t Mesh::getIndicesSize() const {
     return m_indices.size();
+}
+
+inline size_t Mesh::getIndicesBytes() const {
+    return m_indices.size() * sizeof(unsigned int);
 }
 
 inline const Material& Mesh::getMaterial() const {

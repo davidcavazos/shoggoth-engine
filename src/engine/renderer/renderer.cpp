@@ -31,8 +31,25 @@
 #include "engine/renderer/renderablemesh.hpp"
 #include "engine/renderer/light.hpp"
 #include "engine/resources/model.hpp"
+#include "engine/resources/texture.hpp"
 
 using namespace std;
+
+typedef enum {
+    DATA_UPLOAD_VERTEX_ARRAY, // 1.1
+    DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT, // extension
+    DATA_UPLOAD_VERTEX_BUFFER_OBJECT // 1.5
+} data_upload_t;
+
+typedef enum {
+    MIPMAP_GENERATION_GLU, // 1.0
+    MIPMAP_GENERATION_TEX_PARAMETER_EXT, // extension
+    MIPMAP_GENERATION_TEX_PARAMETER // 1.4
+} mipmap_generation_t;
+
+data_upload_t gDataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
+mipmap_generation_t gMipMapGenerationMode = MIPMAP_GENERATION_GLU;
+
 
 void Renderer::setAmbientLight(const float r, const float g, const float b, const float a) {
     GLfloat global_ambient[] = {r, g, b, a};
@@ -80,45 +97,152 @@ void Renderer::initLighting() const {
     }
 }
 
-void Renderer::loadTexture(unsigned int& textureId,
-                           const size_t bytesPerPixel,
-                           const size_t width,
-                           const size_t height,
-                           const texture_format_t& textureFormat,
-                           void* pixels) {
-    GLenum textureFormatGL;
+void Renderer::uploadModel(unsigned int& meshId, unsigned int& indicesId, const Mesh& mesh) {
+    int bufferSize;
+    size_t verticesBytes = mesh.getVerticesBytes();
+    size_t normalsBytes = mesh.getNormalsBytes();
+    size_t uvCoordsBytes = mesh.getUvCoordsBytes();
+    size_t indicesBytes = mesh.getIndicesBytes();
+    switch (gDataUploadMode) {
+        case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
+            glGenBuffers(1, &meshId);
+            glBindBuffer(GL_ARRAY_BUFFER, meshId);
+            glBufferData(GL_ARRAY_BUFFER,
+                         verticesBytes + normalsBytes + uvCoordsBytes,
+                         0,
+                         GL_STATIC_DRAW);
+            glBufferSubData(GL_ARRAY_BUFFER,
+                            0,
+                            verticesBytes,
+                            mesh.getVerticesPtr());
+            glBufferSubData(GL_ARRAY_BUFFER,
+                            verticesBytes,
+                            normalsBytes,
+                            mesh.getNormalsPtr());
+            glBufferSubData(GL_ARRAY_BUFFER,
+                            verticesBytes + normalsBytes,
+                            uvCoordsBytes,
+                            mesh.getUvCoordsPtr());
+            glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+            if(verticesBytes + normalsBytes + uvCoordsBytes != (size_t)bufferSize)
+                cerr << "Error: data size is mismatch with input array" << endl;
 
-    glGenTextures(1, &textureId); // 1.1
-    glBindTexture(GL_TEXTURE_2D, textureId); // 1.1
+            glGenBuffers(1, &indicesId);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesId);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                         indicesBytes,
+                         mesh.getIndicesPtr(),
+                         GL_STATIC_DRAW);
+            glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+            if(indicesBytes != (size_t)bufferSize)
+                cerr << "Error: data size is mismatch with input array" << endl;
+            break;
+        case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
+            glGenBuffersARB(1, &meshId);
+            glBindBufferARB(GL_ARRAY_BUFFER_ARB, meshId);
+            glBufferDataARB(GL_ARRAY_BUFFER_ARB,
+                            verticesBytes + normalsBytes + uvCoordsBytes,
+                            0,
+                            GL_STATIC_DRAW_ARB);
+            glBufferSubDataARB(GL_ARRAY_BUFFER_ARB,
+                               0,
+                               verticesBytes,
+                               mesh.getVerticesPtr());
+            glBufferSubDataARB(GL_ARRAY_BUFFER_ARB,
+                               verticesBytes,
+                               normalsBytes,
+                               mesh.getNormalsPtr());
+            glBufferSubDataARB(GL_ARRAY_BUFFER_ARB,
+                               verticesBytes + normalsBytes,
+                               uvCoordsBytes,
+                               mesh.getUvCoordsPtr());
+            glGetBufferParameterivARB(GL_ARRAY_BUFFER_ARB, GL_BUFFER_SIZE_ARB, &bufferSize);
+            if(verticesBytes + normalsBytes + uvCoordsBytes != (size_t)bufferSize)
+                cerr << "Error: data size is mismatch with input array" << endl;
+
+            glGenBuffersARB(1, &indicesId);
+            glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, indicesId);
+            glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB,
+                            indicesBytes,
+                            mesh.getIndicesPtr(),
+                            GL_STATIC_DRAW_ARB);
+            glGetBufferParameterivARB(GL_ELEMENT_ARRAY_BUFFER_ARB, GL_BUFFER_SIZE_ARB, &bufferSize);
+            if(indicesBytes != (size_t)bufferSize)
+                cerr << "Error: data size is mismatch with input array" << endl;
+            break;
+        case DATA_UPLOAD_VERTEX_ARRAY:
+            break;
+        default:
+            cerr << "Error: invalid data_upload_t: " << gDataUploadMode << endl;
+    }
+}
+
+void Renderer::deleteModel(const unsigned int meshId, const unsigned int indicesId) {
+    switch (gDataUploadMode) {
+        case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
+            glDeleteBuffers(1, &meshId);
+            glDeleteBuffers(1, &indicesId);
+            break;
+        case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
+            glDeleteBuffersARB(1, &meshId);
+            glDeleteBuffersARB(1, &indicesId);
+            break;
+        case DATA_UPLOAD_VERTEX_ARRAY:
+            break;
+        default:
+            cerr << "Error: invalid data_upload_t: " << gDataUploadMode << endl;
+    }
+}
+
+void Renderer::uploadTexture(unsigned int& textureId, const Texture& texture) {
+    GLenum textureFormat;
+
+    glGenTextures(1, &textureId);
+    glBindTexture(GL_TEXTURE_2D, textureId);
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    switch (textureFormat) {
+    switch (texture.getTextureFormat()) {
     case TEXTURE_FORMAT_RGBA:
-        textureFormatGL = GL_RGBA;
+        textureFormat = GL_RGBA;
         break;
     case TEXTURE_FORMAT_RGB:
-        textureFormatGL = GL_RGB;
+        textureFormat = GL_RGB;
         break;
     case TEXTURE_FORMAT_BGRA:
-        textureFormatGL = GL_BGRA;
+        textureFormat = GL_BGRA;
         break;
     case TEXTURE_FORMAT_BGR:
-        textureFormatGL = GL_BGR;
+        textureFormat = GL_BGR;
         break;
     default:
-        cerr << "Error: invalid texture_format_t: " << textureFormat << endl;
-        textureFormatGL = GL_RGBA;
+        cerr << "Error: invalid texture_format_t: " << texture.getTextureFormat() << endl;
+        textureFormat = GL_RGBA;
     }
-    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE); // 1.4 (1.1 GL_GENERATE_MIPMAP_EXT)
-//     gluBuild2DMipmaps(GL_TEXTURE_2D, bytesPerPixel, width, height, textureFormatGL, GL_UNSIGNED_BYTE, pixels);
-    glTexImage2D(GL_TEXTURE_2D, 0, bytesPerPixel, width, height, 0, textureFormatGL, GL_UNSIGNED_BYTE, pixels);
+    switch (gMipMapGenerationMode) {
+    case MIPMAP_GENERATION_TEX_PARAMETER:
+        glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE); // 1.4
+        glTexImage2D(GL_TEXTURE_2D, 0, texture.getBytesPerPixel(), texture.getWidth(),
+                     texture.getHeight(), 0, textureFormat, GL_UNSIGNED_BYTE, texture.getPixels());
+        break;
+    case MIPMAP_GENERATION_TEX_PARAMETER_EXT:
+        glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, GL_TRUE);
+        glTexImage2D(GL_TEXTURE_2D, 0, texture.getBytesPerPixel(), texture.getWidth(),
+                     texture.getHeight(), 0, textureFormat, GL_UNSIGNED_BYTE, texture.getPixels());
+        break;
+    case MIPMAP_GENERATION_GLU:
+        gluBuild2DMipmaps(GL_TEXTURE_2D, texture.getBytesPerPixel(), texture.getWidth(),
+                          texture.getHeight(), textureFormat, GL_UNSIGNED_BYTE, texture.getPixels());
+        break;
+    default:
+        cerr << "Error: invalid mipmap_generation_t: " << gMipMapGenerationMode << endl;
+    }
 }
 
-void Renderer::deleteTexture(const size_t textureId) {
-    glDeleteTextures(1, &textureId); // 1.1
+void Renderer::deleteTexture(const unsigned int textureId) {
+    glDeleteTextures(1, &textureId);
 }
 
 void Renderer::draw() const {
@@ -163,17 +287,47 @@ void Renderer::draw() const {
 
             // set textures
             if (mtl.getTextureMap(MATERIAL_DIFFUSE_MAP) != 0)
-                glBindTexture(GL_TEXTURE_2D, mtl.getTextureMap(MATERIAL_DIFFUSE_MAP)->getId()); // 1.1
+                glBindTexture(GL_TEXTURE_2D, mtl.getTextureMap(MATERIAL_DIFFUSE_MAP)->getId());
             else
-                glBindTexture(GL_TEXTURE_2D, 0); // 1,1
-            glTexCoordPointer(2, GL_FLOAT, 0, mesh.getUvCoordsPtr()); // 1.1 (1.0 glTexCoordPointerEXT)
+                glBindTexture(GL_TEXTURE_2D, 0);
 
             // draw mesh
-            glVertexPointer(3, GL_FLOAT, 0, mesh.getVerticesPtr()); // 1.1 (1.0 glVertexPointerEXT)
-            glNormalPointer(GL_FLOAT, 0, mesh.getNormalsPtr()); // 1.1 (1.0 glNormalPointerEXT)
-            glDrawElements(GL_TRIANGLES, mesh.getIndicesSize(), GL_UNSIGNED_INT, mesh.getIndicesPtr()); // 1.1 (1.0 glDrawArraysEXT)
+            switch (gDataUploadMode) {
+            case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
+                glBindBuffer(GL_ARRAY_BUFFER, mesh.getMeshId());
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.getIndicesId());
+
+                glVertexPointer(3, GL_FLOAT, 0, 0);
+                glNormalPointer(GL_FLOAT, 0, (GLvoid*)(mesh.getVerticesBytes()));
+                glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(mesh.getVerticesBytes() + mesh.getNormalsBytes()));
+                glDrawElements(GL_TRIANGLES, mesh.getIndicesSize(), GL_UNSIGNED_INT, 0);
+
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+                glBindBuffer(GL_ARRAY_BUFFER, 0);
+                break;
+            case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
+                glBindBufferARB(GL_ARRAY_BUFFER_ARB, mesh.getMeshId());
+                glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mesh.getIndicesId());
+
+                glVertexPointer(3, GL_FLOAT, 0, 0);
+                glNormalPointer(GL_FLOAT, 0, (GLvoid*)(mesh.getVerticesBytes()));
+                glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(mesh.getVerticesBytes() + mesh.getNormalsBytes()));
+                glDrawElements(GL_TRIANGLES, mesh.getIndicesSize(), GL_UNSIGNED_INT, 0);
+
+                glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+                glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+                break;
+            case DATA_UPLOAD_VERTEX_ARRAY:
+                glVertexPointer(3, GL_FLOAT, 0, mesh.getVerticesPtr());
+                glNormalPointer(GL_FLOAT, 0, mesh.getNormalsPtr());
+                glTexCoordPointer(2, GL_FLOAT, 0, mesh.getUvCoordsPtr());
+                glDrawElements(GL_TRIANGLES, mesh.getIndicesSize(), GL_UNSIGNED_INT, mesh.getIndicesPtr());
+                break;
+            default:
+                cerr << "Error: invalid data_upload_t: " << gDataUploadMode << endl;
+            }
         }
-        glPopMatrix(); // 1,0
+        glPopMatrix();
     }
 }
 
@@ -216,57 +370,110 @@ Renderer::Renderer():
     ss >> shaderLanguageVersion >> openGLVersion;
 
     // general information
-    cout << "OpenGL version: " << glGetString(GL_VERSION) << endl;
-    cout << "Shader language version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
+    cout << endl;
+    cout << "OpenGL Driver Info" << endl;
+    cout << "==================" << endl;
     cout << "Vendor: " << glGetString(GL_VENDOR) << endl;
+    cout << "Version: " << glGetString(GL_VERSION) << endl;
+    cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
     cout << "Renderer: " << glGetString(GL_RENDERER) << endl;
-    cout << "Using OpenGL Legacy" << endl;
-    glGetIntegerv(GL_NUM_EXTENSIONS, &integer);
-    cout << integer << " extensions" << endl;
+
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &integer);
-    cout << "Max texture size: " << integer << endl;
+    cout << "Max texture size: " << integer << "x" << integer << endl;
+    glGetIntegerv(GL_MAX_LIGHTS, &integer);
+    cout << "Max lights: " << integer << endl;
+    glGetIntegerv(GL_MAX_CLIP_PLANES, &integer);
+    cout << "Max clip planes: " << integer << endl;
+    glGetIntegerv(GL_MAX_MODELVIEW_STACK_DEPTH, &integer);
+    cout << "Max ModelView stack depth: " << integer << endl;
+    glGetIntegerv(GL_MAX_PROJECTION_STACK_DEPTH, &integer);
+    cout << "Max Projection stack depth: " << integer << endl;
+    glGetIntegerv(GL_MAX_ATTRIB_STACK_DEPTH, &integer);
+    cout << "Max Attribute stack depth: " << integer << endl;
+    glGetIntegerv(GL_MAX_TEXTURE_STACK_DEPTH, &integer);
+    cout << "Max Texture stack depth: " << integer << endl;
     glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &integer);
     cout << "Max vertices: " << integer << endl;
     glGetIntegerv(GL_MAX_ELEMENTS_INDICES, &integer);
     cout << "Max indices: " << integer << endl;
 
-    // capabilities and extensions
-    if (openGLVersion >= 4.3) {
-    }
-    else if (openGLVersion >= 4.2) {
-    }
-    else if (openGLVersion >= 4.1) {
-    }
-    else if (openGLVersion >= 4.0) {
-    }
-    else if (openGLVersion >= 3.3) {
-    }
-    else if (openGLVersion >= 3.2) {
-    }
-    else if (openGLVersion >= 3.1) {
-    }
-    else if (openGLVersion >= 3.0) {
-    }
-    else if (openGLVersion >= 2.1) {
-    }
-    else if (openGLVersion >= 2.0) {
-    }
-    else if (openGLVersion >= 1.5) {
-    }
-    else if (openGLVersion >= 1.4) {
-    }
-    else if (openGLVersion >= 1.3) {
-    }
-    else if (openGLVersion >= 1.2) {
-    }
-    else if (openGLVersion >= 1.1) {
-        // vertex arrays
-    }
-    else if (openGLVersion >= 1.0) {
-        // EXT_vertex_array
-    }
+    // capabilities
+    if (openGLVersion >= 3.0)
+        cout << "Using OpenGL Core " << openGLVersion << endl;
     else
+        cout << "Using OpenGL Legacy " << openGLVersion << endl;
+
+    // default techniques
+    gDataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
+    gMipMapGenerationMode = MIPMAP_GENERATION_GLU;
+
+    // version techniques
+    int openGLVersionInt = floor(openGLVersion * 10.0 + 0.5);
+    switch (openGLVersionInt) {
+    case 43: // 4.3
+    case 42: // 4.2
+    case 41: // 4.1
+    case 40: // 4.0
+    case 33: // 3.3
+    case 32: // 3.2
+    case 31: // 3.1
+    case 30: // 3.0
+    case 21: // 2.1
+    case 20: // 2.0
+    case 15: // 1.5
+        gDataUploadMode = DATA_UPLOAD_VERTEX_BUFFER_OBJECT;
+    case 14: // 1.4
+        gMipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER;
+        break;
+    case 13: // 1.3
+    case 12: // 1.2
+    case 11: // 1.1
+        gDataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
+        gMipMapGenerationMode = MIPMAP_GENERATION_GLU;
+        break;
+    default:
         cerr << "Error: unsupported OpenGL version: " << openGLVersion << endl;
+    }
+
+    // extension techniques
+    glGetIntegerv(GL_NUM_EXTENSIONS, &integer);
+    cout << "Extensions: " << integer << endl;
+    if (glewInit() != GLEW_OK)
+        cerr << "Error: failed to initialize GLEW" << endl;
+    if (gDataUploadMode == DATA_UPLOAD_VERTEX_ARRAY &&
+        glewIsSupported("GL_ARB_vertex_buffer_object"))
+        gDataUploadMode = DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT;
+    if (gMipMapGenerationMode == MIPMAP_GENERATION_GLU &&
+        glewIsSupported("GL_SGIS_generate_mipmap"))
+        gMipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER_EXT;
+
+    switch (gDataUploadMode) {
+    case DATA_UPLOAD_VERTEX_ARRAY:
+        cout << "Using Vertex Arrays" << endl;
+        break;
+    case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
+        cout << "Using Vertex Buffer Objects EXT" << endl;
+        break;
+    case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
+        cout << "Using Vertex Buffer Objects" << endl;
+        break;
+    default:
+        cerr << "Error: invalid data_upload_t: " << gDataUploadMode << endl;
+    }
+    switch (gMipMapGenerationMode) {
+    case MIPMAP_GENERATION_GLU:
+        cout << "Using gluBuild2DMipmaps" << endl;
+        break;
+    case MIPMAP_GENERATION_TEX_PARAMETER_EXT:
+        cout << "Using GL_GENERATE_MIPMAP_SGIS" << endl;
+        break;
+    case MIPMAP_GENERATION_TEX_PARAMETER:
+        cout << "Using GL_GENERATE_MIPMAP" << endl;
+        break;
+    default:
+        cerr << "Error: invalid mipmap_generation_t: " << gMipMapGenerationMode << endl;
+    }
+    cout << endl;
 }
 
 Renderer::Renderer(const Renderer& rhs):
@@ -299,10 +506,9 @@ void Renderer::initialize() {
     glEnable(GL_TEXTURE_2D);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-    // enable arrays for Vertex Array (legacy)
-    glEnableClientState(GL_VERTEX_ARRAY); // 1.1
-    glEnableClientState(GL_NORMAL_ARRAY); // 1.1
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY); // 1.1
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 void Renderer::deinitialize() {

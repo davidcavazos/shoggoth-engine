@@ -24,3 +24,8 @@ Model::Model(const std::string& identifier):
     m_identifier(identifier),
     m_meshes()
 {}
+
+void Model::uploadToGPU() {
+    for (size_t i = 0; i < m_meshes.size(); ++i)
+        m_meshes[i].uploadToGPU();
+}

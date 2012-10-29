@@ -1,5 +1,3 @@
-+ Detect OpenGL version and capabilities (check for extensions)
-+ Implement VBO_ARB and Core VBO
 + Implement OpenGL Core and shaders
 + Advanced lighting (spotlights and directional lights)
 + Debug camera
