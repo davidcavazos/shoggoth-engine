@@ -63,6 +63,7 @@ public:
               const double linearSleepingThreshold = 0.8,
               const double angularSleepingThreshold = 1.0,
               const double restitution = 0.0);
+    void activate(const bool forceActivate = true);
     void setTransform(const Vector3& position, const Quaternion& orientation);
     void setMass(const double mass);
     void setDamping(const double linear, const double angular);
@@ -107,6 +108,7 @@ private:
 
     void addRigidBody(btCollisionShape* shape);
 
+    void cmdIsActive(const std::string& arg);
     void cmdMass(const std::string& arg);
     void cmdDamping(const std::string& arg);
     void cmdFriction(const std::string& arg);

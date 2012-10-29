@@ -140,6 +140,10 @@ void RigidBody::init(const double mass,
     m_restitution = restitution;
 }
 
+void RigidBody::activate(const bool forceActivate) {
+    m_rigidBody->activate(forceActivate);
+}
+
 void RigidBody::setTransform(const Vector3& position, const Quaternion& orientation) {
     m_position = position;
     m_orientation = orientation;
@@ -392,6 +396,13 @@ void RigidBody::addRigidBody(btCollisionShape* shape) {
     PhysicsManager::getPhysicsWorld().m_dynamicsWorld->addRigidBody(m_rigidBody);
 }
 
+
+void RigidBody::cmdIsActive(const string& arg) {
+    bool isActive;
+    stringstream ss(arg);
+    ss >> isActive;
+    activate(isActive);
+}
 
 void RigidBody::cmdMass(const string& arg) {
     double mass;

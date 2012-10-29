@@ -154,8 +154,11 @@ void Entity::applyOrientationToChildren() {
 }
 
 void Entity::applyTransformToPhysicsComponent() {
-    if (m_components[COMPONENT_PHYSICS] != 0)
-        dynamic_cast<RigidBody*>(m_components[COMPONENT_PHYSICS])->setTransform(m_positionAbs, m_orientationAbs);
+    if (m_components[COMPONENT_PHYSICS] != 0) {
+        RigidBody* rigidBody = dynamic_cast<RigidBody*>(m_components[COMPONENT_PHYSICS]);
+        rigidBody->activate();
+        rigidBody->setTransform(m_positionAbs, m_orientationAbs);
+    }
 }
 
 Entity* Entity::addChild(const string& childName) {

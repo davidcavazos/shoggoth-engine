@@ -19,7 +19,6 @@
 - Binding keys (or other inputs) with a command
 - Possibility of multiple active cameras in different viewports
 - Animations
-- Be able to move rigidbodies with commands
 
 BUGS:
 Concave hulls in RigidBody crash!

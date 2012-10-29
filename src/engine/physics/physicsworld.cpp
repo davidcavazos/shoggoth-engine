@@ -121,13 +121,16 @@ void PhysicsWorld::updateRigidBodies() {
     btQuaternion rot;
     for (it = m_rigidBodies.begin(); it != m_rigidBodies.end(); ++it) {
         btRigidBody* rigidBody = it->second;
-        Entity* entity = it->first;
 
-        rigidBody->getMotionState()->getWorldTransform(trans);
-        btVector3& pos = trans.getOrigin();
-        rot = trans.getRotation();
+        if (rigidBody->isActive()) {
+            Entity* entity = it->first;
 
-        entity->setPositionAbs(pos.getX(), pos.getY(), pos.getZ());
-        entity->setOrientationAbs(rot.getW(), rot.getX(), rot.getY(), rot.getZ());
+            rigidBody->getMotionState()->getWorldTransform(trans);
+            btVector3& pos = trans.getOrigin();
+            rot = trans.getRotation();
+
+            entity->setPositionAbs(pos.getX(), pos.getY(), pos.getZ());
+            entity->setOrientationAbs(rot.getW(), rot.getX(), rot.getY(), rot.getZ());
+        }
     }
 }
