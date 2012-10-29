@@ -10,6 +10,6 @@ int main(int, char**) {
     Demo game("game", "root");
     game.loadScene();
     game.bindInputs();
-    game.runGameLoop();
+    game.runMainLoop();
     return EXIT_SUCCESS;
 }

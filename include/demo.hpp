@@ -32,7 +32,7 @@ public:
 
     void loadScene();
     void bindInputs();
-    void runGameLoop();
+    void runMainLoop();
 
 private:
     bool m_isRunning;

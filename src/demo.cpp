@@ -174,7 +174,7 @@ void Demo::bindInputs() {
     inputs.bindInput(INPUT_MOUSE_BUTTON_RELEASE, "game fire-sphere", 3);
 }
 
-void Demo::runGameLoop() {
+void Demo::runMainLoop() {
     Uint32 startTime;
     Uint32 deltaTime;
 
