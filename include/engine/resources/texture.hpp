@@ -24,6 +24,8 @@
 #include <string>
 #include <vector>
 
+class Renderer;
+
 typedef enum {
     TEXTURE_FORMAT_RGBA,
     TEXTURE_FORMAT_BGRA,
@@ -33,7 +35,7 @@ typedef enum {
 
 class Texture {
 public:
-    Texture(const std::string& fileName);
+    Texture(const std::string& fileName, Renderer* renderer);
     ~Texture();
 
     const std::string& getFileName() const;
@@ -45,10 +47,10 @@ public:
     void* getPixels() const;
 
     void load();
-    void load(const std::string& fileName);
 
 private:
     std::string m_fileName;
+    Renderer* m_renderer;
     unsigned int m_textureId;
     size_t m_bytesPerPixel;
     size_t m_width;
@@ -88,12 +90,6 @@ inline texture_format_t Texture::getTextureFormat() const {
 
 inline void* Texture::getPixels() const {
     return m_pixels;
-}
-
-
-
-inline void Texture::load() {
-    load(m_fileName);
 }
 
 #endif // TEXTURE_HPP

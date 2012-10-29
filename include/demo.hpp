@@ -21,13 +21,21 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
+#include "engine/kernel/device.hpp"
 #include "engine/kernel/scenemanager.hpp"
-
-class Device;
+#include "engine/renderer/renderer.hpp"
+#include "engine/physics/physicsworld.hpp"
+#include "engine/resources/resources.hpp"
 
 class Demo: public CommandObject {
 public:
-    Demo(const std::string& objectName, const std::string& rootNodeName);
+    Demo(const std::string& objectName,
+         const std::string& deviceName,
+         const std::string& sceneName,
+         const std::string& rootNodeName,
+         const std::string& rendererName,
+         const std::string& resourcesName,
+         const std::string& physicsWorldName);
     ~Demo();
 
     void loadScene();
@@ -36,14 +44,18 @@ public:
 
 private:
     bool m_isRunning;
+    Device m_device;
     SceneManager m_sceneManager;
+    Renderer m_renderer;
+    Resources m_resources;
+    PhysicsWorld m_physicsWorld;
 
-    void quit(const std::string&);
-    void runCommand(const std::string& arg);
-    void printEntity(const std::string& arg);
-    void onMouseMotion(const std::string&);
-    void fireCube(const std::string&);
-    void fireSphere(const std::string&);
+    void cmdQuit(const std::string&);
+    void cmdRunCommand(const std::string& arg);
+    void cmdPrintEntity(const std::string& arg);
+    void cmdOnMouseMotion(const std::string&);
+    void cmdFireCube(const std::string&);
+    void cmdFireSphere(const std::string&);
 };
 
 #endif // GAME_HPP

@@ -23,7 +23,9 @@
 
 #include <string>
 #include <set>
+#include "engine/kernel/commandobject.hpp"
 
+class Device;
 class Vector3;
 class Quaternion;
 class RenderManager;
@@ -33,13 +35,17 @@ class RenderableMesh;
 class Mesh;
 class Texture;
 
-class Renderer {
+class Renderer: public CommandObject {
 public:
     friend class RenderManager;
     friend class Camera;
     friend class Light;
     friend class RenderableMesh;
 
+    Renderer(const std::string& objectName, const Device* device);
+
+    void initialize();
+    void shutdown();
     void setAmbientLight(const float r, const float g, const float b, const float a = 1.0f);
     void initLighting() const;
     void uploadModel(unsigned int& meshId, unsigned int& indicesId, const Mesh& mesh);
@@ -50,16 +56,14 @@ public:
     std::string listsToString() const;
 
 private:
-    Renderer();
     Renderer(const Renderer& rhs);
     Renderer& operator=(const Renderer& rhs);
 
-    void initialize();
-    void deinitialize();
     void initCamera() const;
     void displayLegacyLights() const;
     void setOpenGLMatrix(float* const m, const Vector3& pos, const Quaternion& rot) const;
 
+    const Device* m_device;
     Camera* m_activeCamera;
     std::set<Camera*> m_cameras;
     std::set<Light*> m_lights;

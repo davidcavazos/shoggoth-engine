@@ -24,9 +24,16 @@ using namespace std;
 
 map<string, Entity*> SceneManager::ms_entities = map<string, Entity*>();
 
-SceneManager::SceneManager(const string& rootNodeName):
-    m_root(0, rootNodeName)
+SceneManager::SceneManager(const string& objectName, const string& rootNodeName, const Device& device):
+    CommandObject(objectName),
+    m_root(0, rootNodeName, device)
 {}
+
+void SceneManager::initialize() {
+}
+
+void SceneManager::shutdown() {
+}
 
 bool SceneManager::findEntity(const string& name, Entity*& entity) {
     map<string, Entity*>::iterator it = ms_entities.find(name);

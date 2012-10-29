@@ -18,20 +18,26 @@
 */
 
 
-#ifndef SCENEMANAGER_HPP
-#define SCENEMANAGER_HPP
+#ifndef SCENE_HPP
+#define SCENE_HPP
 
 #include <string>
+#include "commandobject.hpp"
 #include "entity.hpp"
 
-class SceneManager {
+class Device;
+class SceneManager: public CommandObject {
 public:
     friend class Entity;
 
-    SceneManager(const std::string& rootNodeName);
-    Entity& getRoot();
-    Entity* getRootPtr();
+    SceneManager(const std::string& objectName, const std::string& rootNodeName, const Device& device);
 
+    const Entity& getRoot() const;
+
+    Entity& root();
+
+    void initialize();
+    void shutdown();
     bool findEntity(const std::string& name, Entity*& entity);
     std::string sceneGraphToString();
 
@@ -42,12 +48,13 @@ private:
 
 
 
-inline Entity& SceneManager::getRoot() {
+inline const Entity& SceneManager::getRoot() const {
     return m_root;
 }
 
-inline Entity* SceneManager::getRootPtr() {
-    return &m_root;
+
+inline Entity& SceneManager::root() {
+    return m_root;
 }
 
-#endif // SCENEMANAGER_HPP
+#endif // SCENE_HPP

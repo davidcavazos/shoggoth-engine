@@ -29,6 +29,8 @@
 #include "commandobject.hpp"
 #include "component.hpp"
 
+class Device;
+
 typedef enum {
     SPACE_LOCAL,
     SPACE_PARENT,
@@ -40,7 +42,7 @@ public:
     friend class Component;
     friend std::ostream& operator<<(std::ostream& out, const Entity& rhs);
 
-    Entity(const Entity* m_parent, const std::string& objectName);
+    Entity(const Entity* parent, const std::string& objectName, const Device& device);
     ~Entity();
 
     const Vector3& getPositionAbs() const;
@@ -81,6 +83,7 @@ public:
 
 private:
     const Entity& m_parent;
+    const Device& m_device;
     std::set<Entity*> m_children;
     std::vector<Component*> m_components;
     Vector3 m_positionAbs;

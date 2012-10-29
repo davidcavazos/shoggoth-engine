@@ -38,6 +38,62 @@ const Uint32 SDL_VIDEO_FLAGS = SDL_HWSURFACE | SDL_ANYFORMAT | SDL_OPENGL;
 InputManager Device::ms_inputManager = InputManager();
 SDL_Surface* Device::ms_screen = 0;
 
+Device::Device(const string& objectName):
+    CommandObject(objectName),
+    m_width(DEFAULT_SCREEN_WIDTH),
+    m_height(DEFAULT_SCREEN_HEIGHT),
+    m_halfWidth(m_width / 2),
+    m_halfHeight(m_height / 2),
+    m_depth(DEFAULT_SCREEN_DEPTH),
+    m_keysPressed(),
+    m_mouseButtonsPressed(),
+    m_startTime(0.0),
+    m_deltaTime(0.0),
+    m_fps(0.0)
+{}
+
+void Device::initialize() {
+    cout << "Creating SDL-OpenGL device" << endl;
+    if (SDL_Init(SDL_INIT_FLAGS) != 0) // 0 success, -1 failure
+        exit(EXIT_FAILURE);
+
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, true);
+
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+    SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
+
+    SDL_GL_SetAttribute(SDL_GL_ACCUM_RED_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_ACCUM_GREEN_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_ACCUM_BLUE_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_ACCUM_ALPHA_SIZE, 8);
+
+    //     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    //     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
+
+    const SDL_VideoInfo* info = SDL_GetVideoInfo();
+    m_width = info->current_w;
+    m_halfWidth = m_width / 2;
+    m_height = info->current_h;
+    m_halfHeight = m_height / 2;
+    m_depth = info->vfmt->BitsPerPixel;
+
+    ms_screen = SDL_SetVideoMode(m_width, m_height, m_depth, SDL_VIDEO_FLAGS);
+    if (ms_screen == 0)
+        exit(EXIT_FAILURE);
+
+    SDL_ShowCursor(SDL_FALSE);
+}
+
+void Device::shutdown() {
+    cout << "SDL-OpenGL device quit" << endl;
+    SDL_Quit();
+}
+
 void Device::onFrameStart() {
     m_startTime = SDL_GetTicks() * 0.001;
 }
@@ -127,59 +183,4 @@ void Device::processEvents(bool& isRunning) {
         ms_inputManager.onKeyPressed(*it);
     for (it = m_mouseButtonsPressed.begin(); it != m_mouseButtonsPressed.end(); ++it)
         ms_inputManager.onMouseButtonPressed(*it);
-}
-
-Device::Device():
-    m_width(DEFAULT_SCREEN_WIDTH),
-    m_height(DEFAULT_SCREEN_HEIGHT),
-    m_halfWidth(m_width / 2),
-    m_halfHeight(m_height / 2),
-    m_depth(DEFAULT_SCREEN_DEPTH),
-    m_keysPressed(),
-    m_mouseButtonsPressed(),
-    m_startTime(0.0),
-    m_deltaTime(0.0),
-    m_fps(0.0)
-{}
-
-void Device::initialize() {
-    cout << "Creating SDL-OpenGL device" << endl;
-    if (SDL_Init(SDL_INIT_FLAGS) != 0) // 0 success, -1 failure
-        exit(EXIT_FAILURE);
-
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, true);
-
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
-    SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
-
-    SDL_GL_SetAttribute(SDL_GL_ACCUM_RED_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_ACCUM_GREEN_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_ACCUM_BLUE_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_ACCUM_ALPHA_SIZE, 8);
-
-//     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-//     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
-
-    const SDL_VideoInfo* info = SDL_GetVideoInfo();
-    m_width = info->current_w;
-    m_halfWidth = m_width / 2;
-    m_height = info->current_h;
-    m_halfHeight = m_height / 2;
-    m_depth = info->vfmt->BitsPerPixel;
-
-    ms_screen = SDL_SetVideoMode(m_width, m_height, m_depth, SDL_VIDEO_FLAGS);
-    if (ms_screen == 0)
-        exit(EXIT_FAILURE);
-
-    SDL_ShowCursor(SDL_FALSE);
-}
-
-void Device::deinitialize() {
-    cout << "SDL-OpenGL device quit" << endl;
-    SDL_Quit();
 }

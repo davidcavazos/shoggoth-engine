@@ -22,15 +22,15 @@
 #define MESH_HPP
 
 #include "material.hpp"
-#include "uvmap.hpp"
 
+class Renderer;
 class ModelLoader;
 
 class Mesh {
 public:
     friend class ModelLoader;
 
-    Mesh();
+    Mesh(Renderer* renderer);
     ~Mesh();
 
     unsigned int getMeshId() const;
@@ -72,6 +72,7 @@ public:
     void uploadToGPU();
 
 private:
+    Renderer* m_renderer;
     unsigned int m_meshId;
     unsigned int m_indicesId;
     std::vector<float> m_vertices;

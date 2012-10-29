@@ -28,6 +28,55 @@ using namespace std;
 
 const double DEFAULT_MIN_EXPECTED_FRAMERATE = 10.0;
 
+PhysicsWorld::PhysicsWorld(const string& objectName):
+    CommandObject(objectName),
+    m_maxSubsteps(1),
+    m_lastTime(0.0),
+    m_broadphase(0),
+    m_collisionConfiguration(0),
+    m_collisionDispatcher(0),
+    m_solver(0),
+    m_dynamicsWorld(0),
+    m_collisionShapes(),
+    m_rigidBodies()
+{}
+
+void PhysicsWorld::initialize() {
+    cout << "Physics simulations done with Bullet Physics" << endl;
+    setMinExpectedFramerate(DEFAULT_MIN_EXPECTED_FRAMERATE);
+
+    cout << "Creating dynamics world" << endl;
+    m_broadphase = new btDbvtBroadphase;
+    m_collisionConfiguration = new btDefaultCollisionConfiguration;
+    m_collisionDispatcher = new btCollisionDispatcher(m_collisionConfiguration);
+    m_solver = new btSequentialImpulseConstraintSolver;
+    m_dynamicsWorld = new btDiscreteDynamicsWorld(m_collisionDispatcher, m_broadphase, m_solver, m_collisionConfiguration);
+
+    cout << "Setting default gravity as -9.8 in the y-axis" << endl;
+    setGravity(0.0, -9.8, 0.0);
+}
+
+void PhysicsWorld::shutdown() {
+    cout << "Destroying dynamics world" << endl;
+
+    rigid_bodies_map_t::iterator itRig;
+    for (itRig = m_rigidBodies.begin(); itRig != m_rigidBodies.end(); ++itRig) {
+        m_dynamicsWorld->removeRigidBody(itRig->second);
+        delete itRig->second->getMotionState();
+        delete itRig->second;
+    }
+
+    collision_shapes_map_t::iterator itCol;
+    for (itCol = m_collisionShapes.begin(); itCol != m_collisionShapes.end(); ++itCol)
+        delete itCol->second;
+
+    delete m_dynamicsWorld;
+    delete m_solver;
+    delete m_collisionDispatcher;
+    delete m_collisionConfiguration;
+    delete m_broadphase;
+}
+
 void PhysicsWorld::setGravity(const double x, const double y, const double z) {
     m_dynamicsWorld->setGravity(btVector3(static_cast<btScalar>(x),
                                           static_cast<btScalar>(y),
@@ -41,22 +90,8 @@ void PhysicsWorld::stepSimulation(const double currentTimeSeconds) {
     updateRigidBodies();
 }
 
-PhysicsWorld::PhysicsWorld():
-    m_maxSubsteps(1),
-    m_lastTime(0.0),
-    m_broadphase(0),
-    m_collisionConfiguration(0),
-    m_collisionDispatcher(0),
-    m_solver(0),
-    m_dynamicsWorld(0),
-    m_collisionShapes(),
-    m_rigidBodies()
-{
-    cout << "Physics simulations done with Bullet Physics" << endl;
-    setMinExpectedFramerate(DEFAULT_MIN_EXPECTED_FRAMERATE);
-}
-
 PhysicsWorld::PhysicsWorld(const PhysicsWorld& rhs):
+    CommandObject(rhs.m_objectName),
     m_maxSubsteps(rhs.m_maxSubsteps),
     m_lastTime(rhs.m_lastTime),
     m_broadphase(rhs.m_broadphase),
@@ -80,39 +115,6 @@ PhysicsWorld& PhysicsWorld::operator=(const PhysicsWorld& rhs) {
     m_collisionShapes = rhs.m_collisionShapes;
     m_rigidBodies = rhs.m_rigidBodies;
     return *this;
-}
-
-void PhysicsWorld::initialize() {
-    cout << "Creating dynamics world" << endl;
-    m_broadphase = new btDbvtBroadphase;
-    m_collisionConfiguration = new btDefaultCollisionConfiguration;
-    m_collisionDispatcher = new btCollisionDispatcher(m_collisionConfiguration);
-    m_solver = new btSequentialImpulseConstraintSolver;
-    m_dynamicsWorld = new btDiscreteDynamicsWorld(m_collisionDispatcher, m_broadphase, m_solver, m_collisionConfiguration);
-
-    cout << "Setting default gravity as -9.8 in the y-axis" << endl;
-    setGravity(0.0, -9.8, 0.0);
-}
-
-void PhysicsWorld::deinitialize() {
-    cout << "Destroying dynamics world" << endl;
-
-    rigid_bodies_map_t::iterator itRig;
-    for (itRig = m_rigidBodies.begin(); itRig != m_rigidBodies.end(); ++itRig) {
-        m_dynamicsWorld->removeRigidBody(itRig->second);
-        delete itRig->second->getMotionState();
-        delete itRig->second;
-    }
-
-    collision_shapes_map_t::iterator itCol;
-    for (itCol = m_collisionShapes.begin(); itCol != m_collisionShapes.end(); ++itCol)
-        delete itCol->second;
-
-    delete m_dynamicsWorld;
-    delete m_solver;
-    delete m_collisionDispatcher;
-    delete m_collisionConfiguration;
-    delete m_broadphase;
 }
 
 void PhysicsWorld::updateRigidBodies() {

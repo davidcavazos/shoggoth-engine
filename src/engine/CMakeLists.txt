@@ -9,13 +9,12 @@ set(KERNEL_SRC_FILES
     kernel/command.cpp
     kernel/terminal.cpp
 
-    kernel/device.cpp
-    kernel/inputmanager.cpp
-    kernel/devicemanager.cpp
-
     kernel/entity.cpp
     kernel/component.cpp
     kernel/scenemanager.cpp
+
+    kernel/inputmanager.cpp
+    kernel/device.cpp
 )
 
 set(RENDER_SRC_FILES
@@ -23,7 +22,6 @@ set(RENDER_SRC_FILES
     renderer/light.cpp
     renderer/renderablemesh.cpp
     renderer/renderer.cpp
-    renderer/rendermanager.cpp
 )
 
 set(RESOURCES_SRC_FILES
@@ -33,13 +31,11 @@ set(RESOURCES_SRC_FILES
     resources/mesh.cpp
     resources/model.cpp
     resources/resources.cpp
-    resources/resourcemanager.cpp
 )
 
 set(PHYSICS_SRC_FILES
     physics/rigidbody.cpp
     physics/physicsworld.cpp
-    physics/physicsmanager.cpp
 )
 
 add_library(${KERNEL_LIBRARY_NAME} SHARED ${KERNEL_SRC_FILES})

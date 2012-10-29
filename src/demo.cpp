@@ -25,19 +25,11 @@
 #include <fstream>
 #include <iomanip>
 #include <SDL/SDL.h>
-#include "engine/kernel/device.hpp"
-#include "engine/kernel/devicemanager.hpp"
 #include "engine/kernel/terminal.hpp"
-#include "engine/kernel/scenemanager.hpp"
-#include "engine/renderer/rendermanager.hpp"
-#include "engine/renderer/renderer.hpp"
 #include "engine/renderer/renderablemesh.hpp"
 #include "engine/renderer/camera.hpp"
 #include "engine/renderer/light.hpp"
-#include "engine/resources/resourcemanager.hpp"
 #include "engine/physics/rigidbody.hpp"
-#include "engine/physics/physicsworld.hpp"
-#include "engine/physics/physicsmanager.hpp"
 
 using namespace std;
 
@@ -45,52 +37,61 @@ const double FIRE_SPEED = 50.0;
 const double MISSILE_SIZE = 0.5;
 
 
-Demo::Demo(const string& objectName, const string& rootNodeName):
+Demo::Demo(const string& objectName,
+           const string& deviceName,
+           const string& sceneName,
+           const string& rootNodeName,
+           const string& rendererName,
+           const string& resourcesName,
+           const string& physicsWorldName):
     CommandObject(objectName),
     m_isRunning(false),
-    m_sceneManager(rootNodeName)
+    m_device(deviceName),
+    m_sceneManager(sceneName, rootNodeName, m_device),
+    m_renderer(rendererName, &m_device),
+    m_resources(resourcesName, &m_renderer),
+    m_physicsWorld(physicsWorldName)
 {
-    registerCommand("quit", boost::bind(&Demo::quit, this, _1));
-    registerCommand("run", boost::bind(&Demo::runCommand, this, _1));
-    registerCommand("print-entity", boost::bind(&Demo::printEntity, this, _1));
-    registerCommand("on-mouse-motion", boost::bind(&Demo::onMouseMotion, this, _1));
-    registerCommand("fire-cube", boost::bind(&Demo::fireCube, this, _1));
-    registerCommand("fire-sphere", boost::bind(&Demo::fireSphere, this, _1));
+    registerCommand("quit", boost::bind(&Demo::cmdQuit, this, _1));
+    registerCommand("run", boost::bind(&Demo::cmdRunCommand, this, _1));
+    registerCommand("print-entity", boost::bind(&Demo::cmdPrintEntity, this, _1));
+    registerCommand("on-mouse-motion", boost::bind(&Demo::cmdOnMouseMotion, this, _1));
+    registerCommand("fire-cube", boost::bind(&Demo::cmdFireCube, this, _1));
+    registerCommand("fire-sphere", boost::bind(&Demo::cmdFireSphere, this, _1));
 
-    Device* device = DeviceManager::create();
-    device->setTitle("Shoggoth Engine Demo");
-    device->setResolution(800, 500);
-//     device->setFullscreen();
-
-    ResourceManager::create();
-    RenderManager::create();
-    PhysicsManager::create();
+    m_device.initialize();
+    m_device.setResolution(800, 500);
+    m_sceneManager.initialize();
+    m_renderer.initialize();
+    m_resources.initialize();
+    m_physicsWorld.initialize();
 }
 
 Demo::~Demo() {
-    PhysicsManager::shutdown();
-    RenderManager::shutdown();
-    ResourceManager::shutdown();
-    DeviceManager::shutdown();
+    m_physicsWorld.shutdown();
+    m_resources.shutdown();
+    m_renderer.shutdown();
+    m_sceneManager.shutdown();
+    m_device.shutdown();
 }
 
 void Demo::loadScene() {
     cout << "Loading scene..." << endl;
 
-    Entity* root = m_sceneManager.getRootPtr();
+    Entity* root = &m_sceneManager.root();
 
     Entity* floor = root->addChild("floor");
     floor->setPositionAbs(0.0f, -1.0f, 0.0f);
-    RenderableMesh* floorMesh = new RenderableMesh(floor);
+    RenderableMesh* floorMesh = new RenderableMesh(floor, m_renderer, m_resources);
     floorMesh->loadBox(100, 1, 100);
-    RigidBody* floorBody = new RigidBody(floor);
+    RigidBody* floorBody = new RigidBody(floor, &m_physicsWorld);
     floorBody->addBox(100, 1, 100);
 
     Entity* b1 = root->addChild("b1");
     b1->setPositionAbs(5.0f, 4.0f, -10.0f);
-    RenderableMesh* b1Mesh = new RenderableMesh(b1);
+    RenderableMesh* b1Mesh = new RenderableMesh(b1, m_renderer, m_resources);
     b1Mesh->loadBox(3.0f, 9.0f, 3.0f);
-    RigidBody* b1Body = new RigidBody(b1);
+    RigidBody* b1Body = new RigidBody(b1, &m_physicsWorld);
     b1Body->addBox(3, 9, 3);
 
     // model            faces (triangles)
@@ -107,17 +108,17 @@ void Demo::loadScene() {
     Entity* cube = root->addChild("cube");
     cube->setPositionAbs(-1.0, 8.0, 0.0);
     cube->setOrientationAbs(0.5, 0.3, 0.2);
-    RenderableMesh* cubeMesh = new RenderableMesh(cube);
+    RenderableMesh* cubeMesh = new RenderableMesh(cube, m_renderer, m_resources);
     cubeMesh->loadBox(0.5, 0.5, 0.5);
-    RigidBody* cubeBody = new RigidBody(cube);
+    RigidBody* cubeBody = new RigidBody(cube, &m_physicsWorld);
     cubeBody->init(1.0);
     cubeBody->addBox(0.5, 0.5, 0.5);
 
     Entity* mesh = root->addChild("model");
     mesh->setPositionRel(1.5f, 5.0f, 0.0f);
-    RenderableMesh* renderableMesh = new RenderableMesh(mesh);
+    RenderableMesh* renderableMesh = new RenderableMesh(mesh, m_renderer, m_resources);
     renderableMesh->loadFromFile("assets/meshes/materialtest.dae");
-    RigidBody* meshBody = new RigidBody(mesh);
+    RigidBody* meshBody = new RigidBody(mesh, &m_physicsWorld);
     meshBody->init(10.0);
     meshBody->addBox(2, 2, 2);
 //     meshBody->addConvexHull("assets/meshes/materialtest.dae");
@@ -126,14 +127,14 @@ void Demo::loadScene() {
     camera->setPositionAbs(0.0f, 4.0f, 10.0f);
     camera->pitch(-0.2);
 //     camera->lookAt(cube->getPositionAbs(), VECTOR3_UNIT_Y);
-    Camera* camComponent = new Camera(camera, CAMERA_PROJECTION);
+    Camera* camComponent = new Camera(camera, CAMERA_PROJECTION, m_renderer);
     camComponent->setPerspectiveFOV(45.0);
 //     RigidBody* cameraBody = new RigidBody(camera);
 //     cameraBody->addSphere(1);
 
     Entity* light1 = root->addChild("light1");
     light1->setPositionAbs(5, 5, 5);
-    Light* light1Cmp = new Light(light1);
+    Light* light1Cmp = new Light(light1, m_renderer);
     light1Cmp->setDiffuse(1.0, 1.0, 1.0);
 
 //     Entity* light2 = root->addChild("light2");
@@ -154,10 +155,10 @@ void Demo::loadScene() {
 
 void Demo::bindInputs() {
     cout << "Binding inputs..." << endl;
-    InputManager& inputs = DeviceManager::getDevice().getInputManager();
-    inputs.bindInput(INPUT_KEY_RELEASE, "game quit", SDLK_ESCAPE);
-    inputs.bindInput(INPUT_KEY_RELEASE, "game run commands.txt", SDLK_TAB);
-    inputs.bindInput(INPUT_MOUSE_MOTION, "game on-mouse-motion");
+    InputManager& inputs = m_device.getInputManager();
+    inputs.bindInput(INPUT_KEY_RELEASE, "demo quit", SDLK_ESCAPE);
+    inputs.bindInput(INPUT_KEY_RELEASE, "demo run commands.txt", SDLK_TAB);
+    inputs.bindInput(INPUT_MOUSE_MOTION, "demo on-mouse-motion");
 
     inputs.bindInput(INPUT_KEY_PRESSED, "cube move-z -5", SDLK_UP);
     inputs.bindInput(INPUT_KEY_PRESSED, "cube move-x -5", SDLK_LEFT);
@@ -170,29 +171,26 @@ void Demo::bindInputs() {
     inputs.bindInput(INPUT_KEY_PRESSED, "camera move-x  5", SDLK_d);
     inputs.bindInput(INPUT_KEY_PRESSED, "camera move-y-global  5", SDLK_SPACE);
     inputs.bindInput(INPUT_KEY_PRESSED, "camera move-y-global -5", SDLK_LSHIFT);
-    inputs.bindInput(INPUT_MOUSE_BUTTON_RELEASE, "game fire-cube", 1);
-    inputs.bindInput(INPUT_MOUSE_BUTTON_RELEASE, "game fire-sphere", 3);
+    inputs.bindInput(INPUT_MOUSE_BUTTON_RELEASE, "demo fire-cube", 1);
+    inputs.bindInput(INPUT_MOUSE_BUTTON_RELEASE, "demo fire-sphere", 3);
 }
 
 void Demo::runMainLoop() {
     Uint32 startTime;
     Uint32 deltaTime;
 
-    Device* device = DeviceManager::getDevicePtr();
-    Renderer* renderer = RenderManager::getRendererPtr();
-    PhysicsWorld* world = PhysicsManager::getPhysicsWorldPtr();
-    renderer->initLighting();
-    renderer->setAmbientLight(0.2f, 0.2f, 0.2f);
+    m_renderer.initLighting();
+    m_renderer.setAmbientLight(0.2f, 0.2f, 0.2f);
 
     cout << "Entering game loop" << endl;
     m_isRunning = true;
     while (m_isRunning) {
         startTime = SDL_GetTicks();
-        device->onFrameStart();
+        m_device.onFrameStart();
 
-        world->stepSimulation(0.001 * SDL_GetTicks());
+        m_physicsWorld.stepSimulation(0.001 * SDL_GetTicks());
 
-        device->processEvents(m_isRunning);
+        m_device.processEvents(m_isRunning);
         Terminal::processCommandsQueue();
 
         stringstream ss;
@@ -200,22 +198,22 @@ void Demo::runMainLoop() {
         ss << "Shoggoth Engine Demo - CPU:" << setw(3) << deltaTime << " ms - ";
 
         startTime = SDL_GetTicks();
-        renderer->draw();
-        device->swapBuffers();
+        m_renderer.draw();
+        m_device.swapBuffers();
         deltaTime = SDL_GetTicks() - startTime;
         ss << "GPU:" << setw(3) << deltaTime << " ms (16-40 ideal) - ";
 
-        device->onFrameEnd();
-        ss << setw(5) << fixed << setprecision(1) << device->getFps() << " fps";
-        device->setTitle(ss.str());
+        m_device.onFrameEnd();
+        ss << setw(5) << fixed << setprecision(1) << m_device.getFps() << " fps";
+        m_device.setTitle(ss.str());
     }
 }
 
-void Demo::quit(const string&) {
+void Demo::cmdQuit(const string&) {
     m_isRunning = false;
 }
 
-void Demo::runCommand(const string& arg) {
+void Demo::cmdRunCommand(const string& arg) {
     string cmd;
 
     fstream file(arg.c_str(), ios::in);
@@ -229,17 +227,17 @@ void Demo::runCommand(const string& arg) {
     file.close();
 }
 
-void Demo::printEntity(const string& arg) {
+void Demo::cmdPrintEntity(const string& arg) {
     Entity* entity;
     if (m_sceneManager.findEntity(arg, entity))
         cout << *entity << endl;
 }
 
-void Demo::onMouseMotion(const string&) {
+void Demo::cmdOnMouseMotion(const string&) {
     static Command moveXCmd("camera yaw-global");
     static Command moveYCmd("camera pitch");
 
-    mouse_motion_t motion = DeviceManager::getDevice().getInputManager().getLastMouseMotion();
+    mouse_motion_t motion = m_device.getInputManager().getLastMouseMotion();
 
     float sensitivity = 0.05;
     stringstream ssx;
@@ -253,44 +251,44 @@ void Demo::onMouseMotion(const string&) {
     Terminal::pushCommand(moveYCmd);
 }
 
-void Demo::fireCube(const std::string&) {
+void Demo::cmdFireCube(const std::string&) {
     Entity* camera;
     if (m_sceneManager.findEntity("camera", camera)) {
         static size_t n = 0;
         stringstream ss;
         ss << "missile-cube-" << ++n;
 
-        Entity* cube = m_sceneManager.getRoot().addChild(ss.str());
+        Entity* cube = m_sceneManager.root().addChild(ss.str());
         Vector3 orientationUnit = VECTOR3_UNIT_Z_NEG.rotate(camera->getOrientationAbs());
         cube->setPositionAbs(camera->getPositionAbs() + orientationUnit);
         cube->setOrientationAbs(camera->getOrientationAbs());
 
-        RenderableMesh* cubeMesh = new RenderableMesh(cube);
+        RenderableMesh* cubeMesh = new RenderableMesh(cube, m_renderer, m_resources);
         cubeMesh->loadBox(MISSILE_SIZE, MISSILE_SIZE, MISSILE_SIZE);
 
-        RigidBody* cubeBody = new RigidBody(cube);
+        RigidBody* cubeBody = new RigidBody(cube, &m_physicsWorld);
         cubeBody->init(1.0, 0.8);
         cubeBody->addBox(MISSILE_SIZE, MISSILE_SIZE, MISSILE_SIZE);
         cubeBody->setLinearVelocity(orientationUnit * FIRE_SPEED);
     }
 }
 
-void Demo::fireSphere(const std::string&) {
+void Demo::cmdFireSphere(const std::string&) {
     Entity* camera;
     if (m_sceneManager.findEntity("camera", camera)) {
         static size_t n = 0;
         stringstream ss;
         ss << "missile-sphere-" << ++n;
 
-        Entity* sphere = m_sceneManager.getRoot().addChild(ss.str());
+        Entity* sphere = m_sceneManager.root().addChild(ss.str());
         Vector3 orientationUnit = VECTOR3_UNIT_Z_NEG.rotate(camera->getOrientationAbs());
         sphere->setPositionAbs(camera->getPositionAbs() + orientationUnit);
         sphere->setOrientationAbs(camera->getOrientationAbs());
 
-        RenderableMesh* cubeMesh = new RenderableMesh(sphere);
+        RenderableMesh* cubeMesh = new RenderableMesh(sphere, m_renderer, m_resources);
         cubeMesh->loadFromFile("assets/meshes/icosphere3.dae");
 
-        RigidBody* cubeBody = new RigidBody(sphere);
+        RigidBody* cubeBody = new RigidBody(sphere, &m_physicsWorld);
         cubeBody->init(1.0, 0.8);
         cubeBody->addSphere(1.0);
 //         cubeBody->addConvexHull("assets/meshes/icosphere1.dae");

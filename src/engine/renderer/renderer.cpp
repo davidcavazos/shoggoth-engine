@@ -23,10 +23,8 @@
 #include <iostream>
 #include <GL/glew.h>
 #include "engine/kernel/device.hpp"
-#include "engine/kernel/devicemanager.hpp"
 #include "engine/kernel/entity.hpp"
 #include "engine/kernel/matrix3x3.hpp"
-#include "engine/renderer/rendermanager.hpp"
 #include "engine/renderer/camera.hpp"
 #include "engine/renderer/renderablemesh.hpp"
 #include "engine/renderer/light.hpp"
@@ -50,6 +48,158 @@ typedef enum {
 data_upload_t gDataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
 mipmap_generation_t gMipMapGenerationMode = MIPMAP_GENERATION_GLU;
 
+
+Renderer::Renderer(const string& objectName, const Device* device):
+    CommandObject(objectName),
+    m_device(device),
+    m_activeCamera(0),
+    m_cameras(),
+    m_lights(),
+    m_model()
+{}
+
+void Renderer::initialize() {
+    double openGLVersion;
+    double shaderLanguageVersion;
+    GLint integer;
+
+    stringstream ss;
+    ss << glGetString(GL_SHADING_LANGUAGE_VERSION) << " " << glGetString(GL_VERSION);
+    ss >> shaderLanguageVersion >> openGLVersion;
+
+    // general information
+    cout << endl;
+    cout << "OpenGL Driver Info" << endl;
+    cout << "==================" << endl;
+    cout << "Vendor: " << glGetString(GL_VENDOR) << endl;
+    cout << "Version: " << glGetString(GL_VERSION) << endl;
+    cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
+    cout << "Renderer: " << glGetString(GL_RENDERER) << endl;
+
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &integer);
+    cout << "Max texture size: " << integer << "x" << integer << endl;
+    glGetIntegerv(GL_MAX_LIGHTS, &integer);
+    cout << "Max lights: " << integer << endl;
+    glGetIntegerv(GL_MAX_CLIP_PLANES, &integer);
+    cout << "Max clip planes: " << integer << endl;
+    glGetIntegerv(GL_MAX_MODELVIEW_STACK_DEPTH, &integer);
+    cout << "Max ModelView stack depth: " << integer << endl;
+    glGetIntegerv(GL_MAX_PROJECTION_STACK_DEPTH, &integer);
+    cout << "Max Projection stack depth: " << integer << endl;
+    glGetIntegerv(GL_MAX_ATTRIB_STACK_DEPTH, &integer);
+    cout << "Max Attribute stack depth: " << integer << endl;
+    glGetIntegerv(GL_MAX_TEXTURE_STACK_DEPTH, &integer);
+    cout << "Max Texture stack depth: " << integer << endl;
+    glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &integer);
+    cout << "Max vertices: " << integer << endl;
+    glGetIntegerv(GL_MAX_ELEMENTS_INDICES, &integer);
+    cout << "Max indices: " << integer << endl;
+
+    // capabilities
+    if (openGLVersion >= 3.0)
+        cout << "Using OpenGL Core " << openGLVersion << endl;
+    else
+        cout << "Using OpenGL Legacy " << openGLVersion << endl;
+
+    // default techniques
+    gDataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
+    gMipMapGenerationMode = MIPMAP_GENERATION_GLU;
+
+    // version techniques
+    int openGLVersionInt = floor(openGLVersion * 10.0 + 0.5);
+    switch (openGLVersionInt) {
+        case 43: // 4.3
+        case 42: // 4.2
+        case 41: // 4.1
+        case 40: // 4.0
+        case 33: // 3.3
+        case 32: // 3.2
+        case 31: // 3.1
+        case 30: // 3.0
+        case 21: // 2.1
+        case 20: // 2.0
+        case 15: // 1.5
+            gDataUploadMode = DATA_UPLOAD_VERTEX_BUFFER_OBJECT;
+        case 14: // 1.4
+            gMipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER;
+            break;
+        case 13: // 1.3
+        case 12: // 1.2
+        case 11: // 1.1
+            gDataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
+            gMipMapGenerationMode = MIPMAP_GENERATION_GLU;
+            break;
+        default:
+            cerr << "Error: unsupported OpenGL version: " << openGLVersion << endl;
+    }
+
+    // extension techniques
+    glGetIntegerv(GL_NUM_EXTENSIONS, &integer);
+    cout << "Extensions: " << integer << endl;
+    if (glewInit() != GLEW_OK)
+        cerr << "Error: failed to initialize GLEW" << endl;
+    if (gDataUploadMode == DATA_UPLOAD_VERTEX_ARRAY &&
+        glewIsSupported("GL_ARB_vertex_buffer_object"))
+        gDataUploadMode = DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT;
+    if (gMipMapGenerationMode == MIPMAP_GENERATION_GLU &&
+        glewIsSupported("GL_SGIS_generate_mipmap"))
+        gMipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER_EXT;
+
+    switch (gDataUploadMode) {
+        case DATA_UPLOAD_VERTEX_ARRAY:
+            cout << "Using Vertex Arrays" << endl;
+            break;
+        case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
+            cout << "Using Vertex Buffer Objects EXT" << endl;
+            break;
+        case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
+            cout << "Using Vertex Buffer Objects" << endl;
+            break;
+        default:
+            cerr << "Error: invalid data_upload_t: " << gDataUploadMode << endl;
+    }
+    switch (gMipMapGenerationMode) {
+        case MIPMAP_GENERATION_GLU:
+            cout << "Using gluBuild2DMipmaps" << endl;
+            break;
+        case MIPMAP_GENERATION_TEX_PARAMETER_EXT:
+            cout << "Using GL_GENERATE_MIPMAP_SGIS" << endl;
+            break;
+        case MIPMAP_GENERATION_TEX_PARAMETER:
+            cout << "Using GL_GENERATE_MIPMAP" << endl;
+            break;
+        default:
+            cerr << "Error: invalid mipmap_generation_t: " << gMipMapGenerationMode << endl;
+    }
+    cout << endl;
+
+    // always
+    glFrontFace(GL_CCW); // redundant
+    glCullFace(GL_BACK); // redundant
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+}
+
+void Renderer::shutdown() {
+    set<Camera*>::const_iterator itCam;
+    for (itCam = m_cameras.begin(); itCam != m_cameras.end(); ++itCam)
+        delete *itCam;
+
+    set<Light*>::const_iterator itLight;
+    for (itLight = m_lights.begin(); itLight != m_lights.end(); ++itLight)
+        delete *itLight;
+
+    set<RenderableMesh*>::const_iterator itMesh;
+    for (itMesh = m_model.begin(); itMesh != m_model.end(); ++itMesh)
+        delete *itMesh;
+}
 
 void Renderer::setAmbientLight(const float r, const float g, const float b, const float a) {
     GLfloat global_ambient[] = {r, g, b, a};
@@ -355,128 +505,9 @@ string Renderer::listsToString() const {
     return ss.str();
 }
 
-Renderer::Renderer():
-    m_activeCamera(0),
-    m_cameras(),
-    m_lights(),
-    m_model()
-{
-    double openGLVersion;
-    double shaderLanguageVersion;
-    GLint integer;
-
-    stringstream ss;
-    ss << glGetString(GL_SHADING_LANGUAGE_VERSION) << " " << glGetString(GL_VERSION);
-    ss >> shaderLanguageVersion >> openGLVersion;
-
-    // general information
-    cout << endl;
-    cout << "OpenGL Driver Info" << endl;
-    cout << "==================" << endl;
-    cout << "Vendor: " << glGetString(GL_VENDOR) << endl;
-    cout << "Version: " << glGetString(GL_VERSION) << endl;
-    cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
-    cout << "Renderer: " << glGetString(GL_RENDERER) << endl;
-
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &integer);
-    cout << "Max texture size: " << integer << "x" << integer << endl;
-    glGetIntegerv(GL_MAX_LIGHTS, &integer);
-    cout << "Max lights: " << integer << endl;
-    glGetIntegerv(GL_MAX_CLIP_PLANES, &integer);
-    cout << "Max clip planes: " << integer << endl;
-    glGetIntegerv(GL_MAX_MODELVIEW_STACK_DEPTH, &integer);
-    cout << "Max ModelView stack depth: " << integer << endl;
-    glGetIntegerv(GL_MAX_PROJECTION_STACK_DEPTH, &integer);
-    cout << "Max Projection stack depth: " << integer << endl;
-    glGetIntegerv(GL_MAX_ATTRIB_STACK_DEPTH, &integer);
-    cout << "Max Attribute stack depth: " << integer << endl;
-    glGetIntegerv(GL_MAX_TEXTURE_STACK_DEPTH, &integer);
-    cout << "Max Texture stack depth: " << integer << endl;
-    glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &integer);
-    cout << "Max vertices: " << integer << endl;
-    glGetIntegerv(GL_MAX_ELEMENTS_INDICES, &integer);
-    cout << "Max indices: " << integer << endl;
-
-    // capabilities
-    if (openGLVersion >= 3.0)
-        cout << "Using OpenGL Core " << openGLVersion << endl;
-    else
-        cout << "Using OpenGL Legacy " << openGLVersion << endl;
-
-    // default techniques
-    gDataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
-    gMipMapGenerationMode = MIPMAP_GENERATION_GLU;
-
-    // version techniques
-    int openGLVersionInt = floor(openGLVersion * 10.0 + 0.5);
-    switch (openGLVersionInt) {
-    case 43: // 4.3
-    case 42: // 4.2
-    case 41: // 4.1
-    case 40: // 4.0
-    case 33: // 3.3
-    case 32: // 3.2
-    case 31: // 3.1
-    case 30: // 3.0
-    case 21: // 2.1
-    case 20: // 2.0
-    case 15: // 1.5
-        gDataUploadMode = DATA_UPLOAD_VERTEX_BUFFER_OBJECT;
-    case 14: // 1.4
-        gMipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER;
-        break;
-    case 13: // 1.3
-    case 12: // 1.2
-    case 11: // 1.1
-        gDataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
-        gMipMapGenerationMode = MIPMAP_GENERATION_GLU;
-        break;
-    default:
-        cerr << "Error: unsupported OpenGL version: " << openGLVersion << endl;
-    }
-
-    // extension techniques
-    glGetIntegerv(GL_NUM_EXTENSIONS, &integer);
-    cout << "Extensions: " << integer << endl;
-    if (glewInit() != GLEW_OK)
-        cerr << "Error: failed to initialize GLEW" << endl;
-    if (gDataUploadMode == DATA_UPLOAD_VERTEX_ARRAY &&
-        glewIsSupported("GL_ARB_vertex_buffer_object"))
-        gDataUploadMode = DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT;
-    if (gMipMapGenerationMode == MIPMAP_GENERATION_GLU &&
-        glewIsSupported("GL_SGIS_generate_mipmap"))
-        gMipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER_EXT;
-
-    switch (gDataUploadMode) {
-    case DATA_UPLOAD_VERTEX_ARRAY:
-        cout << "Using Vertex Arrays" << endl;
-        break;
-    case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
-        cout << "Using Vertex Buffer Objects EXT" << endl;
-        break;
-    case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
-        cout << "Using Vertex Buffer Objects" << endl;
-        break;
-    default:
-        cerr << "Error: invalid data_upload_t: " << gDataUploadMode << endl;
-    }
-    switch (gMipMapGenerationMode) {
-    case MIPMAP_GENERATION_GLU:
-        cout << "Using gluBuild2DMipmaps" << endl;
-        break;
-    case MIPMAP_GENERATION_TEX_PARAMETER_EXT:
-        cout << "Using GL_GENERATE_MIPMAP_SGIS" << endl;
-        break;
-    case MIPMAP_GENERATION_TEX_PARAMETER:
-        cout << "Using GL_GENERATE_MIPMAP" << endl;
-        break;
-    default:
-        cerr << "Error: invalid mipmap_generation_t: " << gMipMapGenerationMode << endl;
-    }
-    cout << endl;
-}
-
 Renderer::Renderer(const Renderer& rhs):
+    CommandObject(rhs.m_objectName),
+    m_device(rhs.m_device),
     m_activeCamera(rhs.m_activeCamera),
     m_cameras(rhs.m_cameras),
     m_lights(rhs.m_lights),
@@ -496,38 +527,8 @@ Renderer& Renderer::operator=(const Renderer& rhs) {
     return *this;
 }
 
-void Renderer::initialize() {
-    // always
-    glFrontFace(GL_CCW); // redundant
-    glCullFace(GL_BACK); // redundant
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_TEXTURE_2D);
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_NORMAL_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-}
-
-void Renderer::deinitialize() {
-    set<Camera*>::const_iterator itCam;
-    for (itCam = m_cameras.begin(); itCam != m_cameras.end(); ++itCam)
-        delete *itCam;
-
-    set<Light*>::const_iterator itLight;
-    for (itLight = m_lights.begin(); itLight != m_lights.end(); ++itLight)
-        delete *itLight;
-
-    set<RenderableMesh*>::const_iterator itMesh;
-    for (itMesh = m_model.begin(); itMesh != m_model.end(); ++itMesh)
-        delete *itMesh;
-}
-
 void Renderer::initCamera() const {
-    Device& dev = DeviceManager::getDevice();
-    m_activeCamera->setViewport(0, 0, dev.getWinWidth(), dev.getWinHeight());
+    m_activeCamera->setViewport(0, 0, m_device->getWinWidth(), m_device->getWinHeight());
     viewport_t view = m_activeCamera->getViewport();
     glViewport(view.posX, view.posY, view.width, view.height);
 

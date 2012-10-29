@@ -22,13 +22,13 @@
 
 #include <iostream>
 #include <SDL/SDL_image.h>
-#include "engine/renderer/rendermanager.hpp"
 #include "engine/renderer/renderer.hpp"
 
 using namespace std;
 
-Texture::Texture(const string& fileName):
+Texture::Texture(const string& fileName, Renderer* renderer):
     m_fileName(fileName),
+    m_renderer(renderer),
     m_textureId(0),
     m_bytesPerPixel(0),
     m_width(0),
@@ -38,13 +38,13 @@ Texture::Texture(const string& fileName):
 {}
 
 Texture::~Texture() {
-    RenderManager::getRenderer().deleteTexture(m_textureId);
+    m_renderer->deleteTexture(m_textureId);
 }
 
-void Texture::load(const string& fileName) {
-    SDL_Surface* img = IMG_Load(fileName.c_str());
+void Texture::load() {
+    SDL_Surface* img = IMG_Load(m_fileName.c_str());
     if (img == 0) {
-        cerr << "Error opening image file: " << fileName << endl;
+        cerr << "Error opening image file: " << m_fileName << endl;
         return;
     }
 
@@ -56,9 +56,9 @@ void Texture::load(const string& fileName) {
 
     // check width and height
     if ((m_width & (m_width - 1)) != 0)
-        cerr << "Warning: image's width is not a power of 2: " << fileName << endl;
+        cerr << "Warning: image's width is not a power of 2: " << m_fileName << endl;
     if ((m_height & (m_height - 1)) != 0)
-        cerr << "Warning: image's height is not a power of 2: " << fileName << endl;
+        cerr << "Warning: image's height is not a power of 2: " << m_fileName << endl;
 
     // check for number of channels in each pixel
     switch (m_bytesPerPixel) {
@@ -75,15 +75,16 @@ void Texture::load(const string& fileName) {
             m_textureFormat = TEXTURE_FORMAT_BGR;
         break;
     default:
-        cerr << "Warning: image is not truecolor: " << fileName << endl;
+        cerr << "Warning: image is not truecolor: " << m_fileName << endl;
     }
 
-    RenderManager::getRenderer().uploadTexture(m_textureId, *this);
+    m_renderer->uploadTexture(m_textureId, *this);
     SDL_FreeSurface(img);
 }
 
 Texture::Texture(const Texture& rhs):
     m_fileName(rhs.m_fileName),
+    m_renderer(rhs.m_renderer),
     m_textureId(rhs.m_textureId),
     m_bytesPerPixel(rhs.m_bytesPerPixel),
     m_width(rhs.m_width),
@@ -96,6 +97,7 @@ Texture& Texture::operator=(const Texture& rhs) {
     if (this == &rhs)
         return *this;
     m_fileName = rhs.m_fileName;
+    m_renderer = rhs.m_renderer;
     m_textureId = rhs.m_textureId;
     m_bytesPerPixel = rhs.m_bytesPerPixel;
     m_width = rhs.m_width;

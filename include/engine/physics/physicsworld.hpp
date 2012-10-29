@@ -23,6 +23,7 @@
 
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
+#include "engine/kernel/commandobject.hpp"
 
 const double FIXED_TIMESTEP = 1.0 / 60.0;
 
@@ -39,23 +40,24 @@ class btDiscreteDynamicsWorld;
 class btCollisionShape;
 class btRigidBody;
 
-class PhysicsWorld {
+class PhysicsWorld: public CommandObject {
 public:
     friend class PhysicsManager;
     friend class RigidBody;
 
+    PhysicsWorld(const std::string& objectName);
+
+    void initialize();
+    void shutdown();
     void setMinExpectedFramerate(const double minExpectedFramerate);
     void setGravity(const double x, const double y, const double z);
     void stepSimulation(const double currentTimeSeconds);
 
 private:
-    PhysicsWorld();
     PhysicsWorld(const PhysicsWorld& rhs);
 
     PhysicsWorld& operator=(const PhysicsWorld& rhs);
 
-    void initialize();
-    void deinitialize();
     void updateRigidBodies();
 
     int m_maxSubsteps;
@@ -70,6 +72,8 @@ private:
     collision_shapes_map_t m_collisionShapes;
     rigid_bodies_map_t m_rigidBodies;
 };
+
+
 
 inline void PhysicsWorld::setMinExpectedFramerate(const double minExpectedFramerate) {
     double minTimestep = 1.0 / minExpectedFramerate;

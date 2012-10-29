@@ -18,8 +18,8 @@
 */
 
 
-#ifndef INPUTMANAGER_HPP
-#define INPUTMANAGER_HPP
+#ifndef INPUTS_HPP
+#define INPUTS_HPP
 
 #include <ostream>
 #include <string>
@@ -79,4 +79,4 @@ inline const mouse_motion_t& InputManager::getLastMouseMotion() {
     return m_lastMouseMotion;
 }
 
-#endif // INPUTMANAGER_HPP
+#endif // INPUTS_HPP

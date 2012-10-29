@@ -25,16 +25,16 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include "engine/resources/resourcemanager.hpp"
+#include "engine/resources/model.hpp"
 #include "engine/resources/resources.hpp"
 
 using namespace std;
 
 const string OPTIMIZED_BINARY_FILE_EXTENSION = ".model";
 
-bool ModelLoader::load(const std::string& fileName, Model& model) {
+bool ModelLoader::load(const string& fileName, Model& model, Renderer* renderer, Resources* resources) {
     cout << "TEMPORAL: always importing model for testing purposes" << endl;
-    import(fileName, model);
+    import(fileName, model, renderer, resources);
 
 //     if (!loadBinary(fileName, model)) {
 //         if (!import(fileName, model))
@@ -44,7 +44,7 @@ bool ModelLoader::load(const std::string& fileName, Model& model) {
     return true;
 }
 
-bool ModelLoader::import(const std::string& fileName, Model& model) {
+bool ModelLoader::import(const string& fileName, Model& model, Renderer* renderer, Resources* resources) {
     model.m_meshes.clear();
     cout << "Importing mesh: " << fileName << endl;
 
@@ -86,7 +86,7 @@ bool ModelLoader::import(const std::string& fileName, Model& model) {
 
     string modelDir = fileName.substr(0, fileName.find_last_of("/\\") + 1);
 
-    model.m_meshes.resize(scene->mNumMeshes);
+    model.m_meshes.resize(scene->mNumMeshes, renderer);
     for (size_t n = 0; n < model.getTotalMeshes(); ++n) {
         const struct aiMesh* mesh = scene->mMeshes[n];
 
@@ -156,14 +156,14 @@ bool ModelLoader::import(const std::string& fileName, Model& model) {
         aiString file;
         if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
             material->GetTexture(aiTextureType_DIFFUSE, 0, &file);
-            texture = ResourceManager::getResources().loadTextureFromFile(modelDir + file.C_Str());
+            texture = resources->loadTextureFromFile(modelDir + file.C_Str());
             model.mesh(n).material().setTextureMap(MATERIAL_DIFFUSE_MAP, texture);
         }
     }
     return true;
 }
 
-bool ModelLoader::loadBinary(const std::string& fileName, Model& model) {
+bool ModelLoader::loadBinary(const string& fileName, Model& model, Renderer* renderer, Resources* resources) {
     model.m_meshes.clear();
     string fileBin = fileName + OPTIMIZED_BINARY_FILE_EXTENSION;
     ifstream file(fileBin.c_str(), ios::in | ios::binary);
@@ -178,7 +178,7 @@ bool ModelLoader::loadBinary(const std::string& fileName, Model& model) {
     cout << "Loading mesh: " << fileBin << endl;
     // load header
     file.read(reinterpret_cast<char*>(&size), sizeof(size_t));
-    model.m_meshes.resize(size);
+    model.m_meshes.resize(size, renderer);
 
     // load body
     for (size_t n = 0; n < model.m_meshes.size(); ++n) {

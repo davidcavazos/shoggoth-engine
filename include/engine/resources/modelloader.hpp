@@ -21,15 +21,19 @@
 #ifndef MODELLOADER_HPP
 #define MODELLOADER_HPP
 
-#include "model.hpp"
+#include <string>
+
+class Model;
+class Renderer;
+class Resources;
 
 class ModelLoader {
 public:
-    static bool load(const std::string& fileName, Model& model);
+    static bool load(const std::string& fileName, Model& model, Renderer* renderer, Resources* resources);
 
 private:
-    static bool import(const std::string& fileName, Model& model);
-    static bool loadBinary(const std::string& fileName, Model& model);
+    static bool import(const std::string& fileName, Model& model, Renderer* renderer, Resources* resources);
+    static bool loadBinary(const std::string& fileName, Model& model, Renderer* renderer, Resources* resources);
     static bool writeBinary(const std::string& fileName, Model& model);
 };
 

@@ -24,13 +24,14 @@
 #include <string>
 #include "mesh.hpp"
 
+class Renderer;
 class ModelLoader;
 
 class Model {
 public:
     friend class ModelLoader;
 
-    Model(const std::string& identifier);
+    Model(const std::string& identifier, Renderer* renderer);
 
     const std::string& getIdentifier() const;
     size_t getTotalMeshes() const;
@@ -45,6 +46,7 @@ public:
 
 private:
     std::string m_identifier;
+    Renderer* m_renderer;
     std::vector<Mesh> m_meshes;
 };
 
@@ -73,7 +75,7 @@ inline void Model::setIdentifier(const std::string& identifier) {
 }
 
 inline void Model::setTotalMeshes(const size_t totalMeshes) {
-    m_meshes.resize(totalMeshes);;
+    m_meshes.resize(totalMeshes, Mesh(m_renderer));
 }
 
 #endif // MODEL_HPP

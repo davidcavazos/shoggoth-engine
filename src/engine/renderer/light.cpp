@@ -20,15 +20,15 @@
 
 #include "engine/renderer/light.hpp"
 
-#include "engine/renderer/rendermanager.hpp"
 #include "engine/renderer/renderer.hpp"
 
 using namespace std;
 
 const string LIGHT_DESCRIPTION = "$light";
 
-Light::Light(Entity*const entity):
-    Component(COMPONENT_LIGHT, entity)
+Light::Light(Entity*const entity, Renderer& renderer):
+    Component(COMPONENT_LIGHT, entity),
+    m_renderer(renderer)
 {
     m_description = LIGHT_DESCRIPTION;
 
@@ -47,9 +47,9 @@ Light::Light(Entity*const entity):
     m_specular[2] = 1.0f;
     m_specular[3] = 1.0f;
 
-    RenderManager::getRenderer().m_lights.insert(this);
+    m_renderer.m_lights.insert(this);
 }
 
 Light::~Light() {
-    RenderManager::getRenderer().m_lights.erase(this);
+    m_renderer.m_lights.erase(this);
 }

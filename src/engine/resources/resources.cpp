@@ -26,6 +26,21 @@
 
 using namespace std;
 
+Resources::Resources(const string& objectName, Renderer* renderer):
+m_renderer(renderer),
+m_modelsMap(),
+m_texturesMap()
+{}
+
+void Resources::initialize() {
+}
+
+void Resources::shutdown() {
+    models_map_t::const_iterator itMesh;
+    for (itMesh = m_modelsMap.begin(); itMesh != m_modelsMap.end(); ++itMesh)
+        delete itMesh->second;
+}
+
 Model* Resources::generateBox(const string& identifier, const double lengthX, const double lengthY, const double lengthZ) {
     Model* model;
     model = findModel(identifier);
@@ -60,7 +75,7 @@ Model* Resources::generateBox(const string& identifier, const double lengthX, co
         20, 21, 22,  22, 23, 20   // back
     };
 
-    model = new Model(identifier);
+    model = new Model(identifier, m_renderer);
     model->setTotalMeshes(1);
     model->mesh(0).setVertices(vertices, 72);
     model->mesh(0).setNormals(normals, 72);
@@ -76,8 +91,8 @@ Model* Resources::generateModelFromFile(const std::string& fileName) {
     if (model != 0)
         return model;
 
-    model = new Model(fileName);
-    ModelLoader::load(fileName, *model);
+    model = new Model(fileName, m_renderer);
+    ModelLoader::load(fileName, *model, m_renderer, this);
     registerModel(model);
     model->uploadToGPU();
     return model;
@@ -89,24 +104,10 @@ Texture* Resources::loadTextureFromFile(const std::string& fileName) {
     if (texture != 0)
         return texture;
 
-    texture = new Texture(fileName);
+    texture = new Texture(fileName, m_renderer);
     texture->load();
     registerTexture(texture);
     return texture;
-}
-
-Resources::Resources():
-    m_modelsMap(),
-    m_texturesMap()
-{}
-
-void Resources::initialize() {
-}
-
-void Resources::deinitialize() {
-    models_map_t::const_iterator itMesh;
-    for (itMesh = m_modelsMap.begin(); itMesh != m_modelsMap.end(); ++itMesh)
-        delete itMesh->second;
 }
 
 string Resources::listsToString() {

@@ -21,25 +21,25 @@
 #include "engine/renderer/renderablemesh.hpp"
 
 #include <sstream>
-#include "engine/renderer/rendermanager.hpp"
 #include "engine/renderer/renderer.hpp"
 #include "engine/resources/model.hpp"
-#include "engine/resources/resourcemanager.hpp"
 #include "engine/resources/resources.hpp"
 
 using namespace std;
 
 const string BOX_DESCRIPTION = "$box";
 
-RenderableMesh::RenderableMesh(Entity* const entity):
+RenderableMesh::RenderableMesh(Entity* const entity, Renderer& renderer, Resources& resources):
     Component(COMPONENT_RENDERABLE_MESH, entity),
+    m_renderer(renderer),
+    m_resources(resources),
     m_meshData(0)
 {
-    RenderManager::getRenderer().m_model.insert(this);
+    m_renderer.m_model.insert(this);
 }
 
 RenderableMesh::~RenderableMesh() {
-    RenderManager::getRenderer().m_model.erase(this);
+    m_renderer.m_model.erase(this);
 }
 
 
@@ -48,10 +48,10 @@ void RenderableMesh::loadBox(const double lengthX, const double lengthY, const d
     stringstream ss;
     ss << BOX_DESCRIPTION << "_" << lengthX << "_" << lengthY << "_" << lengthZ;
     m_description = ss.str();
-    m_meshData = ResourceManager::getResources().generateBox(m_description, lengthX, lengthY, lengthZ);
+    m_meshData = m_resources.generateBox(m_description, lengthX, lengthY, lengthZ);
 }
 
 void RenderableMesh::loadFromFile(const string& fileName) {
     m_description = fileName;
-    m_meshData = ResourceManager::getResources().generateModelFromFile(fileName);
+    m_meshData = m_resources.generateModelFromFile(fileName);
 }

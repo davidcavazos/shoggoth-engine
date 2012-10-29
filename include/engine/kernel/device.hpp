@@ -23,19 +23,24 @@
 
 #include <string>
 #include <set>
+#include "commandobject.hpp"
 #include "inputmanager.hpp"
 
 class DeviceManager;
 struct SDL_Surface;
 
-class Device {
+class Device: public CommandObject {
 public:
     friend class DeviceManager;
+
+    Device(const std::string& objectName);
 
     InputManager& getInputManager();
     double getDeltaTime() const;
     double getFps() const;
 
+    void initialize();
+    void shutdown();
     void onFrameStart();
     void onFrameEnd();
     void swapBuffers();
@@ -60,11 +65,6 @@ protected:
     double m_startTime;
     double m_deltaTime;
     double m_fps;
-
-    Device();
-
-    void initialize();
-    void deinitialize();
 };
 
 

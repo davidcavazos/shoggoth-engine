@@ -23,6 +23,8 @@
 
 #include "engine/kernel/component.hpp"
 
+class Renderer;
+
 typedef enum {
     CAMERA_ORTHOGRAPHIC,
     CAMERA_PROJECTION
@@ -37,7 +39,7 @@ typedef struct {
 
 class Camera: public Component {
 public:
-    Camera(Entity* const entity, const camera_t type);
+    Camera(Entity* const entity, const camera_t type, Renderer& renderer);
     ~Camera();
 
     camera_t getType() const;
@@ -59,6 +61,7 @@ public:
 
 private:
     camera_t m_type;
+    Renderer& m_renderer;
     bool m_hasChanged;
     viewport_t m_viewport;
     float m_aspectRatio;

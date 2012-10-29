@@ -20,10 +20,10 @@
 
 #include "engine/resources/mesh.hpp"
 
-#include "engine/renderer/rendermanager.hpp"
 #include "engine/renderer/renderer.hpp"
 
-Mesh::Mesh():
+Mesh::Mesh(Renderer* renderer):
+    m_renderer(renderer),
     m_meshId(0),
     m_indicesId(0),
     m_vertices(),
@@ -34,9 +34,9 @@ Mesh::Mesh():
 {}
 
 Mesh::~Mesh() {
-    RenderManager::getRenderer().deleteModel(m_meshId, m_indicesId);
+    m_renderer->deleteModel(m_meshId, m_indicesId);
 }
 
 void Mesh::uploadToGPU() {
-    RenderManager::getRenderer().uploadModel(m_meshId, m_indicesId, *this);
+    m_renderer->uploadModel(m_meshId, m_indicesId, *this);
 }

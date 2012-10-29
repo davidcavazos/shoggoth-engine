@@ -7,9 +7,9 @@
 using namespace std;
 
 int main(int, char**) {
-    Demo game("game", "root");
-    game.loadScene();
-    game.bindInputs();
-    game.runMainLoop();
+    Demo demo("demo", "device", "scene", "root", "renderer", "resources", "physics-world");
+    demo.loadScene();
+    demo.bindInputs();
+    demo.runMainLoop();
     return EXIT_SUCCESS;
 }

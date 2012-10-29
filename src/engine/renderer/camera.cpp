@@ -20,7 +20,6 @@
 
 #include "engine/renderer/camera.hpp"
 
-#include "engine/renderer/rendermanager.hpp"
 #include "engine/renderer/renderer.hpp"
 #include "engine/kernel/entity.hpp"
 
@@ -32,9 +31,10 @@ const float DEFAULT_ORTHO_HEIGHT = 10.0f;
 const float DEFAULT_NEAR_DISTANCE = 0.1f;
 const float DEFAULT_FAR_DISTANCE = 1000.0f;
 
-Camera::Camera(Entity* const entity, const camera_t type):
+Camera::Camera(Entity* const entity, const camera_t type, Renderer& renderer):
     Component(COMPONENT_CAMERA, entity),
     m_type(type),
+    m_renderer(renderer),
     m_hasChanged(true),
     m_viewport(),
     m_aspectRatio(0.0f),
@@ -55,8 +55,8 @@ Camera::Camera(Entity* const entity, const camera_t type):
         m_description.append("INVALID");
     }
 
-    RenderManager::getRenderer().m_cameras.insert(this);
-    RenderManager::getRenderer().m_activeCamera = this;
+    m_renderer.m_cameras.insert(this);
+    m_renderer.m_activeCamera = this;
 
     m_entity.registerAttribute("type", boost::bind(&Camera::cmdType, this, _1));
     m_entity.registerAttribute("perspective-fov", boost::bind(&Camera::cmdPerspectiveFOV, this, _1));
@@ -66,7 +66,7 @@ Camera::Camera(Entity* const entity, const camera_t type):
 }
 
 Camera::~Camera() {
-    RenderManager::getRenderer().m_cameras.erase(this);
+    m_renderer.m_cameras.erase(this);
 }
 
 

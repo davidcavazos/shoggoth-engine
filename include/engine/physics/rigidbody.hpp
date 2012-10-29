@@ -24,6 +24,8 @@
 #include "engine/kernel/component.hpp"
 #include "engine/kernel/vector3.hpp"
 
+class PhysicsWorld;
+class Resources;
 class btRigidBody;
 class btCollisionShape;
 class btDefaultMotionState;
@@ -37,7 +39,7 @@ typedef enum {
 
 class RigidBody: public Component {
 public:
-    RigidBody(Entity* const entity);
+    RigidBody(Entity* const entity, PhysicsWorld* physicsWorld);
 
     const Vector3& getPosition() const;
     const Quaternion& getOrientation() const;
@@ -82,10 +84,11 @@ public:
     void addCylinder(const double radius, const double height);
     void addCapsule(const double radius, const double height);
     void addCone(const double radius, const double height);
-    void addConvexHull(const std::string& fileName);
-    void addConcaveHull(const std::string& fileName);
+    void addConvexHull(const std::string& fileName, Resources& resources);
+    void addConcaveHull(const std::string& fileName, Resources& resources);
 
 private:
+    PhysicsWorld* m_physicsWorld;
     btRigidBody* m_rigidBody;
     Vector3 m_position;
     Quaternion m_orientation;

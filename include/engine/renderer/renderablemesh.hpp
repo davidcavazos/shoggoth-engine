@@ -23,11 +23,13 @@
 
 #include "engine/kernel/component.hpp"
 
+class Renderer;
+class Resources;
 class Model;
 
 class RenderableMesh: public Component {
 public:
-    RenderableMesh(Entity* const entity);
+    RenderableMesh(Entity* const entity, Renderer& renderer, Resources& resources);
     ~RenderableMesh();
 
     const Model* getModelPtr() const;
@@ -37,6 +39,8 @@ public:
     void loadFromFile(const std::string& fileName);
 
 private:
+    Renderer& m_renderer;
+    Resources& m_resources;
     Model* m_meshData;
 
     // Should not be called
@@ -58,6 +62,8 @@ inline const Model& RenderableMesh::getModel() const {
 
 inline RenderableMesh::RenderableMesh(const RenderableMesh& rhs):
     Component(rhs.m_type, &rhs.m_entity),
+    m_renderer(rhs.m_renderer),
+    m_resources(rhs.m_resources),
     m_meshData(rhs.m_meshData)
 {}
 

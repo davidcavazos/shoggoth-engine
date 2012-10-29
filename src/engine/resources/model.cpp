@@ -20,8 +20,9 @@
 
 #include "engine/resources/model.hpp"
 
-Model::Model(const std::string& identifier):
+Model::Model(const std::string& identifier, Renderer* renderer):
     m_identifier(identifier),
+    m_renderer(renderer),
     m_meshes()
 {}
 
