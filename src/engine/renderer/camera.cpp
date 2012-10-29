@@ -21,8 +21,8 @@
 #include "engine/renderer/camera.hpp"
 
 #include <iostream>
-#include "engine/renderer/renderer.hpp"
 #include "engine/kernel/entity.hpp"
+#include "engine/renderer/renderer.hpp"
 
 using namespace std;
 

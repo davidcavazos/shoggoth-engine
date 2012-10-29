@@ -25,8 +25,8 @@
 #include <sstream>
 #include <bullet/btBulletDynamicsCommon.h>
 #include <bullet/BulletCollision/CollisionShapes/btShapeHull.h>
-#include "engine/kernel/entity.hpp"
 #include "engine/physics/physicsworld.hpp"
+#include "engine/kernel/entity.hpp"
 #include "engine/resources/model.hpp"
 #include "engine/resources/resources.hpp"
 

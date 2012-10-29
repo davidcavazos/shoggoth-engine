@@ -45,6 +45,10 @@ private:
 
     Light(const Light& rhs);
     Light& operator=(const Light&);
+
+    void cmdAmbient(const std::string& arg);
+    void cmdDiffuse(const std::string& arg);
+    void cmdSpecular(const std::string& arg);
 };
 
 

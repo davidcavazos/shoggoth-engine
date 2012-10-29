@@ -21,6 +21,7 @@
 #include "engine/renderer/light.hpp"
 
 #include <iostream>
+#include "engine/kernel/entity.hpp"
 #include "engine/renderer/renderer.hpp"
 
 using namespace std;
@@ -49,6 +50,10 @@ Light::Light(Entity* const entity, Renderer* renderer):
     m_specular[3] = 1.0f;
 
     m_renderer->m_lights.insert(this);
+
+    m_entity->registerAttribute("ambient-color", boost::bind(&Light::cmdAmbient, this, _1));
+    m_entity->registerAttribute("diffuse-color", boost::bind(&Light::cmdDiffuse, this, _1));
+    m_entity->registerAttribute("specular-color", boost::bind(&Light::cmdSpecular, this, _1));
 }
 
 Light::~Light() {
@@ -67,4 +72,27 @@ Light::Light(const Light& rhs):
 Light& Light::operator=(const Light&) {
     cerr << "Error: Light assignment operator should not be called!" << endl;
     return *this;
+}
+
+
+
+void Light::cmdAmbient(const std::string& arg) {
+    double r, g, b, a;
+    stringstream ss(arg);
+    ss >> r >> g >> b >> a;
+    setAmbient(r, g, b, a);
+}
+
+void Light::cmdDiffuse(const std::string& arg) {
+    double r, g, b, a;
+    stringstream ss(arg);
+    ss >> r >> g >> b >> a;
+    setDiffuse(r, g, b, a);
+}
+
+void Light::cmdSpecular(const std::string& arg) {
+    double r, g, b, a;
+    stringstream ss(arg);
+    ss >> r >> g >> b >> a;
+    setSpecular(r, g, b, a);
 }

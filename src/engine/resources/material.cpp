@@ -20,6 +20,8 @@
 
 #include "engine/resources/material.hpp"
 
+#include "engine/resources/texture.hpp"
+
 Material::Material():
     m_colors(),
     m_shininess(0.0f),

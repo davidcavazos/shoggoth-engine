@@ -24,12 +24,12 @@
 #include <ostream>
 #include <vector>
 #include <set>
+#include "commandobject.hpp"
 #include "vector3.hpp"
 #include "quaternion.hpp"
-#include "commandobject.hpp"
-#include "component.hpp"
 
 class Device;
+class Component;
 
 typedef enum {
     SPACE_LOCAL,

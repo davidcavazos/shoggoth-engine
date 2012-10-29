@@ -21,6 +21,7 @@
 #include "engine/renderer/renderablemesh.hpp"
 
 #include <sstream>
+#include "engine/kernel/entity.hpp"
 #include "engine/renderer/renderer.hpp"
 #include "engine/resources/model.hpp"
 #include "engine/resources/resources.hpp"
@@ -36,6 +37,9 @@ RenderableMesh::RenderableMesh(Entity* const entity, Renderer* renderer, Resourc
     m_model(0)
 {
     m_renderer->m_model.insert(this);
+
+    m_entity->registerCommand("load-model-box", boost::bind(&RenderableMesh::cmdLoadModelBox, this, _1));
+    m_entity->registerCommand("load-model-file", boost::bind(&RenderableMesh::cmdLoadModelFile, this, _1));
 }
 
 RenderableMesh::~RenderableMesh() {
@@ -56,6 +60,8 @@ void RenderableMesh::loadFromFile(const string& fileName) {
     m_model = m_resources->generateModelFromFile(fileName);
 }
 
+
+
 RenderableMesh::RenderableMesh(const RenderableMesh& rhs):
     Component(rhs.m_type, rhs.m_entity),
     m_renderer(rhs.m_renderer),
@@ -69,3 +75,16 @@ RenderableMesh& RenderableMesh::operator=(const RenderableMesh&) {
     cerr << "Error: RenderableMesh assignment operator should not be called!" << endl;
     return *this;
 }
+
+
+void RenderableMesh::cmdLoadModelBox(const std::string& arg) {
+    double x, y, z;
+    stringstream ss(arg);
+    ss >> x >> y >> z;
+    loadBox(x, y, z);
+}
+
+void RenderableMesh::cmdLoadModelFile(const std::string& arg) {
+    loadFromFile(arg);
+}
+

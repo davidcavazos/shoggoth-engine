@@ -27,7 +27,8 @@
 #include <deque>
 #include "tokentable.hpp"
 #include "command.hpp"
-#include "commandobject.hpp"
+
+class CommandObject;
 
 class Terminal {
 public:
@@ -72,11 +73,6 @@ inline bool Terminal::getObject(const size_t id, CommandObject*& object) {
             return true;
     }
     return false;
-}
-
-inline const std::string Terminal::getObjectName(const size_t idObject) {
-//     return ms_objectsTable.findName(idObject);
-    return ms_objectPointersTable[idObject]->getObjectName();
 }
 
 inline std::string Terminal::findCommandName(const size_t idCommand) {

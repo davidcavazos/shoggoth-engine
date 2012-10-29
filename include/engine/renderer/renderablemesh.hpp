@@ -46,6 +46,9 @@ private:
 
     RenderableMesh(const RenderableMesh& rhs);
     RenderableMesh& operator=(const RenderableMesh&);
+
+    void cmdLoadModelBox(const std::string& arg);
+    void cmdLoadModelFile(const std::string& arg);
 };
 
 

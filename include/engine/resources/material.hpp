@@ -23,7 +23,8 @@
 
 #include <iostream>
 #include <vector>
-#include "texture.hpp"
+
+class Texture;
 
 typedef enum {
     MATERIAL_COLOR_DIFFUSE,

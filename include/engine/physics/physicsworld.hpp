@@ -22,7 +22,6 @@
 #define PHYSICSWORLD_HPP
 
 #include <boost/unordered_map.hpp>
-#include <boost/unordered_set.hpp>
 #include "engine/kernel/commandobject.hpp"
 
 const double FIXED_TIMESTEP = 1.0 / 60.0;

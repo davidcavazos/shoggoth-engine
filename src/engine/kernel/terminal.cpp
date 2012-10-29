@@ -58,6 +58,11 @@ void parse(const string& expression, size_t& i, string& token, token_state_t& cu
         token.push_back(expression[i]);
 }
 
+
+const std::string Terminal::getObjectName(const size_t idObject) {
+    return ms_objectPointersTable[idObject]->getObjectName();
+}
+
 void Terminal::pushCommand(const Command& cmd) {
     ms_commandsQueue.push_back(cmd);
 }
