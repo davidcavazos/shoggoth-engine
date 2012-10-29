@@ -78,9 +78,9 @@ Model* Resources::generateBox(const string& identifier, const double lengthX, co
 
     model = new Model(identifier, m_renderer);
     model->setTotalMeshes(1);
-    model->mesh(0).setVertices(vertices, 72);
-    model->mesh(0).setNormals(normals, 72);
-    model->mesh(0).setIndices(indices, 36);
+    model->mesh(0)->setVertices(vertices, 72);
+    model->mesh(0)->setNormals(normals, 72);
+    model->mesh(0)->setIndices(indices, 36);
     registerModel(model);
     model->uploadToGPU();
     return model;

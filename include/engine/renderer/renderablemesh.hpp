@@ -32,8 +32,9 @@ public:
     RenderableMesh(Entity* const entity, Renderer* renderer, Resources* resources);
     ~RenderableMesh();
 
-    const Model* getModelPtr() const;
-    const Model& getModel() const;
+    const Model* getModel() const;
+
+    Model* model();
 
     void loadBox(const double lengthX, const double lengthY, const double lengthZ);
     void loadFromFile(const std::string& fileName);
@@ -49,12 +50,14 @@ private:
 
 
 
-inline const Model* RenderableMesh::getModelPtr() const {
+inline const Model* RenderableMesh::getModel() const {
     return m_model;
 }
 
-inline const Model& RenderableMesh::getModel() const {
-    return *getModelPtr();
+
+
+inline Model* RenderableMesh::model() {
+    return m_model;
 }
 
 #endif // RENDERABLEMESH_HPP

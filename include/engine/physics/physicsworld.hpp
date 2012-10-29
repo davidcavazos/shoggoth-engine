@@ -27,7 +27,6 @@
 
 const double FIXED_TIMESTEP = 1.0 / 60.0;
 
-class PhysicsManager;
 class RigidBody;
 class Entity;
 
@@ -42,7 +41,6 @@ class btRigidBody;
 
 class PhysicsWorld: public CommandObject {
 public:
-    friend class PhysicsManager;
     friend class RigidBody;
 
     PhysicsWorld(const std::string& objectName);

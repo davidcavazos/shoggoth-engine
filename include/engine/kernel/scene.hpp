@@ -32,9 +32,9 @@ public:
 
     Scene(const std::string& objectName, const std::string& rootNodeName, const Device* device);
 
-    const Entity& getRoot() const;
+    const Entity* getRoot() const;
 
-    Entity& root();
+    Entity* root();
 
     void initialize();
     void shutdown();
@@ -48,13 +48,13 @@ private:
 
 
 
-inline const Entity& Scene::getRoot() const {
-    return m_root;
+inline const Entity* Scene::getRoot() const {
+    return &m_root;
 }
 
 
-inline Entity& Scene::root() {
-    return m_root;
+inline Entity* Scene::root() {
+    return &m_root;
 }
 
 #endif // SCENE_HPP

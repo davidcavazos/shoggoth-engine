@@ -57,9 +57,9 @@ public:
     const unsigned int* getIndicesPtr() const;
     size_t getIndicesSize() const;
     size_t getIndicesBytes() const;
-    const Material& getMaterial() const;
+    const Material* getMaterial() const;
 
-    Material& material();
+    Material* material();
 
     void setVertices(const std::vector<float>& vertices);
     void setVertices(const float* vertices, const size_t size);
@@ -174,14 +174,14 @@ inline size_t Mesh::getIndicesBytes() const {
     return m_indices.size() * sizeof(unsigned int);
 }
 
-inline const Material& Mesh::getMaterial() const {
-    return m_material;
+inline const Material* Mesh::getMaterial() const {
+    return &m_material;
 }
 
 
 
-inline Material& Mesh::material() {
-    return m_material;
+inline Material* Mesh::material() {
+    return &m_material;
 }
 
 

@@ -28,7 +28,6 @@
 class Device;
 class Vector3;
 class Quaternion;
-class RenderManager;
 class Camera;
 class Light;
 class RenderableMesh;
@@ -37,7 +36,6 @@ class Texture;
 
 class Renderer: public CommandObject {
 public:
-    friend class RenderManager;
     friend class Camera;
     friend class Light;
     friend class RenderableMesh;

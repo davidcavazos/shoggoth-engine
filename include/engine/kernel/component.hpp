@@ -40,7 +40,7 @@ public:
 
     const Entity* getEntity() const;
     Entity* entity();
-    component_t getType() const;
+    const component_t& getType() const;
     const std::string& getDescription() const;
 
 protected:
@@ -65,7 +65,7 @@ inline Entity* Component::entity() {
     return m_entity;
 }
 
-inline component_t Component::getType() const {
+inline const component_t& Component::getType() const {
     return m_type;
 }
 

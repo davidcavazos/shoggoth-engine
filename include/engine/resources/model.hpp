@@ -35,9 +35,9 @@ public:
 
     const std::string& getIdentifier() const;
     size_t getTotalMeshes() const;
-    const Mesh& getMesh(const size_t index) const;
+    const Mesh* getMesh(const size_t index) const;
 
-    Mesh& mesh(const size_t index);
+    Mesh* mesh(const size_t index);
 
     void setIdentifier(const std::string& identifier);
     void setTotalMeshes(const size_t totalMeshes);
@@ -63,12 +63,14 @@ inline size_t Model::getTotalMeshes() const {
     return m_meshes.size();
 }
 
-inline const Mesh& Model::getMesh(const size_t index) const {
-    return m_meshes[index];
+inline const Mesh* Model::getMesh(const size_t index) const {
+    return &m_meshes[index];
 }
 
-inline Mesh& Model::mesh(const size_t index) {
-    return m_meshes[index];
+
+
+inline Mesh* Model::mesh(const size_t index) {
+    return &m_meshes[index];
 }
 
 

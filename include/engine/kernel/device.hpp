@@ -26,16 +26,13 @@
 #include "commandobject.hpp"
 #include "inputs.hpp"
 
-class DeviceManager;
 struct SDL_Surface;
 
 class Device: public CommandObject {
 public:
-    friend class DeviceManager;
-
     Device(const std::string& objectName);
 
-    Inputs& getInputManager();
+    Inputs* getInputs();
     double getDeltaTime() const;
     double getFps() const;
 
@@ -69,8 +66,8 @@ protected:
 
 
 
-inline Inputs& Device::getInputManager() {
-    return ms_inputs;
+inline Inputs* Device::getInputs() {
+    return &ms_inputs;
 }
 
 inline double Device::getDeltaTime() const {

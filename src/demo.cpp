@@ -78,7 +78,7 @@ Demo::~Demo() {
 void Demo::loadScene() {
     cout << "Loading scene..." << endl;
 
-    Entity* root = &m_scene.root();
+    Entity* root = m_scene.root();
 
     Entity* floor = root->addChild("floor");
     floor->setPositionAbs(0.0f, -1.0f, 0.0f);
@@ -145,24 +145,24 @@ void Demo::loadScene() {
 
 void Demo::bindInputs() {
     cout << "Binding inputs..." << endl;
-    Inputs& inputs = m_device.getInputManager();
-    inputs.bindInput(INPUT_KEY_RELEASE, "demo quit", SDLK_ESCAPE);
-    inputs.bindInput(INPUT_KEY_RELEASE, "demo run commands.txt", SDLK_TAB);
-    inputs.bindInput(INPUT_MOUSE_MOTION, "demo on-mouse-motion");
+    Inputs* inputs = m_device.getInputs();
+    inputs->bindInput(INPUT_KEY_RELEASE, "demo quit", SDLK_ESCAPE);
+    inputs->bindInput(INPUT_KEY_RELEASE, "demo run commands.txt", SDLK_TAB);
+    inputs->bindInput(INPUT_MOUSE_MOTION, "demo on-mouse-motion");
 
-    inputs.bindInput(INPUT_KEY_PRESSED, "cube move-z -5", SDLK_UP);
-    inputs.bindInput(INPUT_KEY_PRESSED, "cube move-x -5", SDLK_LEFT);
-    inputs.bindInput(INPUT_KEY_PRESSED, "cube move-z  5", SDLK_DOWN);
-    inputs.bindInput(INPUT_KEY_PRESSED, "cube move-x  5", SDLK_RIGHT);
+    inputs->bindInput(INPUT_KEY_PRESSED, "cube move-z -5", SDLK_UP);
+    inputs->bindInput(INPUT_KEY_PRESSED, "cube move-x -5", SDLK_LEFT);
+    inputs->bindInput(INPUT_KEY_PRESSED, "cube move-z  5", SDLK_DOWN);
+    inputs->bindInput(INPUT_KEY_PRESSED, "cube move-x  5", SDLK_RIGHT);
 
-    inputs.bindInput(INPUT_KEY_PRESSED, "camera move-z -5", SDLK_w);
-    inputs.bindInput(INPUT_KEY_PRESSED, "camera move-x -5", SDLK_a);
-    inputs.bindInput(INPUT_KEY_PRESSED, "camera move-z  5", SDLK_s);
-    inputs.bindInput(INPUT_KEY_PRESSED, "camera move-x  5", SDLK_d);
-    inputs.bindInput(INPUT_KEY_PRESSED, "camera move-y-global  5", SDLK_SPACE);
-    inputs.bindInput(INPUT_KEY_PRESSED, "camera move-y-global -5", SDLK_LSHIFT);
-    inputs.bindInput(INPUT_MOUSE_BUTTON_RELEASE, "demo fire-cube", 1);
-    inputs.bindInput(INPUT_MOUSE_BUTTON_RELEASE, "demo fire-sphere", 3);
+    inputs->bindInput(INPUT_KEY_PRESSED, "camera move-z -5", SDLK_w);
+    inputs->bindInput(INPUT_KEY_PRESSED, "camera move-x -5", SDLK_a);
+    inputs->bindInput(INPUT_KEY_PRESSED, "camera move-z  5", SDLK_s);
+    inputs->bindInput(INPUT_KEY_PRESSED, "camera move-x  5", SDLK_d);
+    inputs->bindInput(INPUT_KEY_PRESSED, "camera move-y-global  5", SDLK_SPACE);
+    inputs->bindInput(INPUT_KEY_PRESSED, "camera move-y-global -5", SDLK_LSHIFT);
+    inputs->bindInput(INPUT_MOUSE_BUTTON_RELEASE, "demo fire-cube", 1);
+    inputs->bindInput(INPUT_MOUSE_BUTTON_RELEASE, "demo fire-sphere", 3);
 }
 
 void Demo::runMainLoop() {
@@ -227,7 +227,7 @@ void Demo::cmdOnMouseMotion(const string&) {
     static Command moveXCmd("camera yaw-global");
     static Command moveYCmd("camera pitch");
 
-    mouse_motion_t motion = m_device.getInputManager().getLastMouseMotion();
+    mouse_motion_t motion = m_device.getInputs()->getLastMouseMotion();
 
     float sensitivity = 0.05;
     stringstream ssx;
@@ -248,7 +248,7 @@ void Demo::cmdFireCube(const std::string&) {
         stringstream ss;
         ss << "missile-cube-" << ++n;
 
-        Entity* cube = m_scene.root().addChild(ss.str());
+        Entity* cube = m_scene.root()->addChild(ss.str());
         Vector3 orientationUnit = VECTOR3_UNIT_Z_NEG.rotate(camera->getOrientationAbs());
         cube->setPositionAbs(camera->getPositionAbs() + orientationUnit);
         cube->setOrientationAbs(camera->getOrientationAbs());
@@ -270,7 +270,7 @@ void Demo::cmdFireSphere(const std::string&) {
         stringstream ss;
         ss << "missile-sphere-" << ++n;
 
-        Entity* sphere = m_scene.root().addChild(ss.str());
+        Entity* sphere = m_scene.root()->addChild(ss.str());
         Vector3 orientationUnit = VECTOR3_UNIT_Z_NEG.rotate(camera->getOrientationAbs());
         sphere->setPositionAbs(camera->getPositionAbs() + orientationUnit);
         sphere->setOrientationAbs(camera->getOrientationAbs());

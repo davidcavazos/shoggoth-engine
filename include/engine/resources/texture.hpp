@@ -43,7 +43,7 @@ public:
     size_t getBytesPerPixel() const;
     size_t getWidth() const;
     size_t getHeight() const;
-    texture_format_t getTextureFormat() const;
+    const texture_format_t& getTextureFormat() const;
     void* getPixels() const;
 
     void load();
@@ -84,7 +84,7 @@ inline size_t Texture::getHeight() const {
     return m_height;
 }
 
-inline texture_format_t Texture::getTextureFormat() const {
+inline const texture_format_t& Texture::getTextureFormat() const {
     return m_textureFormat;
 }
 

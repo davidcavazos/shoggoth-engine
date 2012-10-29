@@ -418,60 +418,60 @@ void Renderer::draw() const {
     // set meshes
     set<RenderableMesh*>::const_iterator it;
     for (it = m_model.begin(); it != m_model.end(); ++it) {
-        const Model& model = (*it)->getModel();
+        const Model* model = (*it)->getModel();
         const Entity* entity = (*it)->getEntity();
 
         glPushMatrix();
         setOpenGLMatrix(m, entity->getPositionAbs(), entity->getOrientationAbs());
         glMultMatrixf(m);
-        for (size_t n = 0; n < model.getTotalMeshes(); ++n) {
-            const Mesh& mesh = model.getMesh(n);
-            const Material& mtl = mesh.getMaterial();
+        for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
+            const Mesh* mesh = model->getMesh(n);
+            const Material* mtl = mesh->getMaterial();
 
             // set material
-            glMaterialfv(GL_FRONT, GL_DIFFUSE, mtl.getColor(MATERIAL_COLOR_DIFFUSE).rgb);
-            glMaterialfv(GL_FRONT, GL_SPECULAR, mtl.getColor(MATERIAL_COLOR_SPECULAR).rgb);
-            glMaterialfv(GL_FRONT, GL_AMBIENT, mtl.getColor(MATERIAL_COLOR_AMBIENT).rgb);
-            glMaterialfv(GL_FRONT, GL_EMISSION, mtl.getColor(MATERIAL_COLOR_EMISSIVE).rgb);
-            glMaterialf(GL_FRONT, GL_SHININESS, mtl.getShininess());
+            glMaterialfv(GL_FRONT, GL_DIFFUSE, mtl->getColor(MATERIAL_COLOR_DIFFUSE).rgb);
+            glMaterialfv(GL_FRONT, GL_SPECULAR, mtl->getColor(MATERIAL_COLOR_SPECULAR).rgb);
+            glMaterialfv(GL_FRONT, GL_AMBIENT, mtl->getColor(MATERIAL_COLOR_AMBIENT).rgb);
+            glMaterialfv(GL_FRONT, GL_EMISSION, mtl->getColor(MATERIAL_COLOR_EMISSIVE).rgb);
+            glMaterialf(GL_FRONT, GL_SHININESS, mtl->getShininess());
 
             // set textures
-            if (mtl.getTextureMap(MATERIAL_DIFFUSE_MAP) != 0)
-                glBindTexture(GL_TEXTURE_2D, mtl.getTextureMap(MATERIAL_DIFFUSE_MAP)->getId());
+            if (mtl->getTextureMap(MATERIAL_DIFFUSE_MAP) != 0)
+                glBindTexture(GL_TEXTURE_2D, mtl->getTextureMap(MATERIAL_DIFFUSE_MAP)->getId());
             else
                 glBindTexture(GL_TEXTURE_2D, 0);
 
             // draw mesh
             switch (gDataUploadMode) {
             case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
-                glBindBuffer(GL_ARRAY_BUFFER, mesh.getMeshId());
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.getIndicesId());
+                glBindBuffer(GL_ARRAY_BUFFER, mesh->getMeshId());
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->getIndicesId());
 
                 glVertexPointer(3, GL_FLOAT, 0, 0);
-                glNormalPointer(GL_FLOAT, 0, (GLvoid*)(mesh.getVerticesBytes()));
-                glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(mesh.getVerticesBytes() + mesh.getNormalsBytes()));
-                glDrawElements(GL_TRIANGLES, mesh.getIndicesSize(), GL_UNSIGNED_INT, 0);
+                glNormalPointer(GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes()));
+                glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes() + mesh->getNormalsBytes()));
+                glDrawElements(GL_TRIANGLES, mesh->getIndicesSize(), GL_UNSIGNED_INT, 0);
 
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
                 glBindBuffer(GL_ARRAY_BUFFER, 0);
                 break;
             case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
-                glBindBufferARB(GL_ARRAY_BUFFER_ARB, mesh.getMeshId());
-                glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mesh.getIndicesId());
+                glBindBufferARB(GL_ARRAY_BUFFER_ARB, mesh->getMeshId());
+                glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mesh->getIndicesId());
 
                 glVertexPointer(3, GL_FLOAT, 0, 0);
-                glNormalPointer(GL_FLOAT, 0, (GLvoid*)(mesh.getVerticesBytes()));
-                glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(mesh.getVerticesBytes() + mesh.getNormalsBytes()));
-                glDrawElements(GL_TRIANGLES, mesh.getIndicesSize(), GL_UNSIGNED_INT, 0);
+                glNormalPointer(GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes()));
+                glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes() + mesh->getNormalsBytes()));
+                glDrawElements(GL_TRIANGLES, mesh->getIndicesSize(), GL_UNSIGNED_INT, 0);
 
                 glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
                 glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
                 break;
             case DATA_UPLOAD_VERTEX_ARRAY:
-                glVertexPointer(3, GL_FLOAT, 0, mesh.getVerticesPtr());
-                glNormalPointer(GL_FLOAT, 0, mesh.getNormalsPtr());
-                glTexCoordPointer(2, GL_FLOAT, 0, mesh.getUvCoordsPtr());
-                glDrawElements(GL_TRIANGLES, mesh.getIndicesSize(), GL_UNSIGNED_INT, mesh.getIndicesPtr());
+                glVertexPointer(3, GL_FLOAT, 0, mesh->getVerticesPtr());
+                glNormalPointer(GL_FLOAT, 0, mesh->getNormalsPtr());
+                glTexCoordPointer(2, GL_FLOAT, 0, mesh->getUvCoordsPtr());
+                glDrawElements(GL_TRIANGLES, mesh->getIndicesSize(), GL_UNSIGNED_INT, mesh->getIndicesPtr());
                 break;
             default:
                 cerr << "Error: invalid data_upload_t: " << gDataUploadMode << endl;

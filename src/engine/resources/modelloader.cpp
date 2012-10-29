@@ -91,37 +91,37 @@ bool ModelLoader::import(const string& fileName, Model& model, Renderer* rendere
         const struct aiMesh* mesh = scene->mMeshes[n];
 
         // vertices
-        model.mesh(n).m_vertices.reserve(mesh->mNumVertices * 3);
+        model.mesh(n)->m_vertices.reserve(mesh->mNumVertices * 3);
         for (size_t i = 0; i < mesh->mNumVertices; ++i) {
-            model.mesh(n).m_vertices.push_back(mesh->mVertices[i].x);
-            model.mesh(n).m_vertices.push_back(mesh->mVertices[i].y);
-            model.mesh(n).m_vertices.push_back(mesh->mVertices[i].z);
+            model.mesh(n)->m_vertices.push_back(mesh->mVertices[i].x);
+            model.mesh(n)->m_vertices.push_back(mesh->mVertices[i].y);
+            model.mesh(n)->m_vertices.push_back(mesh->mVertices[i].z);
         }
 
         // normals
-        model.mesh(n).m_normals.reserve(mesh->mNumVertices * 3);
+        model.mesh(n)->m_normals.reserve(mesh->mNumVertices * 3);
         for (size_t i = 0; i < mesh->mNumVertices; ++i) {
-            model.mesh(n).m_normals.push_back(mesh->mNormals[i].x);
-            model.mesh(n).m_normals.push_back(mesh->mNormals[i].y);
-            model.mesh(n).m_normals.push_back(mesh->mNormals[i].z);
+            model.mesh(n)->m_normals.push_back(mesh->mNormals[i].x);
+            model.mesh(n)->m_normals.push_back(mesh->mNormals[i].y);
+            model.mesh(n)->m_normals.push_back(mesh->mNormals[i].z);
         }
 
         // indices
-        model.mesh(n).m_indices.reserve(mesh->mNumFaces * 3);
+        model.mesh(n)->m_indices.reserve(mesh->mNumFaces * 3);
         for (size_t i = 0; i < mesh->mNumFaces; ++i) {
             if (mesh->mFaces[i].mNumIndices != 3)
                 cerr << "Error: non-triangle face found, check model: " << fileName << endl;
-            model.mesh(n).m_indices.push_back(mesh->mFaces[i].mIndices[0]);
-            model.mesh(n).m_indices.push_back(mesh->mFaces[i].mIndices[1]);
-            model.mesh(n).m_indices.push_back(mesh->mFaces[i].mIndices[2]);
+            model.mesh(n)->m_indices.push_back(mesh->mFaces[i].mIndices[0]);
+            model.mesh(n)->m_indices.push_back(mesh->mFaces[i].mIndices[1]);
+            model.mesh(n)->m_indices.push_back(mesh->mFaces[i].mIndices[2]);
         }
 
         // uv coordinates
         if (mesh->GetNumUVChannels() > 0) {
-            model.mesh(n).m_uvCoords.reserve(mesh->mNumVertices * 2);
+            model.mesh(n)->m_uvCoords.reserve(mesh->mNumVertices * 2);
             for (size_t i = 0; i < mesh->mNumVertices; ++i) {
-                model.mesh(n).m_uvCoords.push_back(mesh->mTextureCoords[0][i].x);
-                model.mesh(n).m_uvCoords.push_back(mesh->mTextureCoords[0][i].y);
+                model.mesh(n)->m_uvCoords.push_back(mesh->mTextureCoords[0][i].x);
+                model.mesh(n)->m_uvCoords.push_back(mesh->mTextureCoords[0][i].y);
             }
         }
 
@@ -130,22 +130,22 @@ bool ModelLoader::import(const string& fileName, Model& model, Renderer* rendere
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
         // diffuse color
         material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-        model.mesh(n).material().setColor(MATERIAL_COLOR_DIFFUSE, color.r, color.g, color.b);
+        model.mesh(n)->material()->setColor(MATERIAL_COLOR_DIFFUSE, color.r, color.g, color.b);
         // specular color
         material->Get(AI_MATKEY_COLOR_SPECULAR, color);
-        model.mesh(n).material().setColor(MATERIAL_COLOR_SPECULAR, color.r, color.g, color.b);
+        model.mesh(n)->material()->setColor(MATERIAL_COLOR_SPECULAR, color.r, color.g, color.b);
         // ambient color
         material->Get(AI_MATKEY_COLOR_AMBIENT, color);
-        model.mesh(n).material().setColor(MATERIAL_COLOR_AMBIENT, color.r, color.g, color.b);
+        model.mesh(n)->material()->setColor(MATERIAL_COLOR_AMBIENT, color.r, color.g, color.b);
         // emissive color
         material->Get(AI_MATKEY_COLOR_EMISSIVE, color);
-        model.mesh(n).material().setColor(MATERIAL_COLOR_EMISSIVE, color.r, color.g, color.b);
+        model.mesh(n)->material()->setColor(MATERIAL_COLOR_EMISSIVE, color.r, color.g, color.b);
         // shininess
         float shininess = 0.0f;
         float strength = 1.0f;
         material->Get(AI_MATKEY_SHININESS, shininess);
         material->Get(AI_MATKEY_SHININESS_STRENGTH, strength);
-        model.mesh(n).material().setShininess(shininess * strength);
+        model.mesh(n)->material()->setShininess(shininess * strength);
 
         // texture maps
         if (scene->HasTextures()) {
@@ -157,7 +157,7 @@ bool ModelLoader::import(const string& fileName, Model& model, Renderer* rendere
         if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
             material->GetTexture(aiTextureType_DIFFUSE, 0, &file);
             texture = resources->loadTextureFromFile(modelDir + file.C_Str());
-            model.mesh(n).material().setTextureMap(MATERIAL_DIFFUSE_MAP, texture);
+            model.mesh(n)->material()->setTextureMap(MATERIAL_DIFFUSE_MAP, texture);
         }
     }
     return true;
@@ -184,42 +184,42 @@ bool ModelLoader::loadBinary(const string& fileName, Model& model, Renderer* ren
     for (size_t n = 0; n < model.m_meshes.size(); ++n) {
         // vertices
         file.read(reinterpret_cast<char*>(&size), sizeof(size_t));
-        model.mesh(n).m_vertices.resize(size);
-        file.read(reinterpret_cast<char*>(&model.mesh(n).m_vertices[0]), size * sizeof(float));
+        model.mesh(n)->m_vertices.resize(size);
+        file.read(reinterpret_cast<char*>(&model.mesh(n)->m_vertices[0]), size * sizeof(float));
 
         // normals
         file.read(reinterpret_cast<char*>(&size), sizeof(size_t));
-        model.mesh(n).m_normals.resize(size);
-        file.read(reinterpret_cast<char*>(&model.mesh(n).m_normals[0]), size * sizeof(float));
+        model.mesh(n)->m_normals.resize(size);
+        file.read(reinterpret_cast<char*>(&model.mesh(n)->m_normals[0]), size * sizeof(float));
 
         // indices
         file.read(reinterpret_cast<char*>(&size), sizeof(size_t));
-        model.mesh(n).m_indices.resize(size);
-        file.read(reinterpret_cast<char*>(&model.mesh(n).m_indices[0]), size * sizeof(unsigned int));
+        model.mesh(n)->m_indices.resize(size);
+        file.read(reinterpret_cast<char*>(&model.mesh(n)->m_indices[0]), size * sizeof(unsigned int));
 
         // uv coordinates
         file.read(reinterpret_cast<char*>(&size), sizeof(size_t));
-        model.mesh(n).m_uvCoords.resize(size);
-        file.read(reinterpret_cast<char*>(&model.mesh(n).m_uvCoords[0]), size * sizeof(float));
+        model.mesh(n)->m_uvCoords.resize(size);
+        file.read(reinterpret_cast<char*>(&model.mesh(n)->m_uvCoords[0]), size * sizeof(float));
 
         // material
         color_t color;
         // diffuse color
         file.read(reinterpret_cast<char*>(&color), sizeof(color_t));
-        model.mesh(n).material().setColor(MATERIAL_COLOR_DIFFUSE, color);
+        model.mesh(n)->material()->setColor(MATERIAL_COLOR_DIFFUSE, color);
         // specular color
         file.read(reinterpret_cast<char*>(&color), sizeof(color_t));
-        model.mesh(n).material().setColor(MATERIAL_COLOR_SPECULAR, color);
+        model.mesh(n)->material()->setColor(MATERIAL_COLOR_SPECULAR, color);
         // ambient color
         file.read(reinterpret_cast<char*>(&color), sizeof(color_t));
-        model.mesh(n).material().setColor(MATERIAL_COLOR_AMBIENT, color);
+        model.mesh(n)->material()->setColor(MATERIAL_COLOR_AMBIENT, color);
         // emissive color
         file.read(reinterpret_cast<char*>(&color), sizeof(color_t));
-        model.mesh(n).material().setColor(MATERIAL_COLOR_EMISSIVE, color);
+        model.mesh(n)->material()->setColor(MATERIAL_COLOR_EMISSIVE, color);
         // shininess
         float shininess;
         file.read(reinterpret_cast<char*>(&shininess), sizeof(float));
-        model.mesh(n).material().setShininess(shininess);
+        model.mesh(n)->material()->setShininess(shininess);
     }
     file.close();
     return true;
@@ -244,41 +244,41 @@ bool ModelLoader::writeBinary(const std::string& fileName, Model& model) {
     // write body
     for (size_t n = 0; n < model.m_meshes.size(); ++n) {
         // vertices
-        size = model.mesh(n).getVerticesSize();
+        size = model.mesh(n)->getVerticesSize();
         file.write(reinterpret_cast<char*>(&size), sizeof(size_t));
-        file.write(reinterpret_cast<char*>(&model.mesh(n).m_vertices[0]), size * sizeof(float));
+        file.write(reinterpret_cast<char*>(&model.mesh(n)->m_vertices[0]), size * sizeof(float));
 
         // normals
-        size = model.mesh(n).getNormalsSize();
+        size = model.mesh(n)->getNormalsSize();
         file.write(reinterpret_cast<char*>(&size), sizeof(size_t));
-        file.write(reinterpret_cast<char*>(&model.mesh(n).m_normals[0]), size * sizeof(float));
+        file.write(reinterpret_cast<char*>(&model.mesh(n)->m_normals[0]), size * sizeof(float));
 
         // indices
-        size = model.mesh(n).getIndicesSize();
+        size = model.mesh(n)->getIndicesSize();
         file.write(reinterpret_cast<char*>(&size), sizeof(size_t));
-        file.write(reinterpret_cast<char*>(&model.mesh(n).m_indices[0]), size * sizeof(unsigned int));
+        file.write(reinterpret_cast<char*>(&model.mesh(n)->m_indices[0]), size * sizeof(unsigned int));
 
         // uv maps
-        size = model.mesh(n).getUvCoordsSize();
+        size = model.mesh(n)->getUvCoordsSize();
         file.write(reinterpret_cast<char*>(&size), sizeof(size_t));
-        file.write(reinterpret_cast<char*>(&model.mesh(n).m_uvCoords[0]), size * sizeof(float));
+        file.write(reinterpret_cast<char*>(&model.mesh(n)->m_uvCoords[0]), size * sizeof(float));
 
         // material
         color_t color;
         // diffuse color
-        color = model.mesh(n).material().getColor(MATERIAL_COLOR_DIFFUSE);
+        color = model.mesh(n)->material()->getColor(MATERIAL_COLOR_DIFFUSE);
         file.write(reinterpret_cast<char*>(&color), sizeof(color_t));
         // specular color
-        color = model.mesh(n).material().getColor(MATERIAL_COLOR_SPECULAR);
+        color = model.mesh(n)->material()->getColor(MATERIAL_COLOR_SPECULAR);
         file.write(reinterpret_cast<char*>(&color), sizeof(color_t));
         // ambient color
-        color = model.mesh(n).material().getColor(MATERIAL_COLOR_AMBIENT);
+        color = model.mesh(n)->material()->getColor(MATERIAL_COLOR_AMBIENT);
         file.write(reinterpret_cast<char*>(&color), sizeof(color_t));
         // emissive color
-        color = model.mesh(n).material().getColor(MATERIAL_COLOR_EMISSIVE);
+        color = model.mesh(n)->material()->getColor(MATERIAL_COLOR_EMISSIVE);
         file.write(reinterpret_cast<char*>(&color), sizeof(color_t));
         // shininess
-        float shininess = model.mesh(n).material().getShininess();
+        float shininess = model.mesh(n)->material()->getShininess();
         file.write(reinterpret_cast<char*>(&shininess), sizeof(float));
     }
     file.close();
