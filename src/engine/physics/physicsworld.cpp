@@ -39,7 +39,12 @@ PhysicsWorld::PhysicsWorld(const string& objectName):
     m_dynamicsWorld(0),
     m_collisionShapes(),
     m_rigidBodies()
-{}
+{
+    registerCommand("initialize", boost::bind(&PhysicsWorld::cmdInitialize, this, _1));
+    registerCommand("shutdown", boost::bind(&PhysicsWorld::cmdShutdown, this, _1));
+    registerAttribute("min-expected-framerate", boost::bind(&PhysicsWorld::cmdMinExpectedFramerate, this, _1));
+    registerAttribute("gravity", boost::bind(&PhysicsWorld::cmdGravity, this, _1));
+}
 
 void PhysicsWorld::initialize() {
     cout << "Physics simulations done with Bullet Physics" << endl;
@@ -135,4 +140,20 @@ void PhysicsWorld::updateRigidBodies() {
             entity->setOrientationAbs(rot.getW(), rot.getX(), rot.getY(), rot.getZ());
         }
     }
+}
+
+
+
+void PhysicsWorld::cmdMinExpectedFramerate(const std::string& arg) {
+    double minFrameRate;
+    stringstream ss(arg);
+    ss >> minFrameRate;
+    setMinExpectedFramerate(minFrameRate);
+}
+
+void PhysicsWorld::cmdGravity(const std::string& arg) {
+    double x, y, z;
+    stringstream ss(arg);
+    ss >> x >> y >> z;
+    setGravity(x, y, z);
 }

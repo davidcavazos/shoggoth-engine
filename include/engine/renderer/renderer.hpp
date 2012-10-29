@@ -44,8 +44,8 @@ public:
 
     void initialize();
     void shutdown();
-    void setAmbientLight(const float r, const float g, const float b, const float a = 1.0f);
     void initLighting() const;
+    void setAmbientLight(const float r, const float g, const float b, const float a = 1.0f);
     void uploadModel(unsigned int& meshId, unsigned int& indicesId, const Mesh& mesh);
     void deleteModel(const unsigned int meshId, const unsigned int indicesId);
     void uploadTexture(unsigned int& textureId, const Texture& texture);
@@ -54,6 +54,12 @@ public:
     std::string listsToString() const;
 
 private:
+    const Device* m_device;
+    Camera* m_activeCamera;
+    std::set<Camera*> m_cameras;
+    std::set<Light*> m_lights;
+    std::set<RenderableMesh*> m_model;
+
     Renderer(const Renderer& rhs);
     Renderer& operator=(const Renderer& rhs);
 
@@ -61,11 +67,24 @@ private:
     void displayLegacyLights() const;
     void setOpenGLMatrix(float* const m, const Vector3& pos, const Quaternion& rot) const;
 
-    const Device* m_device;
-    Camera* m_activeCamera;
-    std::set<Camera*> m_cameras;
-    std::set<Light*> m_lights;
-    std::set<RenderableMesh*> m_model;
+    void cmdInitialize(const std::string&);
+    void cmdShutdown(const std::string&);
+    void cmdInitLighting(const std::string&);
+    void cmdAmbientLight(const std::string& arg);
 };
+
+
+
+inline void Renderer::cmdInitialize(const std::string&) {
+    initialize();
+}
+
+inline void Renderer::cmdShutdown(const std::string&) {
+    shutdown();
+}
+
+inline void Renderer::cmdInitLighting(const std::string&) {
+    initLighting();
+}
 
 #endif // RENDERER_HPP

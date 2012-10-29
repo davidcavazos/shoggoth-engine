@@ -21,6 +21,7 @@
 #include "engine/kernel/terminal.hpp"
 
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include "engine/kernel/commandobject.hpp"
 
@@ -71,6 +72,23 @@ void Terminal::pushCommand(const string& cmdStr) {
     Command cmd(0, 0, "");
     if (cmd.parseCommand(cmdStr))
         pushCommand(cmd);
+}
+
+string Terminal::pushScript(const string& fileName) {
+    string cmd;
+    stringstream output;
+
+    fstream file(fileName.c_str(), ios::in);
+    while (file.good()) {
+        getline(file, cmd);
+        if (!cmd.empty()) {
+            cout << "> " << cmd << endl;
+            output << "> " << cmd << endl;
+            pushCommand(cmd);
+        }
+    }
+    file.close();
+    return output.str();
 }
 
 void Terminal::processCommandsQueue() {
@@ -134,6 +152,16 @@ vector<string> Terminal::generateAutocompleteList(const std::string& expression)
         list = generateAutocompleteObjectList(object);
     return list;
 }
+
+void Terminal::clearAll() {
+    ms_objectsTable.clear();
+    ms_commandsTable.clear();
+    ms_attributesTable.clear();
+    ms_objectPointersTable.clear();;
+    ms_commandsQueue.clear();;
+}
+
+
 
 size_t Terminal::registerObject(const std::string& objectName, CommandObject* obj) {
     size_t id = ms_objectsTable.registerToken(objectName);

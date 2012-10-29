@@ -156,7 +156,7 @@ bool ModelLoader::import(const string& fileName, Model& model, Renderer* rendere
         aiString file;
         if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
             material->GetTexture(aiTextureType_DIFFUSE, 0, &file);
-            texture = resources->loadTextureFromFile(modelDir + file.C_Str());
+            texture = resources->generateTextureFromFile(modelDir + file.C_Str());
             model.mesh(n)->material()->setTextureMap(MATERIAL_DIFFUSE_MAP, texture);
         }
     }

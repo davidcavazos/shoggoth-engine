@@ -68,13 +68,27 @@ private:
     btDiscreteDynamicsWorld* m_dynamicsWorld;
     collision_shapes_map_t m_collisionShapes;
     rigid_bodies_map_t m_rigidBodies;
-};
 
+    void cmdInitialize(const std::string&);
+    void cmdShutdown(const std::string&);
+    void cmdMinExpectedFramerate(const std::string& arg);
+    void cmdGravity(const std::string& arg);
+};
 
 
 inline void PhysicsWorld::setMinExpectedFramerate(const double minExpectedFramerate) {
     double minTimestep = 1.0 / minExpectedFramerate;
     m_maxSubsteps = minTimestep / FIXED_TIMESTEP + 2;
+}
+
+
+
+inline void PhysicsWorld::cmdInitialize(const std::string&) {
+    initialize();
+}
+
+inline void PhysicsWorld::cmdShutdown(const std::string&) {
+    shutdown();
 }
 
 #endif // PHYSICSWORLD_HPP

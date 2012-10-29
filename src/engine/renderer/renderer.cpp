@@ -56,7 +56,12 @@ Renderer::Renderer(const string& objectName, const Device* device):
     m_cameras(),
     m_lights(),
     m_model()
-{}
+{
+    registerCommand("initialize", boost::bind(&Renderer::cmdInitialize, this, _1));
+    registerCommand("shutdown", boost::bind(&Renderer::cmdShutdown, this, _1));
+    registerCommand("init-lighting", boost::bind(&Renderer::cmdInitLighting, this, _1));
+    registerAttribute("ambient-light", boost::bind(&Renderer::cmdAmbientLight, this, _1));
+}
 
 void Renderer::initialize() {
     double openGLVersion;
@@ -201,11 +206,6 @@ void Renderer::shutdown() {
         delete *itMesh;
 }
 
-void Renderer::setAmbientLight(const float r, const float g, const float b, const float a) {
-    GLfloat global_ambient[] = {r, g, b, a};
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
-}
-
 void Renderer::initLighting() const {
     // enable lighting for legacy lights
 //     glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR); // 1.4
@@ -245,6 +245,11 @@ void Renderer::initLighting() const {
         glLightfv(lightEnum, GL_SPECULAR, (*it)->getSpecular());
         ++it;
     }
+}
+
+void Renderer::setAmbientLight(const float r, const float g, const float b, const float a) {
+    GLfloat global_ambient[] = {r, g, b, a};
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
 }
 
 void Renderer::uploadModel(unsigned int& meshId, unsigned int& indicesId, const Mesh& mesh) {
@@ -612,4 +617,13 @@ void Renderer::setOpenGLMatrix(float*const m, const Vector3& pos, const Quaterni
     m[13] = static_cast<float>(pos.getY());
     m[14] = static_cast<float>(pos.getZ());
     m[15] = 1.0f;
+}
+
+
+
+void Renderer::cmdAmbientLight(const std::string& arg) {
+    float r, g, b, a;
+    stringstream ss(arg);
+    ss >> r >> g >> b >> a;
+    setAmbientLight(r, g, b, a);
 }

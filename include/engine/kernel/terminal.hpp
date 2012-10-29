@@ -41,11 +41,13 @@ public:
 
     static void pushCommand(const Command& cmd);
     static void pushCommand(const std::string& cmdStr);
+    static std::string pushScript(const std::string& fileName);
     static void processCommandsQueue();
     static std::vector<std::string> generateObjectsList(const bool shouldIncludeId = false);
     static std::vector<std::string> generateCommandsList(const bool shouldIncludeId = false);
     static std::vector<std::string> generateAttributesList(const bool shouldIncludeId = false);
     static std::vector<std::string> generateAutocompleteList(const std::string& expression);
+    static void clearAll();
     static std::string listsToString();
 
 private:

@@ -99,7 +99,7 @@ Model* Resources::generateModelFromFile(const std::string& fileName) {
     return model;
 }
 
-Texture* Resources::loadTextureFromFile(const std::string& fileName) {
+Texture* Resources::generateTextureFromFile(const std::string& fileName) {
     Texture* texture;
     texture = findTexture(fileName);
     if (texture != 0)

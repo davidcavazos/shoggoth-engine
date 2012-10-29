@@ -27,7 +27,10 @@ map<string, Entity*> Scene::ms_entities = map<string, Entity*>();
 Scene::Scene(const string& objectName, const string& rootNodeName, const Device* device):
     CommandObject(objectName),
     m_root(0, rootNodeName, device)
-{}
+{
+    registerCommand("initialize", boost::bind(&Scene::cmdInitialize, this, _1));
+    registerCommand("shutdown", boost::bind(&Scene::cmdShutdown, this, _1));
+}
 
 void Scene::initialize() {
 }

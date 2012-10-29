@@ -50,7 +50,14 @@ Device::Device(const string& objectName):
     m_startTime(0.0),
     m_deltaTime(0.0),
     m_fps(0.0)
-{}
+{
+    registerCommand("initialize", boost::bind(&Device::cmdInitialize, this, _1));
+    registerCommand("shutdown", boost::bind(&Device::cmdShutdown, this, _1));
+    registerCommand("swap-buffers", boost::bind(&Device::cmdSwapBuffers, this, _1));
+    registerAttribute("title", boost::bind(&Device::cmdTitle, this, _1));
+    registerAttribute("fullscreen", boost::bind(&Device::cmdFullscreen, this, _1));
+    registerAttribute("resolution", boost::bind(&Device::cmdResolution, this, _1));
+}
 
 void Device::initialize() {
     cout << "Creating SDL-OpenGL device" << endl;
@@ -183,4 +190,21 @@ void Device::processEvents(bool& isRunning) {
         ms_inputs.onKeyPressed(*it);
     for (it = m_mouseButtonsPressed.begin(); it != m_mouseButtonsPressed.end(); ++it)
         ms_inputs.onMouseButtonPressed(*it);
+}
+
+
+
+void Device::cmdFullscreen(const std::string& arg) {
+    bool useFullscreen;
+    stringstream ss(arg);
+    ss >> useFullscreen;
+    setFullscreen(useFullscreen);
+}
+
+void Device::cmdResolution(const std::string& arg) {
+    size_t w, h;
+    stringstream ss(arg);
+    ss >> w >> h;
+    if (w != 0 && h != 0)
+        setResolution(w, h);
 }

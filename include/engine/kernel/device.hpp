@@ -62,6 +62,13 @@ protected:
     double m_startTime;
     double m_deltaTime;
     double m_fps;
+
+    void cmdInitialize(const std::string&);
+    void cmdShutdown(const std::string&);
+    void cmdSwapBuffers(const std::string&);
+    void cmdTitle(const std::string& arg);
+    void cmdFullscreen(const std::string& arg);
+    void cmdResolution(const std::string& arg);
 };
 
 
@@ -76,6 +83,24 @@ inline double Device::getDeltaTime() const {
 
 inline double Device::getFps() const {
     return m_fps;
+}
+
+
+
+inline void Device::cmdInitialize(const std::string&) {
+    initialize();
+}
+
+inline void Device::cmdShutdown(const std::string&) {
+    shutdown();
+}
+
+inline void Device::cmdSwapBuffers(const std::string&) {
+    swapBuffers();
+}
+
+inline void Device::cmdTitle(const std::string& arg) {
+    setTitle(arg);
 }
 
 #endif // DEVICE_HPP

@@ -59,20 +59,14 @@ Demo::Demo(const string& objectName,
     registerCommand("fire-cube", boost::bind(&Demo::cmdFireCube, this, _1));
     registerCommand("fire-sphere", boost::bind(&Demo::cmdFireSphere, this, _1));
 
-    m_device.initialize();
-    m_device.setResolution(800, 500);
-    m_scene.initialize();
-    m_renderer.initialize();
-    m_resources.initialize();
-    m_physicsWorld.initialize();
+    Terminal::pushScript("assets/scripts/1-initialization.txt");
+    Terminal::processCommandsQueue();
 }
 
 Demo::~Demo() {
-    m_physicsWorld.shutdown();
-    m_resources.shutdown();
-    m_renderer.shutdown();
-    m_scene.shutdown();
-    m_device.shutdown();
+    Terminal::pushScript("assets/scripts/4-shutdown.txt");
+    Terminal::processCommandsQueue();
+    Terminal::clearAll();
 }
 
 void Demo::loadScene() {
@@ -141,10 +135,16 @@ void Demo::loadScene() {
 //     cout << m_sceneManager.sceneGraphToString() << endl;
 //     cout << RenderManager::getRenderer().listsToString() << endl;
 //     cout << ResourceManager::listsToString() << endl;
+
+    Terminal::pushScript("assets/scripts/2-initialize-scene.txt");
+    Terminal::processCommandsQueue();
 }
 
 void Demo::bindInputs() {
     cout << "Binding inputs..." << endl;
+    Terminal::pushScript("assets/scripts/3-bind-inputs.txt");
+    Terminal::processCommandsQueue();
+
     Inputs* inputs = m_device.getInputs();
     inputs->bindInput(INPUT_KEY_RELEASE, "demo quit", SDLK_ESCAPE);
     inputs->bindInput(INPUT_KEY_RELEASE, "demo run commands.txt", SDLK_TAB);
@@ -169,9 +169,6 @@ void Demo::runMainLoop() {
     Uint32 startTime;
     Uint32 deltaTime;
 
-    m_renderer.initLighting();
-    m_renderer.setAmbientLight(0.2f, 0.2f, 0.2f);
-
     cout << "Entering game loop" << endl;
     m_isRunning = true;
     while (m_isRunning) {
@@ -179,7 +176,6 @@ void Demo::runMainLoop() {
         m_device.onFrameStart();
 
         m_physicsWorld.stepSimulation(0.001 * SDL_GetTicks());
-
         m_device.processEvents(m_isRunning);
         Terminal::processCommandsQueue();
 
@@ -204,17 +200,7 @@ void Demo::cmdQuit(const string&) {
 }
 
 void Demo::cmdRunCommand(const string& arg) {
-    string cmd;
-
-    fstream file(arg.c_str(), ios::in);
-    while (file.good()) {
-        getline(file, cmd);
-        if (!cmd.empty()) {
-            cout << "> " << cmd << endl;
-            Terminal::pushCommand(cmd);
-        }
-    }
-    file.close();
+    Terminal::pushScript(arg);
 }
 
 void Demo::cmdPrintEntity(const string& arg) {

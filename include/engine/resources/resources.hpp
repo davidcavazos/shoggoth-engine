@@ -37,7 +37,7 @@ public:
     void shutdown();
     Model* generateBox(const std::string& identifier, const double lengthX, const double lengthY, const double lengthZ);
     Model* generateModelFromFile(const std::string& fileName);
-    Texture* loadTextureFromFile(const std::string& fileName);
+    Texture* generateTextureFromFile(const std::string& fileName);
     std::string listsToString();
 
 private:
@@ -54,6 +54,19 @@ private:
     void registerTexture(Texture* texture);
     Model* findModel(const std::string& identifier);
     Texture* findTexture(const std::string& fileName);
+
+    void cmdInitialize(const std::string&);
+    void cmdShutdown(const std::string&);
 };
+
+
+
+inline void Resources::cmdInitialize(const std::string&) {
+    initialize();
+}
+
+inline void Resources::cmdShutdown(const std::string&) {
+    shutdown();
+}
 
 #endif // RESOURCES_HPP

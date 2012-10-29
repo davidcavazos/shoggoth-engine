@@ -44,6 +44,9 @@ public:
 private:
     Entity m_root;
     static std::map<std::string, Entity*> ms_entities;
+
+    void cmdInitialize(const std::string&);
+    void cmdShutdown(const std::string&);
 };
 
 
@@ -55,6 +58,16 @@ inline const Entity* Scene::getRoot() const {
 
 inline Entity* Scene::root() {
     return &m_root;
+}
+
+
+
+inline void Scene::cmdInitialize(const std::string&) {
+    initialize();
+}
+
+inline void Scene::cmdShutdown(const std::string&) {
+    shutdown();
 }
 
 #endif // SCENE_HPP
