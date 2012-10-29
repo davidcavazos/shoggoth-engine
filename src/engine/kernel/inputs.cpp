@@ -18,7 +18,7 @@
 */
 
 
-#include "engine/kernel/inputmanager.hpp"
+#include "engine/kernel/inputs.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -26,7 +26,7 @@
 
 using namespace std;
 
-InputManager::InputManager():
+Inputs::Inputs():
     m_keyPressMap(),
     m_keyReleaseMap(),
     m_keyPressedMap(),
@@ -37,7 +37,7 @@ InputManager::InputManager():
     m_lastMouseMotion()
 {}
 
-void InputManager::bindInput(const input_t type, const string& command, const size_t code) {
+void Inputs::bindInput(const input_t type, const string& command, const size_t code) {
     Command cmd(0, 0, "");
     if (cmd.parseCommand(command)) {
         pair<size_t, Command> binding(code, cmd);
@@ -69,7 +69,7 @@ void InputManager::bindInput(const input_t type, const string& command, const si
     }
 }
 
-void InputManager::clearAllBindings() {
+void Inputs::clearAllBindings() {
     m_keyPressMap.clear();
     m_keyReleaseMap.clear();
     m_keyPressedMap.clear();
@@ -79,43 +79,43 @@ void InputManager::clearAllBindings() {
     m_mouseMotionList.clear();
 }
 
-void InputManager::onKeyPress(const size_t code) {
+void Inputs::onKeyPress(const size_t code) {
     input_map_t::iterator it = m_keyPressMap.find(code);
     if (it != m_keyPressMap.end())
         Terminal::pushCommand(it->second);
 }
 
-void InputManager::onKeyRelease(const size_t code) {
+void Inputs::onKeyRelease(const size_t code) {
     input_map_t::iterator it = m_keyReleaseMap.find(code);
     if (it != m_keyReleaseMap.end())
         Terminal::pushCommand(it->second);
 }
 
-void InputManager::onKeyPressed(const size_t code) {
+void Inputs::onKeyPressed(const size_t code) {
     input_map_t::iterator it = m_keyPressedMap.find(code);
     if (it != m_keyPressedMap.end())
         Terminal::pushCommand(it->second);
 }
 
-void InputManager::onMouseButtonPress(const size_t code) {
+void Inputs::onMouseButtonPress(const size_t code) {
     input_map_t::iterator it = m_mouseButtonPressMap.find(code);
     if (it != m_mouseButtonPressMap.end())
         Terminal::pushCommand(it->second);
 }
 
-void InputManager::onMouseButtonRelease(const size_t code) {
+void Inputs::onMouseButtonRelease(const size_t code) {
     input_map_t::iterator it = m_mouseButtonReleaseMap.find(code);
     if (it != m_mouseButtonReleaseMap.end())
         Terminal::pushCommand(it->second);
 }
 
-void InputManager::onMouseButtonPressed(const size_t code) {
+void Inputs::onMouseButtonPressed(const size_t code) {
     input_map_t::iterator it = m_mouseButtonPressedMap.find(code);
     if (it != m_mouseButtonPressedMap.end())
         Terminal::pushCommand(it->second);
 }
 
-void InputManager::onMouseMotion(const mouse_motion_t& motion) {
+void Inputs::onMouseMotion(const mouse_motion_t& motion) {
     m_lastMouseMotion = motion;
     for (size_t i = 0; i < m_mouseMotionList.size(); ++i) {
 //         stringstream ss;
@@ -125,7 +125,7 @@ void InputManager::onMouseMotion(const mouse_motion_t& motion) {
     }
 }
 
-ostream& operator<<(ostream& out, const InputManager& rhs) {
+ostream& operator<<(ostream& out, const Inputs& rhs) {
     map<size_t, Command>::const_iterator it;
 
     out << "Key Press Map:" << endl;

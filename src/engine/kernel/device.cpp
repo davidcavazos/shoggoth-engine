@@ -35,7 +35,7 @@ const size_t DEFAULT_SCREEN_DEPTH = 32;
 const Uint32 SDL_INIT_FLAGS = SDL_INIT_VIDEO;// | SDL_INIT_JOYSTICK;
 const Uint32 SDL_VIDEO_FLAGS = SDL_HWSURFACE | SDL_ANYFORMAT | SDL_OPENGL;
 
-InputManager Device::ms_inputManager = InputManager();
+Inputs Device::ms_inputs = Inputs();
 SDL_Surface* Device::ms_screen = 0;
 
 Device::Device(const string& objectName):
@@ -152,19 +152,19 @@ void Device::processEvents(bool& isRunning) {
             isRunning = false;
             break;
         case SDL_KEYDOWN:
-            ms_inputManager.onKeyPress(event.key.keysym.sym);
+            ms_inputs.onKeyPress(event.key.keysym.sym);
             m_keysPressed.insert(event.key.keysym.sym);
             break;
         case SDL_KEYUP:
-            ms_inputManager.onKeyRelease(event.key.keysym.sym);
+            ms_inputs.onKeyRelease(event.key.keysym.sym);
             m_keysPressed.erase(event.key.keysym.sym);
             break;
         case SDL_MOUSEBUTTONDOWN:
-            ms_inputManager.onMouseButtonPress(event.button.button);
+            ms_inputs.onMouseButtonPress(event.button.button);
             m_mouseButtonsPressed.insert(event.button.button);
             break;
         case SDL_MOUSEBUTTONUP:
-            ms_inputManager.onMouseButtonRelease(event.button.button);
+            ms_inputs.onMouseButtonRelease(event.button.button);
             m_mouseButtonsPressed.erase(event.button.button);
             break;
         case SDL_MOUSEMOTION: {
@@ -173,14 +173,14 @@ void Device::processEvents(bool& isRunning) {
             motion.y = event.motion.y;
             motion.xrel = event.motion.xrel;
             motion.yrel = event.motion.yrel;
-            ms_inputManager.onMouseMotion(motion);
+            ms_inputs.onMouseMotion(motion);
             SDL_WarpMouse(m_halfWidth, m_halfHeight);
             break; }
         }
     }
     set<size_t>::iterator it;
     for (it = m_keysPressed.begin(); it != m_keysPressed.end(); ++it)
-        ms_inputManager.onKeyPressed(*it);
+        ms_inputs.onKeyPressed(*it);
     for (it = m_mouseButtonsPressed.begin(); it != m_mouseButtonsPressed.end(); ++it)
-        ms_inputManager.onMouseButtonPressed(*it);
+        ms_inputs.onMouseButtonPressed(*it);
 }

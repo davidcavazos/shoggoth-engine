@@ -24,7 +24,7 @@
 #include <cmath>
 #include "engine/kernel/device.hpp"
 #include "engine/kernel/matrix3x3.hpp"
-#include "engine/kernel/scenemanager.hpp"
+#include "engine/kernel/scene.hpp"
 #include "engine/kernel/component.hpp"
 #include "engine/physics/rigidbody.hpp"
 
@@ -165,14 +165,14 @@ void Entity::applyTransformToPhysicsComponent() {
 Entity* Entity::addChild(const string& childName) {
     Entity* child = new Entity(this, childName, m_device);
     m_children.insert(child);
-    SceneManager::ms_entities.insert(pair<string, Entity*>(childName, child));
+    Scene::ms_entities.insert(pair<string, Entity*>(childName, child));
     return child;
 }
 
 void Entity::removeChild(Entity* const child) {
-    map<string, Entity*>::iterator smIt = SceneManager::ms_entities.find(child->getObjectName());
-    if (smIt != SceneManager::ms_entities.end())
-        SceneManager::ms_entities.erase(smIt);
+    map<string, Entity*>::iterator smIt = Scene::ms_entities.find(child->getObjectName());
+    if (smIt != Scene::ms_entities.end())
+        Scene::ms_entities.erase(smIt);
 
     set<Entity*>::iterator it = m_children.find(child);
     if (it != m_children.end()) {

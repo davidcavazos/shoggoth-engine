@@ -44,10 +44,10 @@ typedef struct {
     int yrel;
 } mouse_motion_t;
 
-class InputManager {
+class Inputs {
 public:
-    InputManager();
-    friend std::ostream& operator<<(std::ostream& out, const InputManager& rhs);
+    Inputs();
+    friend std::ostream& operator<<(std::ostream& out, const Inputs& rhs);
 
     const mouse_motion_t& getLastMouseMotion();
 
@@ -75,7 +75,7 @@ private:
 
 
 
-inline const mouse_motion_t& InputManager::getLastMouseMotion() {
+inline const mouse_motion_t& Inputs::getLastMouseMotion() {
     return m_lastMouseMotion;
 }
 

@@ -22,7 +22,7 @@
 #define GAME_HPP
 
 #include "engine/kernel/device.hpp"
-#include "engine/kernel/scenemanager.hpp"
+#include "engine/kernel/scene.hpp"
 #include "engine/renderer/renderer.hpp"
 #include "engine/physics/physicsworld.hpp"
 #include "engine/resources/resources.hpp"
@@ -45,7 +45,7 @@ public:
 private:
     bool m_isRunning;
     Device m_device;
-    SceneManager m_sceneManager;
+    Scene m_scene;
     Renderer m_renderer;
     Resources m_resources;
     PhysicsWorld m_physicsWorld;

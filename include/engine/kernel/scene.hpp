@@ -18,35 +18,43 @@
 */
 
 
-#include "engine/kernel/scenemanager.hpp"
+#ifndef SCENE_HPP
+#define SCENE_HPP
 
-using namespace std;
+#include <string>
+#include "commandobject.hpp"
+#include "entity.hpp"
 
-map<string, Entity*> SceneManager::ms_entities = map<string, Entity*>();
+class Device;
+class Scene: public CommandObject {
+public:
+    friend class Entity;
 
-SceneManager::SceneManager(const string& objectName, const string& rootNodeName, const Device& device):
-    CommandObject(objectName),
-    m_root(0, rootNodeName, device)
-{}
+    Scene(const std::string& objectName, const std::string& rootNodeName, const Device& device);
 
-void SceneManager::initialize() {
+    const Entity& getRoot() const;
+
+    Entity& root();
+
+    void initialize();
+    void shutdown();
+    bool findEntity(const std::string& name, Entity*& entity);
+    std::string sceneGraphToString();
+
+private:
+    Entity m_root;
+    static std::map<std::string, Entity*> ms_entities;
+};
+
+
+
+inline const Entity& Scene::getRoot() const {
+    return m_root;
 }
 
-void SceneManager::shutdown() {
+
+inline Entity& Scene::root() {
+    return m_root;
 }
 
-bool SceneManager::findEntity(const string& name, Entity*& entity) {
-    map<string, Entity*>::iterator it = ms_entities.find(name);
-    if (it != ms_entities.end()) {
-        entity = it->second;
-        return true;
-    }
-    return false;
-}
-
-string SceneManager::sceneGraphToString() {
-    stringstream ss;
-    ss << "Scene Graph:" << endl;
-    ss << m_root.treeToString(0);
-    return ss.str();
-}
+#endif // SCENE_HPP

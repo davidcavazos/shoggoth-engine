@@ -47,7 +47,7 @@ Demo::Demo(const string& objectName,
     CommandObject(objectName),
     m_isRunning(false),
     m_device(deviceName),
-    m_sceneManager(sceneName, rootNodeName, m_device),
+    m_scene(sceneName, rootNodeName, m_device),
     m_renderer(rendererName, &m_device),
     m_resources(resourcesName, &m_renderer),
     m_physicsWorld(physicsWorldName)
@@ -61,7 +61,7 @@ Demo::Demo(const string& objectName,
 
     m_device.initialize();
     m_device.setResolution(800, 500);
-    m_sceneManager.initialize();
+    m_scene.initialize();
     m_renderer.initialize();
     m_resources.initialize();
     m_physicsWorld.initialize();
@@ -71,14 +71,14 @@ Demo::~Demo() {
     m_physicsWorld.shutdown();
     m_resources.shutdown();
     m_renderer.shutdown();
-    m_sceneManager.shutdown();
+    m_scene.shutdown();
     m_device.shutdown();
 }
 
 void Demo::loadScene() {
     cout << "Loading scene..." << endl;
 
-    Entity* root = &m_sceneManager.root();
+    Entity* root = &m_scene.root();
 
     Entity* floor = root->addChild("floor");
     floor->setPositionAbs(0.0f, -1.0f, 0.0f);
@@ -155,7 +155,7 @@ void Demo::loadScene() {
 
 void Demo::bindInputs() {
     cout << "Binding inputs..." << endl;
-    InputManager& inputs = m_device.getInputManager();
+    Inputs& inputs = m_device.getInputManager();
     inputs.bindInput(INPUT_KEY_RELEASE, "demo quit", SDLK_ESCAPE);
     inputs.bindInput(INPUT_KEY_RELEASE, "demo run commands.txt", SDLK_TAB);
     inputs.bindInput(INPUT_MOUSE_MOTION, "demo on-mouse-motion");
@@ -229,7 +229,7 @@ void Demo::cmdRunCommand(const string& arg) {
 
 void Demo::cmdPrintEntity(const string& arg) {
     Entity* entity;
-    if (m_sceneManager.findEntity(arg, entity))
+    if (m_scene.findEntity(arg, entity))
         cout << *entity << endl;
 }
 
@@ -253,12 +253,12 @@ void Demo::cmdOnMouseMotion(const string&) {
 
 void Demo::cmdFireCube(const std::string&) {
     Entity* camera;
-    if (m_sceneManager.findEntity("camera", camera)) {
+    if (m_scene.findEntity("camera", camera)) {
         static size_t n = 0;
         stringstream ss;
         ss << "missile-cube-" << ++n;
 
-        Entity* cube = m_sceneManager.root().addChild(ss.str());
+        Entity* cube = m_scene.root().addChild(ss.str());
         Vector3 orientationUnit = VECTOR3_UNIT_Z_NEG.rotate(camera->getOrientationAbs());
         cube->setPositionAbs(camera->getPositionAbs() + orientationUnit);
         cube->setOrientationAbs(camera->getOrientationAbs());
@@ -275,12 +275,12 @@ void Demo::cmdFireCube(const std::string&) {
 
 void Demo::cmdFireSphere(const std::string&) {
     Entity* camera;
-    if (m_sceneManager.findEntity("camera", camera)) {
+    if (m_scene.findEntity("camera", camera)) {
         static size_t n = 0;
         stringstream ss;
         ss << "missile-sphere-" << ++n;
 
-        Entity* sphere = m_sceneManager.root().addChild(ss.str());
+        Entity* sphere = m_scene.root().addChild(ss.str());
         Vector3 orientationUnit = VECTOR3_UNIT_Z_NEG.rotate(camera->getOrientationAbs());
         sphere->setPositionAbs(camera->getPositionAbs() + orientationUnit);
         sphere->setOrientationAbs(camera->getOrientationAbs());

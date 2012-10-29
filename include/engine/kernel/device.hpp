@@ -24,7 +24,7 @@
 #include <string>
 #include <set>
 #include "commandobject.hpp"
-#include "inputmanager.hpp"
+#include "inputs.hpp"
 
 class DeviceManager;
 struct SDL_Surface;
@@ -35,7 +35,7 @@ public:
 
     Device(const std::string& objectName);
 
-    InputManager& getInputManager();
+    Inputs& getInputManager();
     double getDeltaTime() const;
     double getFps() const;
 
@@ -60,7 +60,7 @@ protected:
     size_t m_depth;
     std::set<size_t> m_keysPressed;
     std::set<size_t> m_mouseButtonsPressed;
-    static InputManager ms_inputManager;
+    static Inputs ms_inputs;
     static SDL_Surface* ms_screen;
     double m_startTime;
     double m_deltaTime;
@@ -69,8 +69,8 @@ protected:
 
 
 
-inline InputManager& Device::getInputManager() {
-    return ms_inputManager;
+inline Inputs& Device::getInputManager() {
+    return ms_inputs;
 }
 
 inline double Device::getDeltaTime() const {
