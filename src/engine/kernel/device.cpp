@@ -129,7 +129,7 @@ void Device::processEvents(bool& isRunning) {
         ms_inputManager.onMouseButtonPressed(*it);
 }
 
-Device::Device() :
+Device::Device():
     m_width(DEFAULT_SCREEN_WIDTH),
     m_height(DEFAULT_SCREEN_HEIGHT),
     m_halfWidth(m_width / 2),

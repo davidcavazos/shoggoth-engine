@@ -1,0 +1,2 @@
+cube set position-abs 0 0 0
+
