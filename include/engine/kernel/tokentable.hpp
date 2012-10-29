@@ -36,7 +36,6 @@ public:
     std::string findName(const size_t id) const;
     std::vector<std::string> generateList(const bool shouldIncludeId = false) const;
     std::vector<std::string> autocompleteList(const std::string& token) const;
-    void clear();
 
 private:
     std::map<std::string, size_t> m_tokenMap;

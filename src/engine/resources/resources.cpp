@@ -31,7 +31,10 @@ Resources::Resources(const string& objectName, Renderer* renderer):
     m_renderer(renderer),
     m_modelsMap(),
     m_texturesMap()
-{}
+{
+    registerCommand("initialize", boost::bind(&Resources::cmdInitialize, this, _1));
+    registerCommand("shutdown", boost::bind(&Resources::cmdShutdown, this, _1));
+}
 
 void Resources::initialize() {
 }

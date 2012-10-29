@@ -47,7 +47,6 @@ public:
     static std::vector<std::string> generateCommandsList(const bool shouldIncludeId = false);
     static std::vector<std::string> generateAttributesList(const bool shouldIncludeId = false);
     static std::vector<std::string> generateAutocompleteList(const std::string& expression);
-    static void clearAll();
     static std::string listsToString();
 
 private:

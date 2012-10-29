@@ -153,14 +153,6 @@ vector<string> Terminal::generateAutocompleteList(const std::string& expression)
     return list;
 }
 
-void Terminal::clearAll() {
-    ms_objectsTable.clear();
-    ms_commandsTable.clear();
-    ms_attributesTable.clear();
-    ms_objectPointersTable.clear();;
-    ms_commandsQueue.clear();;
-}
-
 
 
 size_t Terminal::registerObject(const std::string& objectName, CommandObject* obj) {

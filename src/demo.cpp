@@ -66,7 +66,6 @@ Demo::Demo(const string& objectName,
 Demo::~Demo() {
     Terminal::pushScript("assets/scripts/4-shutdown.txt");
     Terminal::processCommandsQueue();
-    Terminal::clearAll();
 }
 
 void Demo::loadScene() {

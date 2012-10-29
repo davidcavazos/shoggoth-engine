@@ -107,7 +107,3 @@ vector<string> TokenTable::autocompleteList(const std::string& token) const {
     }
     return autocomplete;
 }
-
-void TokenTable::clear() {
-    m_tokenMap.clear();
-}
