@@ -59,13 +59,11 @@ Demo::Demo(const string& objectName,
     registerCommand("fire-cube", boost::bind(&Demo::cmdFireCube, this, _1));
     registerCommand("fire-sphere", boost::bind(&Demo::cmdFireSphere, this, _1));
 
-    Terminal::pushScript("assets/scripts/1-initialization.txt");
-    Terminal::processCommandsQueue();
+    Terminal::executeScript("assets/scripts/1-initialization.txt");
 }
 
 Demo::~Demo() {
-    Terminal::pushScript("assets/scripts/4-shutdown.txt");
-    Terminal::processCommandsQueue();
+    Terminal::executeScript("assets/scripts/4-shutdown.txt");
 }
 
 void Demo::loadScene() {
@@ -135,14 +133,12 @@ void Demo::loadScene() {
 //     cout << RenderManager::getRenderer().listsToString() << endl;
 //     cout << ResourceManager::listsToString() << endl;
 
-    Terminal::pushScript("assets/scripts/2-initialize-scene.txt");
-    Terminal::processCommandsQueue();
+    Terminal::executeScript("assets/scripts/2-initialize-scene.txt");
 }
 
 void Demo::bindInputs() {
     cout << "Binding inputs..." << endl;
-    Terminal::pushScript("assets/scripts/3-bind-inputs.txt");
-    Terminal::processCommandsQueue();
+    Terminal::executeScript("assets/scripts/3-bind-inputs.txt");
 
     Inputs* inputs = m_device.getInputs();
     inputs->bindInput(INPUT_KEY_RELEASE, "demo quit", SDLK_ESCAPE);
@@ -199,7 +195,7 @@ void Demo::cmdQuit(const string&) {
 }
 
 void Demo::cmdRunCommand(const string& arg) {
-    Terminal::pushScript(arg);
+    Terminal::executeScript(arg);
 }
 
 void Demo::cmdPrintEntity(const string& arg) {

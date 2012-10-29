@@ -74,7 +74,7 @@ void Terminal::pushCommand(const string& cmdStr) {
         pushCommand(cmd);
 }
 
-string Terminal::pushScript(const string& fileName) {
+string Terminal::executeScript(const string& fileName) {
     string cmd;
     stringstream output;
 
@@ -82,9 +82,10 @@ string Terminal::pushScript(const string& fileName) {
     while (file.good()) {
         getline(file, cmd);
         if (!cmd.empty()) {
-            cout << "> " << cmd << endl;
-            output << "> " << cmd << endl;
-            pushCommand(cmd);
+            Command command(cmd);
+            cout << "> " << command << endl;
+            output << "> " << command << endl;
+            command.run();
         }
     }
     file.close();

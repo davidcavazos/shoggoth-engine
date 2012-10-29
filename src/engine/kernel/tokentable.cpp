@@ -30,15 +30,18 @@ const size_t MAX_EXPECTED_ID_DIGITS = 4;
 
 TokenTable::TokenTable() :
     m_tokenMap(),
+    m_idMap(),
     m_idGenerator()
 {}
 
 size_t TokenTable::registerToken(const string& token) {
     size_t id;
+    pair<map<string, size_t>::iterator, bool> inserted;
     map<string, size_t>::iterator it = m_tokenMap.find(token);
     if (it == m_tokenMap.end()) {
         id = m_idGenerator.nextId();
-        m_tokenMap.insert(pair<string, size_t>(token, id));
+        inserted = m_tokenMap.insert(pair<string, size_t>(token, id));
+        m_idMap.insert(pair<size_t, const string*>(id, &inserted.first->first));
     }
     else
         id = it->second;
@@ -48,6 +51,7 @@ size_t TokenTable::registerToken(const string& token) {
 void TokenTable::unregisterToken(const string& token) {
     map<string, size_t>::iterator it = m_tokenMap.find(token);
     if (it != m_tokenMap.end()) {
+        m_idMap.erase(it->second);
         m_idGenerator.removeId(it->second);
         m_tokenMap.erase(it);
     }
@@ -65,12 +69,10 @@ bool TokenTable::findId(size_t& id, const string& token) const {
 }
 
 string TokenTable::findName(const size_t id) const {
-    map<string, size_t>::const_iterator it;
-    for (it = m_tokenMap.begin(); it != m_tokenMap.end(); ++it) {
-        if (it->second == id) {
-            return it->first;
-        }
-    }
+    map<size_t, const string*>::const_iterator it = m_idMap.find(id);
+    if (it != m_idMap.end())
+        return *it->second;
+    cerr << "Command ID \"" << id << "\" not found!" << endl;
     return "";
 }
 

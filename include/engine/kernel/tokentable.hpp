@@ -39,6 +39,7 @@ public:
 
 private:
     std::map<std::string, size_t> m_tokenMap;
+    std::map<size_t, const std::string*> m_idMap;
     UniqueIdGenerator<size_t> m_idGenerator;
 };
 
