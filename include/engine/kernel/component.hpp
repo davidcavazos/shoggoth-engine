@@ -38,21 +38,30 @@ public:
     Component(const component_t type, Entity* const entity);
     virtual ~Component();
 
-    Entity& getEntity();
+    const Entity* getEntity() const;
+    Entity* entity();
     component_t getType() const;
     const std::string& getDescription() const;
 
 protected:
-    Entity& m_entity;
+    Entity* m_entity;
     const component_t m_type;
     std::string m_description;
+
+private:
+    Component(const Component& rhs);
+    Component& operator=(const Component&);
 };
 
 std::ostream& operator<<(std::ostream& out, const Component& rhs);
 
 
 
-inline Entity& Component::getEntity() {
+inline const Entity* Component::getEntity() const {
+    return m_entity;
+}
+
+inline Entity* Component::entity() {
     return m_entity;
 }
 

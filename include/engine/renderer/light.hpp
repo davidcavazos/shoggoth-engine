@@ -27,7 +27,7 @@ class Renderer;
 
 class Light: public Component {
 public:
-    Light(Entity*const entity, Renderer& renderer);
+    Light(Entity*const entity, Renderer* renderer);
     ~Light();
 
     const float* getAmbient() const;
@@ -38,10 +38,13 @@ public:
     void setSpecular(const float r, const float g, const float b, const float a = 1.0f);
 
 private:
-    Renderer& m_renderer;
+    Renderer* m_renderer;
     float m_ambient[4];
     float m_diffuse[4];
     float m_specular[4];
+
+    Light(const Light& rhs);
+    Light& operator=(const Light&);
 };
 
 

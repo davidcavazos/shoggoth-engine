@@ -39,7 +39,7 @@ typedef struct {
 
 class Camera: public Component {
 public:
-    Camera(Entity* const entity, const camera_t type, Renderer& renderer);
+    Camera(Entity* const entity, const camera_t type, Renderer* renderer);
     ~Camera();
 
     camera_t getType() const;
@@ -61,7 +61,7 @@ public:
 
 private:
     camera_t m_type;
-    Renderer& m_renderer;
+    Renderer* m_renderer;
     bool m_hasChanged;
     viewport_t m_viewport;
     float m_aspectRatio;
@@ -69,6 +69,9 @@ private:
     float m_orthoHeight;
     float m_nearDistance;
     float m_farDistance;
+
+    Camera(const Camera& rhs);
+    Camera& operator=(const Camera&);
 
     void cmdType(const std::string& arg);
     void cmdPerspectiveFOV(const std::string& arg);

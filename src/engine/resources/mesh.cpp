@@ -20,7 +20,10 @@
 
 #include "engine/resources/mesh.hpp"
 
+#include <iostream>
 #include "engine/renderer/renderer.hpp"
+
+using namespace std;
 
 Mesh::Mesh(Renderer* renderer):
     m_renderer(renderer),
@@ -32,6 +35,31 @@ Mesh::Mesh(Renderer* renderer):
     m_indices(),
     m_material()
 {}
+
+Mesh::Mesh(const Mesh& rhs):
+    m_renderer(rhs.m_renderer),
+    m_meshId(rhs.m_meshId),
+    m_indicesId(rhs.m_indicesId),
+    m_vertices(rhs.m_vertices),
+    m_normals(rhs.m_normals),
+    m_uvCoords(rhs.m_uvCoords),
+    m_indices(rhs.m_indices),
+    m_material(rhs.m_material)
+{}
+
+Mesh& Mesh::operator=(const Mesh& rhs) {
+    if (this == &rhs)
+        return *this;
+    m_renderer = rhs.m_renderer;
+    m_meshId = rhs.m_meshId;
+    m_indicesId = rhs.m_indicesId;
+    m_vertices = rhs.m_vertices;
+    m_normals = rhs.m_normals;
+    m_uvCoords = rhs.m_uvCoords;
+    m_indices = rhs.m_indices;
+    m_material = rhs.m_material;
+    return *this;
+}
 
 Mesh::~Mesh() {
     m_renderer->deleteModel(m_meshId, m_indicesId);

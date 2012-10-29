@@ -29,17 +29,17 @@ using namespace std;
 
 const string BOX_DESCRIPTION = "$box";
 
-RenderableMesh::RenderableMesh(Entity* const entity, Renderer& renderer, Resources& resources):
+RenderableMesh::RenderableMesh(Entity* const entity, Renderer* renderer, Resources* resources):
     Component(COMPONENT_RENDERABLE_MESH, entity),
     m_renderer(renderer),
     m_resources(resources),
-    m_meshData(0)
+    m_model(0)
 {
-    m_renderer.m_model.insert(this);
+    m_renderer->m_model.insert(this);
 }
 
 RenderableMesh::~RenderableMesh() {
-    m_renderer.m_model.erase(this);
+    m_renderer->m_model.erase(this);
 }
 
 
@@ -48,10 +48,24 @@ void RenderableMesh::loadBox(const double lengthX, const double lengthY, const d
     stringstream ss;
     ss << BOX_DESCRIPTION << "_" << lengthX << "_" << lengthY << "_" << lengthZ;
     m_description = ss.str();
-    m_meshData = m_resources.generateBox(m_description, lengthX, lengthY, lengthZ);
+    m_model = m_resources->generateBox(m_description, lengthX, lengthY, lengthZ);
 }
 
 void RenderableMesh::loadFromFile(const string& fileName) {
     m_description = fileName;
-    m_meshData = m_resources.generateModelFromFile(fileName);
+    m_model = m_resources->generateModelFromFile(fileName);
+}
+
+RenderableMesh::RenderableMesh(const RenderableMesh& rhs):
+    Component(rhs.m_type, rhs.m_entity),
+    m_renderer(rhs.m_renderer),
+    m_resources(rhs.m_resources),
+    m_model(rhs.m_model)
+{
+    cerr << "Error: RenderableMesh copy constructor should not be called!" << endl;
+}
+
+RenderableMesh& RenderableMesh::operator=(const RenderableMesh&) {
+    cerr << "Error: RenderableMesh assignment operator should not be called!" << endl;
+    return *this;
 }

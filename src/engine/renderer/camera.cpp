@@ -20,6 +20,7 @@
 
 #include "engine/renderer/camera.hpp"
 
+#include <iostream>
 #include "engine/renderer/renderer.hpp"
 #include "engine/kernel/entity.hpp"
 
@@ -31,7 +32,7 @@ const float DEFAULT_ORTHO_HEIGHT = 10.0f;
 const float DEFAULT_NEAR_DISTANCE = 0.1f;
 const float DEFAULT_FAR_DISTANCE = 1000.0f;
 
-Camera::Camera(Entity* const entity, const camera_t type, Renderer& renderer):
+Camera::Camera(Entity* const entity, const camera_t type, Renderer* renderer):
     Component(COMPONENT_CAMERA, entity),
     m_type(type),
     m_renderer(renderer),
@@ -55,21 +56,41 @@ Camera::Camera(Entity* const entity, const camera_t type, Renderer& renderer):
         m_description.append("INVALID");
     }
 
-    m_renderer.m_cameras.insert(this);
-    m_renderer.m_activeCamera = this;
+    m_renderer->m_cameras.insert(this);
+    m_renderer->m_activeCamera = this;
 
-    m_entity.registerAttribute("type", boost::bind(&Camera::cmdType, this, _1));
-    m_entity.registerAttribute("perspective-fov", boost::bind(&Camera::cmdPerspectiveFOV, this, _1));
-    m_entity.registerAttribute("ortho-height", boost::bind(&Camera::cmdOrthoHeight, this, _1));
-    m_entity.registerAttribute("near-distance", boost::bind(&Camera::cmdNearDistance, this, _1));
-    m_entity.registerAttribute("far-distance", boost::bind(&Camera::cmdFarDistance, this, _1));
+    m_entity->registerAttribute("type", boost::bind(&Camera::cmdType, this, _1));
+    m_entity->registerAttribute("perspective-fov", boost::bind(&Camera::cmdPerspectiveFOV, this, _1));
+    m_entity->registerAttribute("ortho-height", boost::bind(&Camera::cmdOrthoHeight, this, _1));
+    m_entity->registerAttribute("near-distance", boost::bind(&Camera::cmdNearDistance, this, _1));
+    m_entity->registerAttribute("far-distance", boost::bind(&Camera::cmdFarDistance, this, _1));
 }
 
 Camera::~Camera() {
-    m_renderer.m_cameras.erase(this);
+    m_renderer->m_cameras.erase(this);
 }
 
 
+
+Camera::Camera(const Camera& rhs):
+    Component(COMPONENT_CAMERA, rhs.m_entity),
+    m_type(rhs.m_type),
+    m_renderer(rhs.m_renderer),
+    m_hasChanged(rhs.m_hasChanged),
+    m_viewport(rhs.m_viewport),
+    m_aspectRatio(rhs.m_aspectRatio),
+    m_perspectiveFOV(rhs.m_perspectiveFOV),
+    m_orthoHeight(rhs.m_orthoHeight),
+    m_nearDistance(rhs.m_nearDistance),
+    m_farDistance(rhs.m_farDistance)
+{
+    cerr << "Error: Camera copy constructor should not be called!" << endl;
+}
+
+Camera& Camera::operator=(const Camera&) {
+    cerr << "Error: Camera assignment operator should not be called!" << endl;
+    return *this;
+}
 
 void Camera::cmdType(const std::string& arg) {
     int type;

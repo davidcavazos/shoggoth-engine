@@ -47,7 +47,7 @@ Demo::Demo(const string& objectName,
     CommandObject(objectName),
     m_isRunning(false),
     m_device(deviceName),
-    m_scene(sceneName, rootNodeName, m_device),
+    m_scene(sceneName, rootNodeName, &m_device),
     m_renderer(rendererName, &m_device),
     m_resources(resourcesName, &m_renderer),
     m_physicsWorld(physicsWorldName)
@@ -82,14 +82,14 @@ void Demo::loadScene() {
 
     Entity* floor = root->addChild("floor");
     floor->setPositionAbs(0.0f, -1.0f, 0.0f);
-    RenderableMesh* floorMesh = new RenderableMesh(floor, m_renderer, m_resources);
+    RenderableMesh* floorMesh = new RenderableMesh(floor, &m_renderer, &m_resources);
     floorMesh->loadBox(100, 1, 100);
     RigidBody* floorBody = new RigidBody(floor, &m_physicsWorld);
     floorBody->addBox(100, 1, 100);
 
     Entity* b1 = root->addChild("b1");
     b1->setPositionAbs(5.0f, 4.0f, -10.0f);
-    RenderableMesh* b1Mesh = new RenderableMesh(b1, m_renderer, m_resources);
+    RenderableMesh* b1Mesh = new RenderableMesh(b1, &m_renderer, &m_resources);
     b1Mesh->loadBox(3.0f, 9.0f, 3.0f);
     RigidBody* b1Body = new RigidBody(b1, &m_physicsWorld);
     b1Body->addBox(3, 9, 3);
@@ -108,7 +108,7 @@ void Demo::loadScene() {
     Entity* cube = root->addChild("cube");
     cube->setPositionAbs(-1.0, 8.0, 0.0);
     cube->setOrientationAbs(0.5, 0.3, 0.2);
-    RenderableMesh* cubeMesh = new RenderableMesh(cube, m_renderer, m_resources);
+    RenderableMesh* cubeMesh = new RenderableMesh(cube, &m_renderer, &m_resources);
     cubeMesh->loadBox(0.5, 0.5, 0.5);
     RigidBody* cubeBody = new RigidBody(cube, &m_physicsWorld);
     cubeBody->init(1.0);
@@ -116,7 +116,7 @@ void Demo::loadScene() {
 
     Entity* mesh = root->addChild("model");
     mesh->setPositionRel(1.5f, 5.0f, 0.0f);
-    RenderableMesh* renderableMesh = new RenderableMesh(mesh, m_renderer, m_resources);
+    RenderableMesh* renderableMesh = new RenderableMesh(mesh, &m_renderer, &m_resources);
     renderableMesh->loadFromFile("assets/meshes/materialtest.dae");
     RigidBody* meshBody = new RigidBody(mesh, &m_physicsWorld);
     meshBody->init(10.0);
@@ -127,25 +127,15 @@ void Demo::loadScene() {
     camera->setPositionAbs(0.0f, 4.0f, 10.0f);
     camera->pitch(-0.2);
 //     camera->lookAt(cube->getPositionAbs(), VECTOR3_UNIT_Y);
-    Camera* camComponent = new Camera(camera, CAMERA_PROJECTION, m_renderer);
+    Camera* camComponent = new Camera(camera, CAMERA_PROJECTION, &m_renderer);
     camComponent->setPerspectiveFOV(45.0);
 //     RigidBody* cameraBody = new RigidBody(camera);
 //     cameraBody->addSphere(1);
 
     Entity* light1 = root->addChild("light1");
     light1->setPositionAbs(5, 5, 5);
-    Light* light1Cmp = new Light(light1, m_renderer);
+    Light* light1Cmp = new Light(light1, &m_renderer);
     light1Cmp->setDiffuse(1.0, 1.0, 1.0);
-
-//     Entity* light2 = root->addChild("light2");
-//     light2->setPositionAbs(0, 5, 5);
-//     Light* light2Cmp = new Light(light2);
-//     light2Cmp->setDiffuse(0.0, 1.0, 0.0);
-
-//     Entity* light3 = root->addChild("light3");
-//     light3->setPositionAbs(0, 5, 0);
-//     Light* light3Cmp = new Light(light3);
-//     light3Cmp->setDiffuse(0.0, 0.0, 1.0);
 
 //     cout << Terminal::listsToString() << endl;
 //     cout << m_sceneManager.sceneGraphToString() << endl;
@@ -263,7 +253,7 @@ void Demo::cmdFireCube(const std::string&) {
         cube->setPositionAbs(camera->getPositionAbs() + orientationUnit);
         cube->setOrientationAbs(camera->getOrientationAbs());
 
-        RenderableMesh* cubeMesh = new RenderableMesh(cube, m_renderer, m_resources);
+        RenderableMesh* cubeMesh = new RenderableMesh(cube, &m_renderer, &m_resources);
         cubeMesh->loadBox(MISSILE_SIZE, MISSILE_SIZE, MISSILE_SIZE);
 
         RigidBody* cubeBody = new RigidBody(cube, &m_physicsWorld);
@@ -285,7 +275,7 @@ void Demo::cmdFireSphere(const std::string&) {
         sphere->setPositionAbs(camera->getPositionAbs() + orientationUnit);
         sphere->setOrientationAbs(camera->getOrientationAbs());
 
-        RenderableMesh* cubeMesh = new RenderableMesh(sphere, m_renderer, m_resources);
+        RenderableMesh* cubeMesh = new RenderableMesh(sphere, &m_renderer, &m_resources);
         cubeMesh->loadFromFile("assets/meshes/icosphere3.dae");
 
         RigidBody* cubeBody = new RigidBody(sphere, &m_physicsWorld);

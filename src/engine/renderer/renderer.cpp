@@ -407,10 +407,10 @@ void Renderer::draw() const {
     float m[16];
 
     // set camera
-    Entity& cam = m_activeCamera->getEntity();
-    setOpenGLMatrix(m, VECTOR3_ZERO, cam.getOrientationAbs().inverse());
+    const Entity* cam = m_activeCamera->getEntity();
+    setOpenGLMatrix(m, VECTOR3_ZERO, cam->getOrientationAbs().inverse());
     glMultMatrixf(m);
-    glTranslatef(-cam.getPositionAbs().getX(), -cam.getPositionAbs().getY(), -cam.getPositionAbs().getZ());
+    glTranslatef(-cam->getPositionAbs().getX(), -cam->getPositionAbs().getY(), -cam->getPositionAbs().getZ());
 
     // set lights
     displayLegacyLights();
@@ -419,10 +419,10 @@ void Renderer::draw() const {
     set<RenderableMesh*>::const_iterator it;
     for (it = m_model.begin(); it != m_model.end(); ++it) {
         const Model& model = (*it)->getModel();
-        const Entity& entity = (*it)->getEntity();
+        const Entity* entity = (*it)->getEntity();
 
         glPushMatrix();
-        setOpenGLMatrix(m, entity.getPositionAbs(), entity.getOrientationAbs());
+        setOpenGLMatrix(m, entity->getPositionAbs(), entity->getOrientationAbs());
         glMultMatrixf(m);
         for (size_t n = 0; n < model.getTotalMeshes(); ++n) {
             const Mesh& mesh = model.getMesh(n);
@@ -587,7 +587,7 @@ void Renderer::displayLegacyLights() const {
                 lightEnum = GL_LIGHT7;
                 break;
         }
-        const Vector3& pos = (*itLight)->getEntity().getPositionAbs();
+        const Vector3& pos = (*itLight)->getEntity()->getPositionAbs();
         float lightPosition[] = {float(pos.getX()), float(pos.getY()), float(pos.getZ()), 1.0f};
         glLightfv(lightEnum, GL_POSITION, lightPosition);
         ++itLight;

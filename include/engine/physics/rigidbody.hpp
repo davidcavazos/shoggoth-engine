@@ -107,7 +107,7 @@ private:
     Vector3 m_gravity;
 
     RigidBody(const RigidBody& rhs);
-    RigidBody& operator=(const RigidBody& rhs);
+    RigidBody& operator=(const RigidBody&);
 
     void addRigidBody(btCollisionShape* shape);
 

@@ -23,16 +23,14 @@
 
 #include <string>
 #include <boost/unordered_map.hpp>
+#include "engine/kernel/commandobject.hpp"
 
-class ResourceManager;
 class Renderer;
 class Model;
 class Texture;
 
-class Resources {
+class Resources: public CommandObject {
 public:
-    friend class ResourceManager;
-
     Resources(const std::string& objectName, Renderer* renderer);
 
     void initialize();
@@ -48,6 +46,9 @@ private:
     Renderer* m_renderer;
     models_map_t m_modelsMap;
     textures_map_t m_texturesMap;
+
+    Resources(const Resources& rhs);
+    Resources& operator=(const Resources&);
 
     void registerModel(Model* model);
     void registerTexture(Texture* texture);

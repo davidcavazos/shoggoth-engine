@@ -32,9 +32,9 @@ using namespace std;
 
 const size_t INDENT_SIZE = 2;
 
-Entity::Entity(const Entity* parent, const string& objectName, const Device& device):
+Entity::Entity(Entity* parent, const string& objectName, const Device* device):
     CommandObject(objectName),
-    m_parent(*parent),
+    m_parent(parent),
     m_device(device),
     m_children(),
     m_components(TOTAL_COMPONENTS_CONTAINER_SIZE, 0),
@@ -44,7 +44,7 @@ Entity::Entity(const Entity* parent, const string& objectName, const Device& dev
     m_orientationRel(QUATERNION_IDENTITY),
     m_lastOrientation(QUATERNION_IDENTITY)
 {
-    if (&m_parent != 0) {
+    if (m_parent != 0) {
         setPositionRel(VECTOR3_ZERO);
         setOrientationRel(QUATERNION_IDENTITY);
     }
@@ -90,7 +90,7 @@ void Entity::translate(const Vector3& displacement, const transform_space_t& rel
         setPositionRel(m_positionRel + displacement.rotate(m_orientationAbs));
         break;
     case SPACE_PARENT:
-        setPositionRel(m_positionRel + displacement.rotate(m_parent.m_orientationAbs));
+        setPositionRel(m_positionRel + displacement.rotate(m_parent->m_orientationAbs));
         break;
     case SPACE_GLOBAL:
         setPositionAbs(m_positionAbs + displacement);
@@ -194,6 +194,26 @@ string Entity::treeToString(const size_t indent) const {
 
 
 
+Entity::Entity(const Entity& rhs):
+    CommandObject(rhs.m_objectName),
+    m_parent(rhs.m_parent),
+    m_device(rhs.m_device),
+    m_children(rhs.m_children),
+    m_components(rhs.m_components),
+    m_positionAbs(rhs.m_positionAbs),
+    m_positionRel(rhs.m_positionRel),
+    m_orientationAbs(rhs.m_orientationAbs),
+    m_orientationRel(rhs.m_orientationRel),
+    m_lastOrientation(rhs.m_lastOrientation)
+{
+    cerr << "Error: Entity copy constructor should not be called!" << endl;
+}
+
+Entity& Entity::operator=(const Entity&) {
+    cerr << "Error: Entity assignment operator should not be called!" << endl;
+    return *this;
+}
+
 void Entity::cmdPositionAbs(const string& arg) {
     scalar_t x, y, z;
     stringstream ss(arg);
@@ -233,21 +253,21 @@ void Entity::cmdMoveX(const std::string& arg) {
     scalar_t dist;
     stringstream ss(arg);
     ss >> dist;
-    translateX(dist * m_device.getDeltaTime());
+    translateX(dist * m_device->getDeltaTime());
 }
 
 void Entity::cmdMoveY(const std::string& arg) {
     scalar_t dist;
     stringstream ss(arg);
     ss >> dist;
-    translateY(dist * m_device.getDeltaTime());
+    translateY(dist * m_device->getDeltaTime());
 }
 
 void Entity::cmdMoveZ(const std::string& arg) {
     scalar_t dist;
     stringstream ss(arg);
     ss >> dist;
-    translateZ(dist * m_device.getDeltaTime());
+    translateZ(dist * m_device->getDeltaTime());
 }
 
 void Entity::cmdMoveXYZ_parent(const std::string& arg) {
@@ -255,9 +275,9 @@ void Entity::cmdMoveXYZ_parent(const std::string& arg) {
     stringstream ss(arg);
     ss >> x >> y >> z;
     translate(
-        x * m_device.getDeltaTime(),
-        y * m_device.getDeltaTime(),
-        z * m_device.getDeltaTime(),
+        x * m_device->getDeltaTime(),
+        y * m_device->getDeltaTime(),
+        z * m_device->getDeltaTime(),
         SPACE_PARENT
     );
 }
@@ -266,21 +286,21 @@ void Entity::cmdMoveX_parent(const std::string& arg) {
     scalar_t dist;
     stringstream ss(arg);
     ss >> dist;
-    translateX(dist * m_device.getDeltaTime(), SPACE_PARENT);
+    translateX(dist * m_device->getDeltaTime(), SPACE_PARENT);
 }
 
 void Entity::cmdMoveY_parent(const std::string& arg) {
     scalar_t dist;
     stringstream ss(arg);
     ss >> dist;
-    translateY(dist * m_device.getDeltaTime(), SPACE_PARENT);
+    translateY(dist * m_device->getDeltaTime(), SPACE_PARENT);
 }
 
 void Entity::cmdMoveZ_parent(const std::string& arg) {
     scalar_t dist;
     stringstream ss(arg);
     ss >> dist;
-    translateZ(dist * m_device.getDeltaTime(), SPACE_PARENT);
+    translateZ(dist * m_device->getDeltaTime(), SPACE_PARENT);
 }
 
 void Entity::cmdMoveXYZ_global(const std::string& arg) {
@@ -288,9 +308,9 @@ void Entity::cmdMoveXYZ_global(const std::string& arg) {
     stringstream ss(arg);
     ss >> x >> y >> z;
     translate(
-        x * m_device.getDeltaTime(),
-        y * m_device.getDeltaTime(),
-        z * m_device.getDeltaTime(),
+        x * m_device->getDeltaTime(),
+        y * m_device->getDeltaTime(),
+        z * m_device->getDeltaTime(),
         SPACE_GLOBAL
     );
 }
@@ -299,84 +319,84 @@ void Entity::cmdMoveX_global(const std::string& arg) {
     scalar_t dist;
     stringstream ss(arg);
     ss >> dist;
-    translateX(dist * m_device.getDeltaTime(), SPACE_GLOBAL);
+    translateX(dist * m_device->getDeltaTime(), SPACE_GLOBAL);
 }
 
 void Entity::cmdMoveY_global(const std::string& arg) {
     scalar_t dist;
     stringstream ss(arg);
     ss >> dist;
-    translateY(dist * m_device.getDeltaTime(), SPACE_GLOBAL);
+    translateY(dist * m_device->getDeltaTime(), SPACE_GLOBAL);
 }
 
 void Entity::cmdMoveZ_global(const std::string& arg) {
     scalar_t dist;
     stringstream ss(arg);
     ss >> dist;
-    translateZ(dist * m_device.getDeltaTime(), SPACE_GLOBAL);
+    translateZ(dist * m_device->getDeltaTime(), SPACE_GLOBAL);
 }
 
 void Entity::cmdYaw(const std::string& arg) {
     scalar_t radians;
     stringstream ss(arg);
     ss >> radians;
-    yaw(radians * m_device.getDeltaTime());
+    yaw(radians * m_device->getDeltaTime());
 }
 
 void Entity::cmdPitch(const std::string& arg) {
     scalar_t radians;
     stringstream ss(arg);
     ss >> radians;
-    pitch(radians * m_device.getDeltaTime());
+    pitch(radians * m_device->getDeltaTime());
 }
 
 void Entity::cmdRoll(const std::string& arg) {
     scalar_t radians;
     stringstream ss(arg);
     ss >> radians;
-    roll(radians * m_device.getDeltaTime());
+    roll(radians * m_device->getDeltaTime());
 }
 
 void Entity::cmdYaw_parent(const std::string& arg) {
     scalar_t radians;
     stringstream ss(arg);
     ss >> radians;
-    yaw(radians * m_device.getDeltaTime(), SPACE_PARENT);
+    yaw(radians * m_device->getDeltaTime(), SPACE_PARENT);
 }
 
 void Entity::cmdPitch_parent(const std::string& arg) {
     scalar_t radians;
     stringstream ss(arg);
     ss >> radians;
-    pitch(radians * m_device.getDeltaTime(), SPACE_PARENT);
+    pitch(radians * m_device->getDeltaTime(), SPACE_PARENT);
 }
 
 void Entity::cmdRoll_parent(const std::string& arg) {
     scalar_t radians;
     stringstream ss(arg);
     ss >> radians;
-    roll(radians * m_device.getDeltaTime(), SPACE_PARENT);
+    roll(radians * m_device->getDeltaTime(), SPACE_PARENT);
 }
 
 void Entity::cmdYaw_global(const std::string& arg) {
     scalar_t radians;
     stringstream ss(arg);
     ss >> radians;
-    yaw(radians * m_device.getDeltaTime(), SPACE_GLOBAL);
+    yaw(radians * m_device->getDeltaTime(), SPACE_GLOBAL);
 }
 
 void Entity::cmdPitch_global(const std::string& arg) {
     scalar_t radians;
     stringstream ss(arg);
     ss >> radians;
-    pitch(radians * m_device.getDeltaTime(), SPACE_GLOBAL);
+    pitch(radians * m_device->getDeltaTime(), SPACE_GLOBAL);
 }
 
 void Entity::cmdRoll_global(const std::string& arg) {
     scalar_t radians;
     stringstream ss(arg);
     ss >> radians;
-    roll(radians * m_device.getDeltaTime(), SPACE_GLOBAL);
+    roll(radians * m_device->getDeltaTime(), SPACE_GLOBAL);
 }
 
 ostream& operator<<(ostream& out, const Entity& rhs) {

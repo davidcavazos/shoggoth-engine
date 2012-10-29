@@ -48,6 +48,9 @@ private:
     std::string m_identifier;
     Renderer* m_renderer;
     std::vector<Mesh> m_meshes;
+
+    Model(const Model& rhs);
+    Model& operator=(const Model&);
 };
 
 

@@ -29,7 +29,7 @@ class Model;
 
 class RenderableMesh: public Component {
 public:
-    RenderableMesh(Entity* const entity, Renderer& renderer, Resources& resources);
+    RenderableMesh(Entity* const entity, Renderer* renderer, Resources* resources);
     ~RenderableMesh();
 
     const Model* getModelPtr() const;
@@ -39,36 +39,22 @@ public:
     void loadFromFile(const std::string& fileName);
 
 private:
-    Renderer& m_renderer;
-    Resources& m_resources;
-    Model* m_meshData;
+    Renderer* m_renderer;
+    Resources* m_resources;
+    Model* m_model;
 
-    // Should not be called
     RenderableMesh(const RenderableMesh& rhs);
-    RenderableMesh& operator=(const RenderableMesh& rhs);
+    RenderableMesh& operator=(const RenderableMesh&);
 };
 
 
 
 inline const Model* RenderableMesh::getModelPtr() const {
-    return m_meshData;
+    return m_model;
 }
 
 inline const Model& RenderableMesh::getModel() const {
     return *getModelPtr();
-}
-
-
-
-inline RenderableMesh::RenderableMesh(const RenderableMesh& rhs):
-    Component(rhs.m_type, &rhs.m_entity),
-    m_renderer(rhs.m_renderer),
-    m_resources(rhs.m_resources),
-    m_meshData(rhs.m_meshData)
-{}
-
-inline RenderableMesh& RenderableMesh::operator=(const RenderableMesh&) {
-    return *this;
 }
 
 #endif // RENDERABLEMESH_HPP

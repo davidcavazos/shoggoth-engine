@@ -20,6 +20,10 @@
 
 #include "engine/resources/model.hpp"
 
+#include <iostream>
+
+using namespace std;
+
 Model::Model(const std::string& identifier, Renderer* renderer):
     m_identifier(identifier),
     m_renderer(renderer),
@@ -29,4 +33,17 @@ Model::Model(const std::string& identifier, Renderer* renderer):
 void Model::uploadToGPU() {
     for (size_t i = 0; i < m_meshes.size(); ++i)
         m_meshes[i].uploadToGPU();
+}
+
+Model::Model(const Model& rhs):
+    m_identifier(rhs.m_identifier),
+    m_renderer(rhs.m_renderer),
+    m_meshes(rhs.m_meshes)
+{
+    cerr << "Error: Model copy constructor should not be called!" << endl;
+}
+
+Model& Model::operator=(const Model&) {
+    cerr << "Error: Model assignment operator should not be called!" << endl;
+    return *this;
 }

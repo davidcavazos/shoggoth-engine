@@ -31,6 +31,8 @@ public:
     friend class ModelLoader;
 
     Mesh(Renderer* renderer);
+    Mesh(const Mesh& rhs);
+    Mesh& operator=(const Mesh& rhs);
     ~Mesh();
 
     unsigned int getMeshId() const;

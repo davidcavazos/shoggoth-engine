@@ -59,7 +59,7 @@ private:
     void* m_pixels;
 
     Texture(const Texture& rhs);
-    Texture& operator=(const Texture& rhs);
+    Texture& operator=(const Texture&);
 };
 
 

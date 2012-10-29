@@ -82,6 +82,8 @@ void Texture::load() {
     SDL_FreeSurface(img);
 }
 
+
+
 Texture::Texture(const Texture& rhs):
     m_fileName(rhs.m_fileName),
     m_renderer(rhs.m_renderer),
@@ -91,18 +93,11 @@ Texture::Texture(const Texture& rhs):
     m_height(rhs.m_height),
     m_textureFormat(rhs.m_textureFormat),
     m_pixels(rhs.m_pixels)
-{}
+{
+    cerr << "Error: Texture copy constructor should not be called!" << endl;
+}
 
-Texture& Texture::operator=(const Texture& rhs) {
-    if (this == &rhs)
-        return *this;
-    m_fileName = rhs.m_fileName;
-    m_renderer = rhs.m_renderer;
-    m_textureId = rhs.m_textureId;
-    m_bytesPerPixel = rhs.m_bytesPerPixel;
-    m_width = rhs.m_width;
-    m_height = rhs.m_height;
-    m_textureFormat = rhs.m_textureFormat;
-    m_pixels = rhs.m_pixels;
+Texture& Texture::operator=(const Texture&) {
+    cerr << "Error: Texture assignment operator should not be called!" << endl;
     return *this;
 }

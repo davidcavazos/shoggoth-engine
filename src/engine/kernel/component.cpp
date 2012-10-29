@@ -20,21 +20,35 @@
 
 #include "engine/kernel/component.hpp"
 
+#include <iostream>
 #include <ostream>
 #include "engine/kernel/entity.hpp"
 
 using namespace std;
 
 Component::Component(const component_t type, Entity* const entity):
-    m_entity(*entity),
+    m_entity(entity),
     m_type(type),
     m_description()
 {
-    m_entity.m_components[m_type] = this;
+    m_entity->m_components[m_type] = this;
 }
 
 Component::~Component() {
-    m_entity.m_components[m_type] = 0;
+    m_entity->m_components[m_type] = 0;
+}
+
+Component::Component(const Component& rhs):
+    m_entity(rhs.m_entity),
+    m_type(rhs.m_type),
+    m_description(rhs.m_description)
+{
+    cerr << "Error: Component copy constructor should not be called!" << endl;
+}
+
+Component& Component::operator=(const Component&) {
+    cerr << "Error: Component assignment operator should not be called!" << endl;
+    return *this;
 }
 
 ostream& operator<<(ostream& out, const Component& rhs) {

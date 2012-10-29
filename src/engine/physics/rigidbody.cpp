@@ -40,7 +40,7 @@ const string COLLISION_SHAPE_CONE = "cone";
 const string COLLISION_SHAPE_CONVEX = "convex";
 const string COLLISION_SHAPE_CONCAVE = "concave";
 
-btDefaultMotionState* getMotionState(const Entity& entity);
+btDefaultMotionState* getMotionState(const Entity* entity);
 btVector3 v3(const Vector3& v);
 btQuaternion quat(const Quaternion& q);
 
@@ -66,60 +66,17 @@ RigidBody::RigidBody(Entity* const entity, PhysicsWorld* physicsWorld):
     m_angularVelocity(VECTOR3_ZERO),
     m_gravity(VECTOR3_ZERO)
 {
-    m_entity.registerAttribute("mass", boost::bind(&RigidBody::cmdMass, this, _1));
-    m_entity.registerAttribute("damping", boost::bind(&RigidBody::cmdDamping, this, _1));
-    m_entity.registerAttribute("friction", boost::bind(&RigidBody::cmdFriction, this, _1));
-    m_entity.registerAttribute("rolling-friction", boost::bind(&RigidBody::cmdRollingFriction, this, _1));
-    m_entity.registerAttribute("restitution", boost::bind(&RigidBody::cmdRestitution, this, _1));
-    m_entity.registerAttribute("sleeping-thresholds", boost::bind(&RigidBody::cmdSleepingThresholds, this, _1));
-    m_entity.registerAttribute("linear-factor", boost::bind(&RigidBody::cmdLinearFactor, this, _1));
-    m_entity.registerAttribute("linear-velocity", boost::bind(&RigidBody::cmdLinearVelocity, this, _1));
-    m_entity.registerAttribute("angular-factor", boost::bind(&RigidBody::cmdAngularFactor, this, _1));
-    m_entity.registerAttribute("angular-velocity", boost::bind(&RigidBody::cmdAngularVelocity, this, _1));
-    m_entity.registerAttribute("gravity", boost::bind(&RigidBody::cmdGravity, this, _1));
-}
-
-RigidBody::RigidBody(const RigidBody& rhs):
-    Component(COMPONENT_PHYSICS, &rhs.m_entity),
-    m_physicsWorld(rhs.m_physicsWorld),
-    m_rigidBody(rhs.m_rigidBody),
-    m_position(rhs.m_position),
-    m_orientation(rhs.m_orientation),
-    m_mass(rhs.m_mass),
-    m_linearDamping(rhs.m_linearDamping),
-    m_angularDamping(rhs.m_angularDamping),
-    m_friction(rhs.m_friction),
-    m_rollingFriction(rhs.m_rollingFriction),
-    m_restitution(rhs.m_restitution),
-    m_linearSleepingThreshold(rhs.m_linearSleepingThreshold),
-    m_angularSleepingThreshold(rhs.m_angularSleepingThreshold),
-    m_linearFactor(rhs.m_linearFactor),
-    m_linearVelocity(rhs.m_linearVelocity),
-    m_angularFactor(rhs.m_angularFactor),
-    m_angularVelocity(rhs.m_angularVelocity),
-    m_gravity(rhs.m_gravity)
-{}
-
-RigidBody& RigidBody::operator=(const RigidBody& rhs) {
-    if (this == &rhs)
-        return *this;
-    m_rigidBody = rhs.m_rigidBody;
-    m_position = rhs.m_position;
-    m_orientation = rhs.m_orientation;
-    m_mass = rhs.m_mass;
-    m_linearDamping = rhs.m_linearDamping;
-    m_angularDamping = rhs.m_angularDamping;
-    m_friction = rhs.m_friction;
-    m_rollingFriction = rhs.m_rollingFriction;
-    m_restitution = rhs.m_restitution;
-    m_linearSleepingThreshold = rhs.m_linearSleepingThreshold;
-    m_angularSleepingThreshold = rhs.m_angularSleepingThreshold;
-    m_linearFactor = rhs.m_linearFactor;
-    m_linearVelocity = rhs.m_linearVelocity;
-    m_angularFactor = rhs.m_angularFactor;
-    m_angularVelocity = rhs.m_angularVelocity;
-    m_gravity = rhs.m_gravity;
-    return *this;
+    m_entity->registerAttribute("mass", boost::bind(&RigidBody::cmdMass, this, _1));
+    m_entity->registerAttribute("damping", boost::bind(&RigidBody::cmdDamping, this, _1));
+    m_entity->registerAttribute("friction", boost::bind(&RigidBody::cmdFriction, this, _1));
+    m_entity->registerAttribute("rolling-friction", boost::bind(&RigidBody::cmdRollingFriction, this, _1));
+    m_entity->registerAttribute("restitution", boost::bind(&RigidBody::cmdRestitution, this, _1));
+    m_entity->registerAttribute("sleeping-thresholds", boost::bind(&RigidBody::cmdSleepingThresholds, this, _1));
+    m_entity->registerAttribute("linear-factor", boost::bind(&RigidBody::cmdLinearFactor, this, _1));
+    m_entity->registerAttribute("linear-velocity", boost::bind(&RigidBody::cmdLinearVelocity, this, _1));
+    m_entity->registerAttribute("angular-factor", boost::bind(&RigidBody::cmdAngularFactor, this, _1));
+    m_entity->registerAttribute("angular-velocity", boost::bind(&RigidBody::cmdAngularVelocity, this, _1));
+    m_entity->registerAttribute("gravity", boost::bind(&RigidBody::cmdGravity, this, _1));
 }
 
 void RigidBody::init(const double mass,
@@ -377,6 +334,36 @@ void RigidBody::addConcaveHull(const string& fileName, Resources& resources) {
     addRigidBody(shape);
 }
 
+
+
+RigidBody::RigidBody(const RigidBody& rhs):
+    Component(COMPONENT_PHYSICS, rhs.m_entity),
+    m_physicsWorld(rhs.m_physicsWorld),
+    m_rigidBody(rhs.m_rigidBody),
+    m_position(rhs.m_position),
+    m_orientation(rhs.m_orientation),
+    m_mass(rhs.m_mass),
+    m_linearDamping(rhs.m_linearDamping),
+    m_angularDamping(rhs.m_angularDamping),
+    m_friction(rhs.m_friction),
+    m_rollingFriction(rhs.m_rollingFriction),
+    m_restitution(rhs.m_restitution),
+    m_linearSleepingThreshold(rhs.m_linearSleepingThreshold),
+    m_angularSleepingThreshold(rhs.m_angularSleepingThreshold),
+    m_linearFactor(rhs.m_linearFactor),
+    m_linearVelocity(rhs.m_linearVelocity),
+    m_angularFactor(rhs.m_angularFactor),
+    m_angularVelocity(rhs.m_angularVelocity),
+    m_gravity(rhs.m_gravity)
+{
+    cerr << "Error: RigidBody copy constructor should not be called!" << endl;
+}
+
+RigidBody& RigidBody::operator=(const RigidBody&) {
+    cerr << "Error: RigidBody assignment operator should not be called!" << endl;
+    return *this;
+}
+
 void RigidBody::addRigidBody(btCollisionShape* shape) {
     btVector3 inertia;
     shape->calculateLocalInertia(m_mass, inertia);
@@ -391,7 +378,7 @@ void RigidBody::addRigidBody(btCollisionShape* shape) {
     constructionInfo.m_restitution = m_restitution;
     m_rigidBody = new btRigidBody(constructionInfo);
     m_physicsWorld->m_rigidBodies.insert(
-        std::pair<Entity*, btRigidBody*>(&m_entity, m_rigidBody)
+        std::pair<Entity*, btRigidBody*>(m_entity, m_rigidBody)
     );
     m_physicsWorld->m_dynamicsWorld->addRigidBody(m_rigidBody);
 }
@@ -483,9 +470,9 @@ void RigidBody::cmdGravity(const string& arg) {
 
 
 
-btDefaultMotionState* getMotionState(const Entity& entity) {
-    const Quaternion& rot = entity.getOrientationAbs();
-    const Vector3& pos = entity.getPositionAbs();
+btDefaultMotionState* getMotionState(const Entity* entity) {
+    const Quaternion& rot = entity->getOrientationAbs();
+    const Vector3& pos = entity->getPositionAbs();
     btDefaultMotionState* motion =
     new btDefaultMotionState(btTransform(
         btQuaternion(rot.getX(), rot.getY(), rot.getZ(), rot.getW()),

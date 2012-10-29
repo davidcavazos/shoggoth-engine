@@ -42,7 +42,7 @@ public:
     friend class Component;
     friend std::ostream& operator<<(std::ostream& out, const Entity& rhs);
 
-    Entity(const Entity* parent, const std::string& objectName, const Device& device);
+    Entity(Entity* parent, const std::string& objectName, const Device* device);
     ~Entity();
 
     const Vector3& getPositionAbs() const;
@@ -82,8 +82,8 @@ public:
     std::string treeToString(const size_t indent) const;
 
 private:
-    const Entity& m_parent;
-    const Device& m_device;
+    Entity* m_parent;
+    const Device* m_device;
     std::set<Entity*> m_children;
     std::vector<Component*> m_components;
     Vector3 m_positionAbs;
@@ -91,6 +91,9 @@ private:
     Quaternion m_orientationAbs;
     Quaternion m_orientationRel;
     Quaternion m_lastOrientation;
+
+    Entity(const Entity& rhs);
+    Entity& operator=(const Entity&);
 
     void applyTranslationToChildren();
     void applyOrientationToChildren();
@@ -145,7 +148,7 @@ inline const Quaternion& Entity::getOrientationRel() const {
 
 inline void Entity::setPositionAbs(const Vector3& position) {
     m_positionAbs = position;
-    m_positionRel = m_positionAbs - m_parent.m_positionAbs;
+    m_positionRel = m_positionAbs - m_parent->m_positionAbs;
     applyTransformToPhysicsComponent();
     applyTranslationToChildren();
 }
@@ -156,7 +159,7 @@ inline void Entity::setPositionAbs(const scalar_t& posX, const scalar_t& posY, c
 
 inline void Entity::setPositionRel(const Vector3& position) {
     m_positionRel = position;
-    m_positionAbs = m_positionRel + m_parent.m_positionAbs;
+    m_positionAbs = m_positionRel + m_parent->m_positionAbs;
     applyTransformToPhysicsComponent();
     applyTranslationToChildren();
 }
@@ -168,7 +171,7 @@ inline void Entity::setPositionRel(const scalar_t& posX, const scalar_t& posY, c
 inline void Entity::setOrientationAbs(const Quaternion& orientation) {
     m_lastOrientation = m_orientationAbs;
     m_orientationAbs = orientation.normalized();
-    m_orientationRel = (m_parent.m_orientationAbs.inverse() * m_orientationAbs).normalized();
+    m_orientationRel = (m_parent->m_orientationAbs.inverse() * m_orientationAbs).normalized();
     applyTransformToPhysicsComponent();
     applyOrientationToChildren();
 }
@@ -188,7 +191,7 @@ inline void Entity::setOrientationAbs(const scalar_t& yawRad, const scalar_t& pi
 inline void Entity::setOrientationRel(const Quaternion& orientation) {
     m_lastOrientation = m_orientationAbs;
     m_orientationRel = orientation.normalized();
-    m_orientationAbs = (m_parent.m_orientationAbs * m_orientationRel).normalized();
+    m_orientationAbs = (m_parent->m_orientationAbs * m_orientationRel).normalized();
     applyTransformToPhysicsComponent();
     applyOrientationToChildren();
 }

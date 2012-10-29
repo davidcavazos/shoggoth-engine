@@ -27,9 +27,10 @@
 using namespace std;
 
 Resources::Resources(const string& objectName, Renderer* renderer):
-m_renderer(renderer),
-m_modelsMap(),
-m_texturesMap()
+    CommandObject(objectName),
+    m_renderer(renderer),
+    m_modelsMap(),
+    m_texturesMap()
 {}
 
 void Resources::initialize() {
@@ -143,4 +144,20 @@ Texture* Resources::findTexture(const std::string& fileName) {
     if (it != m_texturesMap.end())
         return it->second;
     return 0;
+}
+
+
+
+Resources::Resources(const Resources& rhs):
+    CommandObject(rhs.m_objectName),
+    m_renderer(rhs.m_renderer),
+    m_modelsMap(rhs.m_modelsMap),
+    m_texturesMap(rhs.m_texturesMap)
+{
+    cerr << "Error: Resources copy constructor should not be called!" << endl;
+}
+
+Resources& Resources::operator=(const Resources&) {
+    cerr << "Error: Resources assignment operator should not be called!" << endl;
+    return *this;
 }
