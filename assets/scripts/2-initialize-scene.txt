@@ -1,0 +1,2 @@
+renderer init-lighting
+renderer set ambient-light 0.2 0.2 0.2
