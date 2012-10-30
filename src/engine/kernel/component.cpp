@@ -59,7 +59,7 @@ ostream& operator<<(ostream& out, const Component& rhs) {
     case COMPONENT_RENDERABLE_MESH:
         out << "RENDERABLE_MESH";
         break;
-    case COMPONENT_PHYSICS:
+    case COMPONENT_RIGIDBODY:
         out << "PHYSICS";
         break;
     default:

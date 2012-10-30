@@ -28,6 +28,12 @@ using namespace std;
 
 const char COMMENT_CHAR = '#';
 
+Command::Command():
+    m_idObject(0),
+    m_idCommand(0),
+    m_arguments()
+{}
+
 Command::Command(const string& expression):
     m_idObject(0),
     m_idCommand(0),

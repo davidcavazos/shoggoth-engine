@@ -240,9 +240,9 @@ void Renderer::initLighting() const {
             break;
         }
         glEnable(lightEnum);
-        glLightfv(lightEnum, GL_AMBIENT, (*it)->getAmbient());
-        glLightfv(lightEnum, GL_DIFFUSE, (*it)->getDiffuse());
-        glLightfv(lightEnum, GL_SPECULAR, (*it)->getSpecular());
+        glLightfv(lightEnum, GL_AMBIENT, (*it)->getAmbientPtr());
+        glLightfv(lightEnum, GL_DIFFUSE, (*it)->getDiffusePtr());
+        glLightfv(lightEnum, GL_SPECULAR, (*it)->getSpecularPtr());
         ++it;
     }
 }

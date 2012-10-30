@@ -34,6 +34,7 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const Command& rhs);
     friend std::istream& operator>>(std::istream& in, Command& rhs);
 
+    Command();
     Command(const std::string& expression);
     Command(const size_t idObject, const size_t idCommand, const std::string& arguments = "");
 

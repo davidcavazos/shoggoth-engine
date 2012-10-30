@@ -20,7 +20,6 @@
 
 #include "engine/renderer/light.hpp"
 
-#include <iostream>
 #include "engine/kernel/entity.hpp"
 #include "engine/renderer/renderer.hpp"
 
@@ -30,24 +29,12 @@ const string LIGHT_DESCRIPTION = "$light";
 
 Light::Light(Entity* const entity, Renderer* renderer):
     Component(COMPONENT_LIGHT, entity),
-    m_renderer(renderer)
+    m_renderer(renderer),
+    m_ambient(0.0f, 0.0f, 0.0f, 1.0f),
+    m_diffuse(1.0f, 1.0f, 1.0f, 1.0f),
+    m_specular(1.0f, 1.0f, 1.0f, 1.0f)
 {
     m_description = LIGHT_DESCRIPTION;
-
-    m_ambient[0] = 0.0f;
-    m_ambient[1] = 0.0f;
-    m_ambient[2] = 0.0f;
-    m_ambient[3] = 1.0f;
-
-    m_diffuse[0] = 1.0f;
-    m_diffuse[1] = 1.0f;
-    m_diffuse[2] = 1.0f;
-    m_diffuse[3] = 1.0f;
-
-    m_specular[0] = 1.0f;
-    m_specular[1] = 1.0f;
-    m_specular[2] = 1.0f;
-    m_specular[3] = 1.0f;
 
     m_renderer->m_lights.insert(this);
 
@@ -64,7 +51,10 @@ Light::~Light() {
 
 Light::Light(const Light& rhs):
     Component(COMPONENT_LIGHT, rhs.m_entity),
-    m_renderer(rhs.m_renderer)
+    m_renderer(rhs.m_renderer),
+    m_ambient(rhs.m_ambient),
+    m_diffuse(rhs.m_diffuse),
+    m_specular(rhs.m_specular)
 {
     cerr << "Error: Light copy constructor should not be called!" << endl;
 }

@@ -41,8 +41,9 @@ class RigidBody: public Component {
 public:
     RigidBody(Entity* const entity, PhysicsWorld* physicsWorld);
 
-    const Vector3& getPosition() const;
-    const Quaternion& getOrientation() const;
+    const Vector3& getPosition();
+    const Quaternion& getOrientation();
+    const std::string& getShapeId() const;
     double getMass() const;
     double getLinearDamping() const;
     double getAngularDamping() const;
@@ -52,9 +53,9 @@ public:
     double getLinearSleepingThreshold() const;
     double getAngularSleepingThreshold() const;
     const Vector3& getLinearFactor() const;
-    const Vector3& getLinearVelocity() const;
+    const Vector3& getLinearVelocity();
     const Vector3& getAngularFactor() const;
-    const Vector3& getAngularVelocity() const;
+    const Vector3& getAngularVelocity();
     const Vector3& getGravity() const;
 
     void init(const double mass = 0.0,
@@ -84,11 +85,12 @@ public:
     void addCylinder(const double radius, const double height);
     void addCapsule(const double radius, const double height);
     void addCone(const double radius, const double height);
-    void addConvexHull(const std::string& fileName, Resources& resources);
-    void addConcaveHull(const std::string& fileName, Resources& resources);
+    void addConvexHull(const std::string& fileName, Resources* resources);
+    void addConcaveHull(const std::string& fileName, Resources* resources);
 
 private:
     PhysicsWorld* m_physicsWorld;
+    std::string m_shapeId;
     btRigidBody* m_rigidBody;
     Vector3 m_position;
     Quaternion m_orientation;
@@ -124,67 +126,5 @@ private:
     void cmdAngularVelocity(const std::string& arg);
     void cmdGravity(const std::string& arg);
 };
-
-
-
-inline const Vector3& RigidBody::getPosition() const {
-    return m_position;
-}
-
-inline const Quaternion& RigidBody::getOrientation() const {
-    return m_orientation;
-}
-
-inline double RigidBody::getMass() const {
-    return m_mass;
-}
-
-inline double RigidBody::getLinearDamping() const {
-    return m_linearDamping;
-}
-
-inline double RigidBody::getAngularDamping() const {
-    return m_angularDamping;
-}
-
-inline double RigidBody::getFriction() const {
-    return m_friction;
-}
-
-inline double RigidBody::getRollingFriction() const {
-    return m_rollingFriction;
-}
-
-inline double RigidBody::getRestitution() const {
-    return m_restitution;
-}
-
-inline double RigidBody::getLinearSleepingThreshold() const {
-    return m_linearSleepingThreshold;
-}
-
-inline double RigidBody::getAngularSleepingThreshold() const {
-    return m_angularSleepingThreshold;
-}
-
-inline const Vector3& RigidBody::getLinearFactor() const {
-    return m_linearFactor;
-}
-
-inline const Vector3& RigidBody::getLinearVelocity() const {
-    return m_linearVelocity;
-}
-
-inline const Vector3& RigidBody::getAngularFactor() const {
-    return m_angularFactor;
-}
-
-inline const Vector3& RigidBody::getAngularVelocity() const {
-    return m_angularVelocity;
-}
-
-inline const Vector3& RigidBody::getGravity() const {
-    return m_gravity;
-}
 
 #endif // RIGIDBODY_HPP

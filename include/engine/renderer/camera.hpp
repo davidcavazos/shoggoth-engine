@@ -21,6 +21,7 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
 
+#include <iostream>
 #include "engine/kernel/component.hpp"
 
 class Renderer;
@@ -79,6 +80,18 @@ private:
     void cmdNearDistance(const std::string& arg);
     void cmdFarDistance(const std::string& arg);
 };
+
+
+
+inline std::ostream& operator<<(std::ostream& out, const viewport_t& rhs) {
+    out << rhs.posX << " " << rhs.posY << " " << rhs.width << " " << rhs.height;
+    return out;
+}
+
+inline std::istream& operator>>(std::istream& in, viewport_t& rhs) {
+    in >> rhs.posX >> rhs.posY >> rhs.width >> rhs.height;
+    return in;
+}
 
 
 

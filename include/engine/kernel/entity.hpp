@@ -27,6 +27,7 @@
 #include "commandobject.hpp"
 #include "vector3.hpp"
 #include "quaternion.hpp"
+#include "component.hpp"
 
 class Device;
 class Component;
@@ -42,6 +43,9 @@ public:
     friend class Component;
     friend std::ostream& operator<<(std::ostream& out, const Entity& rhs);
 
+    typedef std::set<Entity*>::const_iterator const_child_iterator_t;
+    typedef std::set<Entity*>::iterator child_iterator_t;
+
     Entity(Entity* parent, const std::string& objectName, const Device* device);
     ~Entity();
 
@@ -49,6 +53,11 @@ public:
     const Vector3& getPositionRel() const;
     const Quaternion& getOrientationAbs() const;
     const Quaternion& getOrientationRel() const;
+    const Component* getComponent(const component_t i) const;
+    const_child_iterator_t getChildrenBegin() const;
+    child_iterator_t getChildrenBegin();
+    const_child_iterator_t getChildrenEnd() const;
+    child_iterator_t getChildrenEnd();
 
     void setPositionAbs(const Vector3& position);
     void setPositionAbs(const scalar_t& posX, const scalar_t& posY, const scalar_t& posZ);
@@ -142,6 +151,26 @@ inline const Quaternion& Entity::getOrientationAbs() const {
 
 inline const Quaternion& Entity::getOrientationRel() const {
     return m_orientationRel;
+}
+
+inline const Component* Entity::getComponent(const component_t i) const {
+    return m_components[i];
+}
+
+inline Entity::const_child_iterator_t Entity::getChildrenBegin() const {
+    return m_children.begin();
+}
+
+inline Entity::child_iterator_t Entity::getChildrenBegin() {
+    return m_children.begin();
+}
+
+inline Entity::const_child_iterator_t Entity::getChildrenEnd() const {
+    return m_children.end();
+}
+
+inline Entity::child_iterator_t Entity::getChildrenEnd() {
+    return m_children.end();
 }
 
 

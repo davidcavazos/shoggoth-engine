@@ -21,6 +21,7 @@
 #ifndef VECTOR3_HPP
 #define VECTOR3_HPP
 
+#include <iostream>
 #include <cmath>
 #include "scalar.hpp"
 
@@ -93,6 +94,20 @@ const Vector3 VECTOR3_UNIT_Y_NEG = Vector3(0, -1, 0);
 const Vector3 VECTOR3_UNIT_Z_NEG = Vector3(0, 0, -1);
 
 #include "quaternion.hpp"
+
+
+
+inline std::ostream& operator<<(std::ostream& out, const Vector3& v) {
+    out << v.getX() << " " << v.getY() << " " << v.getZ();
+    return out;
+}
+
+inline std::istream& operator>>(std::istream& in, Vector3& v) {
+    scalar_t x, y, z;
+    in >> x >> y >> z;
+    v.setValue(x, y, z);
+    return in;
+}
 
 
 

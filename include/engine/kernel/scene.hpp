@@ -38,6 +38,8 @@ public:
 
     void initialize();
     void shutdown();
+    void saveToXML(const std::string& fileName) const;
+    void loadFromXML(const std::string& fileName);
     bool findEntity(const std::string& name, Entity*& entity);
     std::string sceneGraphToString();
 
@@ -47,6 +49,8 @@ private:
 
     void cmdInitialize(const std::string&);
     void cmdShutdown(const std::string&);
+    void cmdSaveToXML(const std::string& arg);
+    void cmdLoadFromXML(const std::string& arg);
 };
 
 
@@ -68,6 +72,14 @@ inline void Scene::cmdInitialize(const std::string&) {
 
 inline void Scene::cmdShutdown(const std::string&) {
     shutdown();
+}
+
+inline void Scene::cmdSaveToXML(const std::string& arg) {
+    saveToXML(arg);
+}
+
+inline void Scene::cmdLoadFromXML(const std::string& arg) {
+    loadFromXML(arg);
 }
 
 #endif // SCENE_HPP

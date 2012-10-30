@@ -27,20 +27,21 @@
 #include <assimp/postprocess.h>
 #include "engine/resources/model.hpp"
 #include "engine/resources/resources.hpp"
+#include "engine/resources/texture.hpp"
 
 using namespace std;
 
 const string OPTIMIZED_BINARY_FILE_EXTENSION = ".model";
 
 bool ModelLoader::load(const string& fileName, Model& model, Renderer* renderer, Resources* resources) {
-    cout << "TEMPORAL: always importing model for testing purposes" << endl;
-    import(fileName, model, renderer, resources);
+//     cout << "TEMPORAL: always importing model for testing purposes" << endl;
+//     import(fileName, model, renderer, resources);
 
-//     if (!loadBinary(fileName, model)) {
-//         if (!import(fileName, model))
-//             return false;
-//         writeBinary(fileName, model);
-//     }
+    if (!loadBinary(fileName, model, renderer, resources)) {
+        if (!import(fileName, model, renderer, resources))
+            return false;
+        writeBinary(fileName, model);
+    }
     return true;
 }
 
@@ -154,6 +155,7 @@ bool ModelLoader::import(const string& fileName, Model& model, Renderer* rendere
         }
         Texture* texture;
         aiString file;
+        // diffuse map
         if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
             material->GetTexture(aiTextureType_DIFFUSE, 0, &file);
             texture = resources->generateTextureFromFile(modelDir + file.C_Str());
@@ -220,6 +222,21 @@ bool ModelLoader::loadBinary(const string& fileName, Model& model, Renderer* ren
         float shininess;
         file.read(reinterpret_cast<char*>(&shininess), sizeof(float));
         model.mesh(n)->material()->setShininess(shininess);
+
+        // texture maps
+        Texture* texture;
+        char* temp;
+        string mapName;
+        // diffuse map
+        file.read(reinterpret_cast<char*>(&size), sizeof(size_t));
+        temp = new char[size];
+        file.read(reinterpret_cast<char*>(temp), size * sizeof(char));
+        mapName = string(temp).substr(0, size);
+        delete[] temp;
+        if (mapName.length() > 0) {
+            texture = resources->generateTextureFromFile(mapName);
+            model.mesh(n)->material()->setTextureMap(MATERIAL_DIFFUSE_MAP, texture);
+        }
     }
     file.close();
     return true;
@@ -280,6 +297,14 @@ bool ModelLoader::writeBinary(const std::string& fileName, Model& model) {
         // shininess
         float shininess = model.mesh(n)->material()->getShininess();
         file.write(reinterpret_cast<char*>(&shininess), sizeof(float));
+
+        // texture maps
+        string mapName;
+        // diffuse map
+        mapName = model.mesh(n)->getMaterial()->getTextureMap(MATERIAL_DIFFUSE_MAP)->getFileName();
+        size = mapName.length();
+        file.write(reinterpret_cast<char*>(&size), sizeof(size_t));
+        file.write(reinterpret_cast<char*>(&mapName[0]), size * sizeof(char));
     }
     file.close();
     return true;

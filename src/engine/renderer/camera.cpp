@@ -20,7 +20,6 @@
 
 #include "engine/renderer/camera.hpp"
 
-#include <iostream>
 #include "engine/kernel/entity.hpp"
 #include "engine/renderer/renderer.hpp"
 

@@ -1,1 +1,2 @@
-device set fullscreen 1
+#scene save-to-xml ingame-scene.xml
+scene load-from-xml scene.xml

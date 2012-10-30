@@ -25,7 +25,6 @@
 #include "engine/kernel/matrix3x3.hpp"
 #include "engine/kernel/device.hpp"
 #include "engine/kernel/scene.hpp"
-#include "engine/kernel/component.hpp"
 #include "engine/physics/rigidbody.hpp"
 
 using namespace std;
@@ -155,8 +154,8 @@ void Entity::applyOrientationToChildren() {
 }
 
 void Entity::applyTransformToPhysicsComponent() {
-    if (m_components[COMPONENT_PHYSICS] != 0) {
-        RigidBody* rigidBody = dynamic_cast<RigidBody*>(m_components[COMPONENT_PHYSICS]);
+    if (m_components[COMPONENT_RIGIDBODY] != 0) {
+        RigidBody* rigidBody = dynamic_cast<RigidBody*>(m_components[COMPONENT_RIGIDBODY]);
         rigidBody->activate();
         rigidBody->setTransform(m_positionAbs, m_orientationAbs);
     }

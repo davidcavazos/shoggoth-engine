@@ -21,6 +21,7 @@
 #ifndef QUATERNION_HPP
 #define QUATERNION_HPP
 
+#include <iostream>
 #include "scalar.hpp"
 
 class Vector3;
@@ -82,6 +83,20 @@ private:
 const Quaternion QUATERNION_IDENTITY = Quaternion(1, 0, 0, 0);
 
 #include "vector3.hpp"
+
+
+
+inline std::ostream& operator<<(std::ostream& out, const Quaternion& q) {
+    out << q.getW() << " " << q.getX() << " " << q.getY() << " " << q.getZ();
+    return out;
+}
+
+inline std::istream& operator>>(std::istream& in, Quaternion& q) {
+    scalar_t w, x, y, z;
+    in >> w >> x >> y >> z;
+    q.setValue(w, x, y, z);
+    return in;
+}
 
 
 

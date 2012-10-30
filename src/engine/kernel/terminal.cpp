@@ -82,10 +82,12 @@ string Terminal::executeScript(const string& fileName) {
     while (file.good()) {
         getline(file, cmd);
         if (!cmd.empty()) {
-            Command command(cmd);
-            cout << "> " << command << endl;
-            output << "> " << command << endl;
-            command.run();
+            Command command;
+            if (command.parseCommand(cmd)) {
+                cout << "> " << command << endl;
+                output << "> " << command << endl;
+                command.run();
+            }
         }
     }
     file.close();

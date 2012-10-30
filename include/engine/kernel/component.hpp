@@ -29,7 +29,7 @@ typedef enum {
     COMPONENT_CAMERA,
     COMPONENT_LIGHT,
     COMPONENT_RENDERABLE_MESH,
-    COMPONENT_PHYSICS,
+    COMPONENT_RIGIDBODY,
     TOTAL_COMPONENTS_CONTAINER_SIZE // Do not use as a component, gives size to component container
 } component_t;
 

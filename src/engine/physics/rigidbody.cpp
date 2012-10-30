@@ -32,23 +32,26 @@
 
 using namespace std;
 
-const string COLLISION_SHAPE_BOX = "box";
-const string COLLISION_SHAPE_SPHERE = "sphere";
-const string COLLISION_SHAPE_CYLINDER = "cylinder";
-const string COLLISION_SHAPE_CAPSULE = "capsule";
-const string COLLISION_SHAPE_CONE = "cone";
-const string COLLISION_SHAPE_CONVEX = "convex";
-const string COLLISION_SHAPE_CONCAVE = "concave";
+const string COLLISION_SHAPE_BOX = "#box";
+const string COLLISION_SHAPE_SPHERE = "#sphere";
+const string COLLISION_SHAPE_CYLINDER = "#cylinder";
+const string COLLISION_SHAPE_CAPSULE = "#capsule";
+const string COLLISION_SHAPE_CONE = "#cone";
+const string COLLISION_SHAPE_CONVEX = "#convex";
+const string COLLISION_SHAPE_CONCAVE = "#concave";
 
 btDefaultMotionState* getMotionState(const Entity* entity);
 btVector3 v3(const Vector3& v);
+Vector3 v3(const btVector3& v);
 btQuaternion quat(const Quaternion& q);
+Quaternion quat(const btQuaternion& q);
 
 
 
 RigidBody::RigidBody(Entity* const entity, PhysicsWorld* physicsWorld):
-    Component(COMPONENT_PHYSICS, entity),
+    Component(COMPONENT_RIGIDBODY, entity),
     m_physicsWorld(physicsWorld),
+    m_shapeId(""),
     m_rigidBody(0),
     m_position(VECTOR3_ZERO),
     m_orientation(QUATERNION_IDENTITY),
@@ -78,6 +81,78 @@ RigidBody::RigidBody(Entity* const entity, PhysicsWorld* physicsWorld):
     m_entity->registerAttribute("angular-velocity", boost::bind(&RigidBody::cmdAngularVelocity, this, _1));
     m_entity->registerAttribute("gravity", boost::bind(&RigidBody::cmdGravity, this, _1));
 }
+
+
+
+const Vector3& RigidBody::getPosition() {
+    m_position = v3(m_rigidBody->getCenterOfMassPosition());
+    return m_position;
+}
+
+const Quaternion& RigidBody::getOrientation() {
+    m_orientation = quat(m_rigidBody->getOrientation());
+    return m_orientation;
+}
+
+const std::string& RigidBody::getShapeId() const {
+    return m_shapeId;
+}
+
+double RigidBody::getMass() const {
+    return m_mass;
+}
+
+double RigidBody::getLinearDamping() const {
+    return m_linearDamping;
+}
+
+double RigidBody::getAngularDamping() const {
+    return m_angularDamping;
+}
+
+double RigidBody::getFriction() const {
+    return m_friction;
+}
+
+double RigidBody::getRollingFriction() const {
+    return m_rollingFriction;
+}
+
+double RigidBody::getRestitution() const {
+    return m_restitution;
+}
+
+double RigidBody::getLinearSleepingThreshold() const {
+    return m_linearSleepingThreshold;
+}
+
+double RigidBody::getAngularSleepingThreshold() const {
+    return m_angularSleepingThreshold;
+}
+
+const Vector3& RigidBody::getLinearFactor() const {
+    return m_linearFactor;
+}
+
+const Vector3& RigidBody::getLinearVelocity() {
+    m_linearVelocity = v3(m_rigidBody->getLinearVelocity());
+    return m_linearVelocity;
+}
+
+const Vector3& RigidBody::getAngularFactor() const {
+    return m_angularFactor;
+}
+
+const Vector3& RigidBody::getAngularVelocity() {
+    m_angularVelocity = v3(m_rigidBody->getAngularVelocity());
+    return m_angularVelocity;
+}
+
+const Vector3& RigidBody::getGravity() const {
+    return m_gravity;
+}
+
+
 
 void RigidBody::init(const double mass,
                      const double friction,
@@ -168,17 +243,17 @@ void RigidBody::setGravity(const Vector3& gravity) {
 
 void RigidBody::addSphere(const double radius) {
     stringstream ss;
-    ss << COLLISION_SHAPE_BOX << "_" << radius;
-    string shapeId = ss.str();
+    ss << COLLISION_SHAPE_BOX << " " << radius;
+    m_shapeId = ss.str();
 
     PhysicsWorld::collision_shapes_map_t& collisionShapes = m_physicsWorld->m_collisionShapes;
     PhysicsWorld::collision_shapes_map_t::const_iterator it;
 
     btCollisionShape* shape;
-    it = collisionShapes.find(shapeId);
+    it = collisionShapes.find(m_shapeId);
     if (it == collisionShapes.end()) {
         shape = new btSphereShape(radius);
-        collisionShapes.insert(std::pair<string, btCollisionShape*>(shapeId, shape));
+        collisionShapes.insert(std::pair<string, btCollisionShape*>(m_shapeId, shape));
     }
     else
         shape = it->second;
@@ -187,17 +262,17 @@ void RigidBody::addSphere(const double radius) {
 
 void RigidBody::addBox(const double lengthX, const double lengthY, const double lengthZ) {
     stringstream ss;
-    ss << COLLISION_SHAPE_BOX << "_" << lengthX << "_" << lengthY << "_" << lengthZ;
-    string shapeId = ss.str();
+    ss << COLLISION_SHAPE_BOX << " " << lengthX << " " << lengthY << " " << lengthZ;
+    m_shapeId = ss.str();
 
     PhysicsWorld::collision_shapes_map_t& collisionShapes = m_physicsWorld->m_collisionShapes;
     PhysicsWorld::collision_shapes_map_t::const_iterator it;
 
     btCollisionShape* shape;
-    it = collisionShapes.find(shapeId);
+    it = collisionShapes.find(m_shapeId);
     if (it == collisionShapes.end()) {
         shape = new btBoxShape(btVector3(lengthX * 0.5, lengthY * 0.5, lengthZ * 0.5));
-        collisionShapes.insert(std::pair<string, btCollisionShape*>(shapeId, shape));
+        collisionShapes.insert(std::pair<string, btCollisionShape*>(m_shapeId, shape));
     }
     else
         shape = it->second;
@@ -206,17 +281,17 @@ void RigidBody::addBox(const double lengthX, const double lengthY, const double 
 
 void RigidBody::addCylinder(const double radius, const double height) {
     stringstream ss;
-    ss << COLLISION_SHAPE_CYLINDER << "_" << radius << "_" << height;
-    string shapeId = ss.str();
+    ss << COLLISION_SHAPE_CYLINDER << " " << radius << " " << height;
+    m_shapeId = ss.str();
 
     PhysicsWorld::collision_shapes_map_t& collisionShapes = m_physicsWorld->m_collisionShapes;
     PhysicsWorld::collision_shapes_map_t::const_iterator it;
 
     btCollisionShape* shape;
-    it = collisionShapes.find(shapeId);
+    it = collisionShapes.find(m_shapeId);
     if (it == collisionShapes.end()) {
         shape = new btCylinderShape(btVector3(radius, height, radius));
-        collisionShapes.insert(std::pair<string, btCollisionShape*>(shapeId, shape));
+        collisionShapes.insert(std::pair<string, btCollisionShape*>(m_shapeId, shape));
     }
     else
         shape = it->second;
@@ -225,17 +300,17 @@ void RigidBody::addCylinder(const double radius, const double height) {
 
 void RigidBody::addCapsule(const double radius, const double height) {
     stringstream ss;
-    ss << COLLISION_SHAPE_CAPSULE << "_" << radius << "_" << height;
-    string shapeId = ss.str();
+    ss << COLLISION_SHAPE_CAPSULE << " " << radius << " " << height;
+    m_shapeId = ss.str();
 
     PhysicsWorld::collision_shapes_map_t& collisionShapes = m_physicsWorld->m_collisionShapes;
     PhysicsWorld::collision_shapes_map_t::const_iterator it;
 
     btCollisionShape* shape;
-    it = collisionShapes.find(shapeId);
+    it = collisionShapes.find(m_shapeId);
     if (it == collisionShapes.end()) {
         shape = new btCapsuleShape(radius, height);
-        collisionShapes.insert(std::pair<string, btCollisionShape*>(shapeId, shape));
+        collisionShapes.insert(std::pair<string, btCollisionShape*>(m_shapeId, shape));
     }
     else
         shape = it->second;
@@ -244,36 +319,36 @@ void RigidBody::addCapsule(const double radius, const double height) {
 
 void RigidBody::addCone(const double radius, const double height) {
     stringstream ss;
-    ss << COLLISION_SHAPE_CONE << "_" << radius << "_" << height;
-    string shapeId = ss.str();
+    ss << COLLISION_SHAPE_CONE << " " << radius << " " << height;
+    m_shapeId = ss.str();
 
     PhysicsWorld::collision_shapes_map_t& collisionShapes = m_physicsWorld->m_collisionShapes;
     PhysicsWorld::collision_shapes_map_t::const_iterator it;
 
     btCollisionShape* shape;
-    it = collisionShapes.find(shapeId);
+    it = collisionShapes.find(m_shapeId);
     if (it == collisionShapes.end()) {
         shape = new btConeShape(radius, height);
-        collisionShapes.insert(std::pair<string, btCollisionShape*>(shapeId, shape));
+        collisionShapes.insert(std::pair<string, btCollisionShape*>(m_shapeId, shape));
     }
     else
         shape = it->second;
     addRigidBody(shape);
 }
 
-void RigidBody::addConvexHull(const string& fileName, Resources& resources) {
+void RigidBody::addConvexHull(const string& fileName, Resources* resources) {
     stringstream ss;
-    ss << COLLISION_SHAPE_CONVEX << "_" << fileName;
-    string shapeId = ss.str();
+    ss << COLLISION_SHAPE_CONVEX << " " << fileName;
+    m_shapeId = ss.str();
 
     PhysicsWorld::collision_shapes_map_t& collisionShapes = m_physicsWorld->m_collisionShapes;
     PhysicsWorld::collision_shapes_map_t::const_iterator it;
 
     btCollisionShape* shape;
-    it = collisionShapes.find(shapeId);
+    it = collisionShapes.find(m_shapeId);
     if (it == collisionShapes.end()) {
         // build original mesh from file
-        Model* model = resources.generateModelFromFile(fileName);
+        Model* model = resources->generateModelFromFile(fileName);
         vector<float> points;
         for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
             points.reserve(points.size() + model->mesh(n)->getVerticesSize());
@@ -289,7 +364,7 @@ void RigidBody::addConvexHull(const string& fileName, Resources& resources) {
         hull->buildHull(margin);
 
         shape = new btConvexHullShape(&hull->getVertexPointer()->getX(), hull->numVertices());
-        collisionShapes.insert(std::pair<string, btCollisionShape*>(shapeId, shape));
+        collisionShapes.insert(std::pair<string, btCollisionShape*>(m_shapeId, shape));
 
         delete originalConvexShape;
         delete hull;
@@ -299,19 +374,19 @@ void RigidBody::addConvexHull(const string& fileName, Resources& resources) {
     addRigidBody(shape);
 }
 
-void RigidBody::addConcaveHull(const string& fileName, Resources& resources) {
+void RigidBody::addConcaveHull(const string& fileName, Resources* resources) {
     stringstream ss;
-    ss << COLLISION_SHAPE_CONCAVE << "_" << fileName;
-    string shapeId = ss.str();
+    ss << COLLISION_SHAPE_CONCAVE << " " << fileName;
+    m_shapeId = ss.str();
 
     PhysicsWorld::collision_shapes_map_t& collisionShapes = m_physicsWorld->m_collisionShapes;
     PhysicsWorld::collision_shapes_map_t::const_iterator it;
 
     btCollisionShape* shape;
-    it = collisionShapes.find(shapeId);
+    it = collisionShapes.find(m_shapeId);
     if (it == collisionShapes.end()) {
         // build mesh from file
-        Model* model = resources.generateModelFromFile(fileName);
+        Model* model = resources->generateModelFromFile(fileName);
         btTriangleIndexVertexArray* triangles = new btTriangleIndexVertexArray();
         for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
             btIndexedMesh indexedMesh;
@@ -325,7 +400,7 @@ void RigidBody::addConcaveHull(const string& fileName, Resources& resources) {
         }
 
         shape = new btBvhTriangleMeshShape(triangles, true, true);
-        collisionShapes.insert(std::pair<string, btCollisionShape*>(shapeId, shape));
+        collisionShapes.insert(std::pair<string, btCollisionShape*>(m_shapeId, shape));
 
         delete triangles;
     }
@@ -337,8 +412,9 @@ void RigidBody::addConcaveHull(const string& fileName, Resources& resources) {
 
 
 RigidBody::RigidBody(const RigidBody& rhs):
-    Component(COMPONENT_PHYSICS, rhs.m_entity),
+    Component(COMPONENT_RIGIDBODY, rhs.m_entity),
     m_physicsWorld(rhs.m_physicsWorld),
+    m_shapeId(rhs.m_shapeId),
     m_rigidBody(rhs.m_rigidBody),
     m_position(rhs.m_position),
     m_orientation(rhs.m_orientation),
@@ -485,6 +561,14 @@ btVector3 v3(const Vector3& v) {
     return btVector3(v.getX(), v.getY(), v.getZ());
 }
 
+Vector3 v3(const btVector3& v) {
+    return Vector3(v.getX(), v.getY(), v.getZ());
+}
+
 btQuaternion quat(const Quaternion& q) {
     return btQuaternion(q.getX(), q.getY(), q.getZ(), q.getW());
+}
+
+Quaternion quat(const btQuaternion& q) {
+    return Quaternion(q.getX(), q.getY(), q.getZ(), q.getW());
 }

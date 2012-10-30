@@ -50,7 +50,7 @@ RenderableMesh::~RenderableMesh() {
 
 void RenderableMesh::loadBox(const double lengthX, const double lengthY, const double lengthZ) {
     stringstream ss;
-    ss << BOX_DESCRIPTION << "_" << lengthX << "_" << lengthY << "_" << lengthZ;
+    ss << BOX_DESCRIPTION << " " << lengthX << " " << lengthY << " " << lengthZ;
     m_description = ss.str();
     m_model = m_resources->generateBox(m_description, lengthX, lengthY, lengthZ);
 }

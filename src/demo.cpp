@@ -105,14 +105,14 @@ void Demo::loadScene() {
     cubeBody->init(1.0);
     cubeBody->addBox(0.5, 0.5, 0.5);
 
-    Entity* mesh = root->addChild("model");
+    Entity* mesh = cube->addChild("model");
     mesh->setPositionRel(1.5f, 5.0f, 0.0f);
     RenderableMesh* renderableMesh = new RenderableMesh(mesh, &m_renderer, &m_resources);
     renderableMesh->loadFromFile("assets/meshes/materialtest.dae");
     RigidBody* meshBody = new RigidBody(mesh, &m_physicsWorld);
     meshBody->init(10.0);
     meshBody->addBox(2, 2, 2);
-//     meshBody->addConvexHull("assets/meshes/materialtest.dae");
+//     meshBody->addConvexHull("assets/meshes/suzanne-lowpoly.dae", &m_resources);
 
     Entity* camera = root->addChild("camera");
     camera->setPositionAbs(0.0f, 4.0f, 10.0f);
@@ -134,6 +134,8 @@ void Demo::loadScene() {
 //     cout << ResourceManager::listsToString() << endl;
 
     Terminal::executeScript("assets/scripts/2-initialize-scene.txt");
+
+    m_scene.saveToXML("scene.xml");
 }
 
 void Demo::bindInputs() {

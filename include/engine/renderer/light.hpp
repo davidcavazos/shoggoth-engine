@@ -21,27 +21,43 @@
 #ifndef LIGHT_HPP
 #define LIGHT_HPP
 
+#include <iostream>
 #include "engine/kernel/component.hpp"
 
 class Renderer;
+
+class color4_t {
+public:
+    float rgba[4];
+
+    color4_t(const float r, const float g, const float b, const float a) {
+        rgba[0] = r;
+        rgba[1] = g;
+        rgba[2] = b;
+        rgba[3] = a;
+    }
+};
 
 class Light: public Component {
 public:
     Light(Entity*const entity, Renderer* renderer);
     ~Light();
 
-    const float* getAmbient() const;
-    const float* getDiffuse() const;
-    const float* getSpecular() const;
+    const color4_t& getAmbient() const;
+    const float* getAmbientPtr() const;
+    const color4_t& getDiffuse() const;
+    const float* getDiffusePtr() const;
+    const color4_t& getSpecular() const;
+    const float* getSpecularPtr() const;
     void setAmbient(const float r, const float g, const float b, const float a = 1.0f);
     void setDiffuse(const float r, const float g, const float b, const float a = 1.0f);
     void setSpecular(const float r, const float g, const float b, const float a = 1.0f);
 
 private:
     Renderer* m_renderer;
-    float m_ambient[4];
-    float m_diffuse[4];
-    float m_specular[4];
+    color4_t m_ambient;
+    color4_t m_diffuse;
+    color4_t m_specular;
 
     Light(const Light& rhs);
     Light& operator=(const Light&);
@@ -53,37 +69,61 @@ private:
 
 
 
-inline const float* Light::getAmbient() const {
+inline std::ostream& operator<<(std::ostream& out, const color4_t& rhs) {
+    out << rhs.rgba[0] << " " << rhs.rgba[1] << " " << rhs.rgba[2] << " " << rhs.rgba[3];
+    return out;
+}
+
+inline std::istream& operator>>(std::istream& in, color4_t& rhs) {
+    in >> rhs.rgba[0] >> rhs.rgba[1] >> rhs.rgba[2] >> rhs.rgba[3];
+    return in;
+}
+
+
+
+inline const color4_t& Light::getAmbient() const {
     return m_ambient;
 }
 
-inline const float* Light::getDiffuse() const {
+inline const float* Light::getAmbientPtr() const {
+    return m_ambient.rgba;
+}
+
+inline const color4_t& Light::getDiffuse() const {
     return m_diffuse;
 }
 
-inline const float* Light::getSpecular() const {
+inline const float* Light::getDiffusePtr() const {
+    return m_diffuse.rgba;
+}
+
+inline const color4_t& Light::getSpecular() const {
     return m_specular;
 }
 
+inline const float* Light::getSpecularPtr() const {
+    return m_specular.rgba;
+}
+
 inline void Light::setAmbient(const float r, const float g, const float b, const float a) {
-    m_ambient[0] = r;
-    m_ambient[1] = g;
-    m_ambient[2] = b;
-    m_ambient[3] = a;
+    m_ambient.rgba[0] = r;
+    m_ambient.rgba[1] = g;
+    m_ambient.rgba[2] = b;
+    m_ambient.rgba[3] = a;
 }
 
 inline void Light::setDiffuse(const float r, const float g, const float b, const float a) {
-    m_diffuse[0] = r;
-    m_diffuse[1] = g;
-    m_diffuse[2] = b;
-    m_diffuse[3] = a;
+    m_diffuse.rgba[0] = r;
+    m_diffuse.rgba[1] = g;
+    m_diffuse.rgba[2] = b;
+    m_diffuse.rgba[3] = a;
 }
 
 inline void Light::setSpecular(const float r, const float g, const float b, const float a) {
-    m_specular[0] = r;
-    m_specular[1] = g;
-    m_specular[2] = b;
-    m_specular[3] = a;
+    m_specular.rgba[0] = r;
+    m_specular.rgba[1] = g;
+    m_specular.rgba[2] = b;
+    m_specular.rgba[3] = a;
 }
 
 #endif // LIGHT_HPP
