@@ -1,5 +1,5 @@
+scene shutdown
 physics-world shutdown
 resources shutdown
 renderer shutdown
-scene shutdown
 device shutdown

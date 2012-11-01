@@ -182,7 +182,6 @@ void saveToPTree(const string& path, ptree& tree, const Entity* node) {
 }
 
 void loadFromPTree(const ptree& tree, Entity* node) {
-
 }
 
 
@@ -199,26 +198,33 @@ Scene::Scene(const string& objectName, const string& rootNodeName, const Device*
     registerCommand("load-from-xml", boost::bind(&Scene::cmdLoadFromXML, this, _1));
 }
 
+Scene::~Scene() {
+    unregisterAllCommands();
+    unregisterAllAttributes();
+}
+
 void Scene::initialize() {
 }
 
 void Scene::shutdown() {
+    cout << "Removing all entities" << endl;
+    m_root.removeAllChildren();
 }
 
 void Scene::saveToXML(const string& fileName) const {
     cout << "Saving scene to XML file: " << fileName << endl;
     ptree tree;
-    saveToPTree("scene", tree, &m_root);
-
     xml_writer_settings<char> settings(' ', 2);
+    saveToPTree("scene", tree, &m_root);
     write_xml(fileName, tree, std::locale(), settings);
 }
 
 void Scene::loadFromXML(const string& fileName) {
     cout << "Loading scene from XML file: " << fileName << endl;
     ptree tree;
-    loadFromPTree(tree, &m_root);
+    m_root.removeAllChildren();
     read_xml(fileName, tree, xml_parser::trim_whitespace);
+    loadFromPTree(tree, &m_root);
 }
 
 bool Scene::findEntity(const string& name, Entity*& entity) {

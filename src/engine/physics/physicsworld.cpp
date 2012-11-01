@@ -46,6 +46,11 @@ PhysicsWorld::PhysicsWorld(const string& objectName):
     registerAttribute("gravity", boost::bind(&PhysicsWorld::cmdGravity, this, _1));
 }
 
+PhysicsWorld::~PhysicsWorld() {
+    unregisterAllCommands();
+    unregisterAllAttributes();
+}
+
 void PhysicsWorld::initialize() {
     cout << "Physics simulations done with Bullet Physics" << endl;
     setMinExpectedFramerate(DEFAULT_MIN_EXPECTED_FRAMERATE);

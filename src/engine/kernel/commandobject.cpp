@@ -36,13 +36,11 @@ CommandObject::CommandObject(const string& objectName) :
     m_commands(),
     m_attributes()
 {
-//     cout << "Creating " << m_objectName << endl;
-	m_idObject = Terminal::registerObject(m_objectName, this);
+    m_idObject = Terminal::registerObject(m_objectName, this);
 }
 
 CommandObject::~CommandObject() {
     Terminal::unregisterObject(m_objectName);
-//     cout << "Destroying " << m_objectName << endl;
 }
 
 bool CommandObject::operator<(const CommandObject& rhs) const {
@@ -78,6 +76,26 @@ size_t CommandObject::registerAttribute(const string& attrName, const slot_t& sl
         m_attributes.insert(pair<size_t, slot_t>(id, slot));
     registerCommand(SET_COMMAND, boost::bind(&CommandObject::setAttribute, this, _1));
     return id;
+}
+
+void CommandObject::unregisterCommand(const std::string& cmd) {
+    size_t id;
+    if (Terminal::ms_commandsTable.findId(id, cmd))
+        m_commands.erase(id);
+}
+
+void CommandObject::unregisterAttribute(const std::string& attrName) {
+    size_t id;
+    if (Terminal::ms_attributesTable.findId(id, attrName))
+        m_attributes.erase(id);
+}
+
+void CommandObject::unregisterAllCommands() {
+    m_commands.clear();
+}
+
+void CommandObject::unregisterAllAttributes() {
+    m_attributes.clear();
 }
 
 void CommandObject::setAttribute(const string& arg) {

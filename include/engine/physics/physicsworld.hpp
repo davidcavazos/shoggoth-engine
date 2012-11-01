@@ -43,6 +43,7 @@ public:
     friend class RigidBody;
 
     PhysicsWorld(const std::string& objectName);
+    ~PhysicsWorld();
 
     void initialize();
     void shutdown();

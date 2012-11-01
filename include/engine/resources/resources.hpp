@@ -32,6 +32,7 @@ class Texture;
 class Resources: public CommandObject {
 public:
     Resources(const std::string& objectName, Renderer* renderer);
+    ~Resources();
 
     void initialize();
     void shutdown();

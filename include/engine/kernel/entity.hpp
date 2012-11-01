@@ -88,6 +88,7 @@ public:
 
     Entity* addChild(const std::string& childName);
     void removeChild(Entity* const child);
+    void removeAllChildren();
     std::string treeToString(const size_t indent) const;
 
 private:
@@ -133,6 +134,7 @@ private:
     void cmdYaw_global(const std::string& arg);
     void cmdPitch_global(const std::string& arg);
     void cmdRoll_global(const std::string& arg);
+    void cmdRemoveAllChildren(const std::string&);
 };
 
 
@@ -273,6 +275,12 @@ inline void Entity::pitch(const scalar_t& radians, const transform_space_t& rela
 
 inline void Entity::roll(const scalar_t& radians, const transform_space_t& relativeTo) {
     rotate(VECTOR3_UNIT_Z, radians, relativeTo);
+}
+
+
+
+inline void Entity::cmdRemoveAllChildren(const std::string&) {
+    removeAllChildren();
 }
 
 #endif // ENTITY_HPP

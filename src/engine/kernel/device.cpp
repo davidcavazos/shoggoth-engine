@@ -59,6 +59,11 @@ Device::Device(const string& objectName):
     registerAttribute("resolution", boost::bind(&Device::cmdResolution, this, _1));
 }
 
+Device::~Device() {
+    unregisterAllCommands();
+    unregisterAllAttributes();
+}
+
 void Device::initialize() {
     cout << "Creating SDL-OpenGL device" << endl;
     if (SDL_Init(SDL_INIT_FLAGS) != 0) // 0 success, -1 failure

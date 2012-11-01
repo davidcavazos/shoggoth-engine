@@ -31,6 +31,7 @@ public:
     friend class Entity;
 
     Scene(const std::string& objectName, const std::string& rootNodeName, const Device* device);
+    ~Scene();
 
     const Entity* getRoot() const;
 

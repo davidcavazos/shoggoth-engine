@@ -1,5 +1,6 @@
 device initialize
 device set resolution 800 600
-scene initialize
 renderer initialize
+resources initialize
 physics-world initialize
+scene initialize

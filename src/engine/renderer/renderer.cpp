@@ -55,12 +55,17 @@ Renderer::Renderer(const string& objectName, const Device* device):
     m_activeCamera(0),
     m_cameras(),
     m_lights(),
-    m_model()
+    m_models()
 {
     registerCommand("initialize", boost::bind(&Renderer::cmdInitialize, this, _1));
     registerCommand("shutdown", boost::bind(&Renderer::cmdShutdown, this, _1));
     registerCommand("init-lighting", boost::bind(&Renderer::cmdInitLighting, this, _1));
     registerAttribute("ambient-light", boost::bind(&Renderer::cmdAmbientLight, this, _1));
+}
+
+Renderer::~Renderer() {
+    unregisterAllCommands();
+    unregisterAllAttributes();
 }
 
 void Renderer::initialize() {
@@ -202,7 +207,7 @@ void Renderer::shutdown() {
         delete *itLight;
 
     set<RenderableMesh*>::const_iterator itMesh;
-    for (itMesh = m_model.begin(); itMesh != m_model.end(); ++itMesh)
+    for (itMesh = m_models.begin(); itMesh != m_models.end(); ++itMesh)
         delete *itMesh;
 }
 
@@ -422,7 +427,7 @@ void Renderer::draw() const {
 
     // set meshes
     set<RenderableMesh*>::const_iterator it;
-    for (it = m_model.begin(); it != m_model.end(); ++it) {
+    for (it = m_models.begin(); it != m_models.end(); ++it) {
         const Model* model = (*it)->getModel();
         const Entity* entity = (*it)->getEntity();
 
@@ -499,7 +504,7 @@ string Renderer::listsToString() const {
 
     ss << "Renderer Meshes List:" << endl;
     set<RenderableMesh*>::const_iterator itMesh;
-    for (itMesh = m_model.begin(); itMesh != m_model.end(); ++itMesh)
+    for (itMesh = m_models.begin(); itMesh != m_models.end(); ++itMesh)
         ss << "  " << (*itMesh)->getDescription() << endl;
 
     ss << "Lights List:" << endl;
@@ -516,7 +521,7 @@ Renderer::Renderer(const Renderer& rhs):
     m_activeCamera(rhs.m_activeCamera),
     m_cameras(rhs.m_cameras),
     m_lights(rhs.m_lights),
-    m_model(rhs.m_model)
+    m_models(rhs.m_models)
 {
     cerr << "Renderer copy constructor should not be called" << endl;
 }
@@ -528,7 +533,7 @@ Renderer& Renderer::operator=(const Renderer& rhs) {
     m_activeCamera = rhs.m_activeCamera;
     m_cameras = rhs.m_cameras;
     m_lights = rhs.m_lights;
-    m_model = rhs.m_model;
+    m_models = rhs.m_models;
     return *this;
 }
 

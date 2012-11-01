@@ -72,14 +72,13 @@ Entity::Entity(Entity* parent, const string& objectName, const Device* device):
     registerCommand("yaw-global", boost::bind(&Entity::cmdYaw_global, this, _1));
     registerCommand("pitch-global", boost::bind(&Entity::cmdPitch_global, this, _1));
     registerCommand("roll-global", boost::bind(&Entity::cmdRoll_global, this, _1));
+    registerCommand("remove-all-children", boost::bind(&Entity::cmdRemoveAllChildren, this, _1));
 }
 
 Entity::~Entity() {
-    set<Entity*>::iterator it;
-    for (size_t i = 0; i < m_components.size(); ++i)
-        delete m_components[i];
-    for (it = m_children.begin(); it != m_children.end(); ++it)
-        delete *it;
+    unregisterAllCommands();
+    unregisterAllAttributes();
+    removeAllChildren();
 }
 
 
@@ -127,40 +126,6 @@ void Entity::lookAt(const Vector3& target, const Vector3& up) {
     setOrientationAbs(result);
 }
 
-void Entity::applyTranslationToChildren() {
-    set<Entity*>::iterator it, itend;
-    itend = m_children.end();
-    for (it = m_children.begin(); it != itend; ++it) {
-        Entity& child = **it;
-        child.setPositionRel(child.m_positionRel);
-    }
-}
-
-void Entity::applyOrientationToChildren() {
-    // Qc1 = Qp1 * Inv(Qp0) * Qc0
-    // Where:
-    // Qp0 = Parent orientation last frame
-    // Qp1 = Parent orientation this frame
-    // Qc0 = Child orientation last frame
-    // Qc1 = Child orientation this frame
-    Quaternion relativeRotation = m_orientationAbs * m_lastOrientation.inverse();
-    set<Entity*>::iterator it, itend;
-    itend = m_children.end();
-    for (it = m_children.begin(); it != itend; ++it) {
-        Entity& child = **it;
-        child.setPositionRel(child.m_positionRel.rotate(relativeRotation));
-        child.setOrientationAbs(relativeRotation * child.m_orientationAbs);
-    }
-}
-
-void Entity::applyTransformToPhysicsComponent() {
-    if (m_components[COMPONENT_RIGIDBODY] != 0) {
-        RigidBody* rigidBody = dynamic_cast<RigidBody*>(m_components[COMPONENT_RIGIDBODY]);
-        rigidBody->activate();
-        rigidBody->setTransform(m_positionAbs, m_orientationAbs);
-    }
-}
-
 Entity* Entity::addChild(const string& childName) {
     Entity* child = new Entity(this, childName, m_device);
     m_children.insert(child);
@@ -178,6 +143,18 @@ void Entity::removeChild(Entity* const child) {
         delete *it;
         m_children.erase(it);
     }
+}
+
+void Entity::removeAllChildren() {
+    for (size_t i = 0; i < m_components.size(); ++i) {
+        delete m_components[i];
+        m_components[i] = 0;
+    }
+
+    set<Entity*>::iterator it;
+    for (it = m_children.begin(); it != m_children.end(); ++it)
+        delete *it;
+    m_children.clear();
 }
 
 string Entity::treeToString(const size_t indent) const {
@@ -212,6 +189,44 @@ Entity& Entity::operator=(const Entity&) {
     cerr << "Error: Entity assignment operator should not be called!" << endl;
     return *this;
 }
+
+
+
+void Entity::applyTranslationToChildren() {
+    set<Entity*>::iterator it, itend;
+    itend = m_children.end();
+    for (it = m_children.begin(); it != itend; ++it) {
+        Entity& child = **it;
+        child.setPositionRel(child.m_positionRel);
+    }
+}
+
+void Entity::applyOrientationToChildren() {
+    // Qc1 = Qp1 * Inv(Qp0) * Qc0
+    // Where:
+    // Qp0 = Parent orientation last frame
+    // Qp1 = Parent orientation this frame
+    // Qc0 = Child orientation last frame
+    // Qc1 = Child orientation this frame
+    Quaternion relativeRotation = m_orientationAbs * m_lastOrientation.inverse();
+    set<Entity*>::iterator it, itend;
+    itend = m_children.end();
+    for (it = m_children.begin(); it != itend; ++it) {
+        Entity& child = **it;
+        child.setPositionRel(child.m_positionRel.rotate(relativeRotation));
+        child.setOrientationAbs(relativeRotation * child.m_orientationAbs);
+    }
+}
+
+void Entity::applyTransformToPhysicsComponent() {
+    if (m_components[COMPONENT_RIGIDBODY] != 0) {
+        RigidBody* rigidBody = dynamic_cast<RigidBody*>(m_components[COMPONENT_RIGIDBODY]);
+        rigidBody->activate();
+        rigidBody->setTransform(m_positionAbs, m_orientationAbs);
+    }
+}
+
+
 
 void Entity::cmdPositionAbs(const string& arg) {
     scalar_t x, y, z;

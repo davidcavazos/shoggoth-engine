@@ -67,6 +67,11 @@ Camera::Camera(Entity* const entity, const camera_t type, Renderer* renderer):
 
 Camera::~Camera() {
     m_renderer->m_cameras.erase(this);
+    m_entity->unregisterAttribute("far-distance");
+    m_entity->unregisterAttribute("near-distance");
+    m_entity->unregisterAttribute("ortho-height");
+    m_entity->unregisterAttribute("perspective-fov");
+    m_entity->unregisterAttribute("type");
 }
 
 

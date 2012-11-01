@@ -82,6 +82,21 @@ RigidBody::RigidBody(Entity* const entity, PhysicsWorld* physicsWorld):
     m_entity->registerAttribute("gravity", boost::bind(&RigidBody::cmdGravity, this, _1));
 }
 
+RigidBody::~RigidBody() {
+    m_physicsWorld->m_dynamicsWorld->removeRigidBody(m_rigidBody);
+    m_physicsWorld->m_rigidBodies.erase(m_entity);
+    m_entity->unregisterAttribute("gravity");
+    m_entity->unregisterAttribute("angular-velocity");
+    m_entity->unregisterAttribute("angular-factor");
+    m_entity->unregisterAttribute("linear-velocity");
+    m_entity->unregisterAttribute("linear-factor");
+    m_entity->unregisterAttribute("sleeping-thresholds");
+    m_entity->unregisterAttribute("restitution");
+    m_entity->unregisterAttribute("rolling-friction");
+    m_entity->unregisterAttribute("friction");
+    m_entity->unregisterAttribute("damping");
+    m_entity->unregisterAttribute("mass");
+}
 
 
 const Vector3& RigidBody::getPosition() {

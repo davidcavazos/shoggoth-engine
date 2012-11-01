@@ -45,6 +45,9 @@ Light::Light(Entity* const entity, Renderer* renderer):
 
 Light::~Light() {
     m_renderer->m_lights.erase(this);
+    m_entity->unregisterAttribute("specular-color");
+    m_entity->unregisterAttribute("diffuse-color");
+    m_entity->unregisterAttribute("ambient-color");
 }
 
 

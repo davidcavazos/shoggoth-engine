@@ -36,14 +36,16 @@ RenderableMesh::RenderableMesh(Entity* const entity, Renderer* renderer, Resourc
     m_resources(resources),
     m_model(0)
 {
-    m_renderer->m_model.insert(this);
+    m_renderer->m_models.insert(this);
 
     m_entity->registerCommand("load-model-box", boost::bind(&RenderableMesh::cmdLoadModelBox, this, _1));
     m_entity->registerCommand("load-model-file", boost::bind(&RenderableMesh::cmdLoadModelFile, this, _1));
 }
 
 RenderableMesh::~RenderableMesh() {
-    m_renderer->m_model.erase(this);
+    m_renderer->m_models.erase(this);
+    m_entity->unregisterAttribute("load-model-file");
+    m_entity->unregisterAttribute("load-model-box");
 }
 
 

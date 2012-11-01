@@ -52,6 +52,10 @@ public:
 
     size_t registerCommand(const std::string& cmd, const slot_t& slot);
     size_t registerAttribute(const std::string& attrName, const slot_t& slot);
+    void unregisterCommand(const std::string& cmd);
+    void unregisterAttribute(const std::string& attrName);
+    void unregisterAllCommands();
+    void unregisterAllAttributes();
 
 protected:
     std::string m_objectName;

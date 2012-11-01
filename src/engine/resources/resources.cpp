@@ -36,6 +36,11 @@ Resources::Resources(const string& objectName, Renderer* renderer):
     registerCommand("shutdown", boost::bind(&Resources::cmdShutdown, this, _1));
 }
 
+Resources::~Resources() {
+    unregisterAllCommands();
+    unregisterAllAttributes();
+}
+
 void Resources::initialize() {
 }
 

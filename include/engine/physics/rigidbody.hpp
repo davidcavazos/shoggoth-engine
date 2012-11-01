@@ -40,6 +40,7 @@ typedef enum {
 class RigidBody: public Component {
 public:
     RigidBody(Entity* const entity, PhysicsWorld* physicsWorld);
+    ~RigidBody();
 
     const Vector3& getPosition();
     const Quaternion& getOrientation();

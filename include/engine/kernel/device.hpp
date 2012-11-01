@@ -31,6 +31,7 @@ struct SDL_Surface;
 class Device: public CommandObject {
 public:
     Device(const std::string& objectName);
+    ~Device();
 
     Inputs* getInputs();
     double getDeltaTime() const;
