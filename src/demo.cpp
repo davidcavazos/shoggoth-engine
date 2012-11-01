@@ -114,7 +114,7 @@ void Demo::loadScene() {
     meshBody->addBox(2, 2, 2);
 //     meshBody->addConvexHull("assets/meshes/suzanne-lowpoly.dae", &m_resources);
 
-    Entity* camera = mesh->addChild("camera");
+    Entity* camera = root->addChild("camera");
     camera->setPositionAbs(0.0f, 4.0f, 10.0f);
     camera->pitch(-0.2);
 //     camera->lookAt(cube->getPositionAbs(), VECTOR3_UNIT_Y);

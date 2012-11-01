@@ -229,9 +229,10 @@ bool ModelLoader::loadBinary(const string& fileName, Model& model, Renderer* ren
         string mapName;
         // diffuse map
         file.read(reinterpret_cast<char*>(&size), sizeof(size_t));
-        temp = new char[size];
+        temp = new char[size + 1];
         file.read(reinterpret_cast<char*>(temp), size * sizeof(char));
-        mapName = string(temp).substr(0, size);
+        temp[size] = '\0';
+        mapName = temp;
         delete[] temp;
         if (mapName.length() > 0) {
             texture = resources->generateTextureFromFile(mapName);
@@ -299,12 +300,16 @@ bool ModelLoader::writeBinary(const std::string& fileName, Model& model) {
         file.write(reinterpret_cast<char*>(&shininess), sizeof(float));
 
         // texture maps
+        const Texture* texture;
         string mapName;
         // diffuse map
-        mapName = model.mesh(n)->getMaterial()->getTextureMap(MATERIAL_DIFFUSE_MAP)->getFileName();
-        size = mapName.length();
-        file.write(reinterpret_cast<char*>(&size), sizeof(size_t));
-        file.write(reinterpret_cast<char*>(&mapName[0]), size * sizeof(char));
+        texture = model.mesh(n)->getMaterial()->getTextureMap(MATERIAL_DIFFUSE_MAP);
+        if (texture != 0) {
+            mapName = texture->getFileName();
+            size = mapName.length();
+            file.write(reinterpret_cast<char*>(&size), sizeof(size_t));
+            file.write(reinterpret_cast<char*>(&mapName[0]), size * sizeof(char));
+        }
     }
     file.close();
     return true;
