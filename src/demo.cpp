@@ -166,6 +166,13 @@ void Demo::runMainLoop() {
     Uint32 startTime;
     Uint32 deltaTime;
 
+    // test to measure commands performance
+//     startTime = SDL_GetTicks();
+//     for (size_t i = 0; i < 100000; ++i)
+//         Terminal::pushCommand("cube set position-abs 0 0 0");
+//     Terminal::processCommandsQueue();
+//     cout << SDL_GetTicks() - startTime << " ms" << endl;
+
     cout << "Entering game loop" << endl;
     m_isRunning = true;
     while (m_isRunning) {

@@ -57,17 +57,34 @@ bool Command::parseCommand(const string& expression) {
     string object;
     string command;
 
-    stringstream exp(expression);
-    exp >> object >> command >> m_arguments;
-    if (object[0] == COMMENT_CHAR)
-        return false;
-
-    while (exp.good()) {
-        string temp;
-        exp >> temp;
-        if (!temp.empty()) {
-            m_arguments.append(" ");
-            m_arguments.append(temp);
+    short token = 0;
+    bool isDone = false;
+    for (size_t i = 0; i < expression.length() && !isDone; ++i) {
+        switch (expression[i]) {
+        case ' ': case '\t':
+            if ((token == 0 && !object.empty()) || (token == 1 && !command.empty()))
+                ++token;
+            continue;
+        case COMMENT_CHAR:
+            isDone = true;
+            if (object.empty())
+                return false;
+            break;
+        default:
+            switch(token) {
+            case 0: // object
+                object.push_back(expression[i]);
+                break;
+            case 1: // command
+                command.push_back(expression[i]);
+                break;
+            case 2: // arguments
+                m_arguments = expression.substr(i);
+                isDone = true;
+                break;
+            default: // invalid token
+                cerr << "Error: invalid token " << token << " while parsing: " << expression << endl;
+            }
         }
     }
 
