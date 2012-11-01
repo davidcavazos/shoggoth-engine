@@ -44,8 +44,8 @@ RenderableMesh::RenderableMesh(Entity* const entity, Renderer* renderer, Resourc
 
 RenderableMesh::~RenderableMesh() {
     m_renderer->m_models.erase(this);
-    m_entity->unregisterAttribute("load-model-file");
-    m_entity->unregisterAttribute("load-model-box");
+    m_entity->unregisterCommand("load-model-file");
+    m_entity->unregisterCommand("load-model-box");
 }
 
 

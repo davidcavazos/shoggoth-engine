@@ -1,2 +1,2 @@
-#scene save-to-xml ingame-scene.xml
-scene load-from-xml scene.xml
+#scene save-xml ingame-scene.xml
+scene load-xml scene.xml

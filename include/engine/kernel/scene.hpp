@@ -50,8 +50,8 @@ private:
 
     void cmdInitialize(const std::string&);
     void cmdShutdown(const std::string&);
-    void cmdSaveToXML(const std::string& arg);
-    void cmdLoadFromXML(const std::string& arg);
+    void cmdSaveXML(const std::string& arg);
+    void cmdLoadXML(const std::string& arg);
 };
 
 
@@ -75,11 +75,11 @@ inline void Scene::cmdShutdown(const std::string&) {
     shutdown();
 }
 
-inline void Scene::cmdSaveToXML(const std::string& arg) {
+inline void Scene::cmdSaveXML(const std::string& arg) {
     saveToXML(arg);
 }
 
-inline void Scene::cmdLoadFromXML(const std::string& arg) {
+inline void Scene::cmdLoadXML(const std::string& arg) {
     loadFromXML(arg);
 }
 
