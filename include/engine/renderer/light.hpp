@@ -30,6 +30,7 @@ class color4_t {
 public:
     float rgba[4];
 
+    color4_t() {}
     color4_t(const float r, const float g, const float b, const float a) {
         rgba[0] = r;
         rgba[1] = g;
@@ -49,8 +50,12 @@ public:
     const float* getDiffusePtr() const;
     const color4_t& getSpecular() const;
     const float* getSpecularPtr() const;
+    void set(const color4_t& ambient, const color4_t& diffuse, const color4_t& specular);
+    void setAmbient(const color4_t& color);
     void setAmbient(const float r, const float g, const float b, const float a = 1.0f);
+    void setDiffuse(const color4_t& color);
     void setDiffuse(const float r, const float g, const float b, const float a = 1.0f);
+    void setSpecular(const color4_t& color);
     void setSpecular(const float r, const float g, const float b, const float a = 1.0f);
 
 private:
@@ -103,27 +108,6 @@ inline const color4_t& Light::getSpecular() const {
 
 inline const float* Light::getSpecularPtr() const {
     return m_specular.rgba;
-}
-
-inline void Light::setAmbient(const float r, const float g, const float b, const float a) {
-    m_ambient.rgba[0] = r;
-    m_ambient.rgba[1] = g;
-    m_ambient.rgba[2] = b;
-    m_ambient.rgba[3] = a;
-}
-
-inline void Light::setDiffuse(const float r, const float g, const float b, const float a) {
-    m_diffuse.rgba[0] = r;
-    m_diffuse.rgba[1] = g;
-    m_diffuse.rgba[2] = b;
-    m_diffuse.rgba[3] = a;
-}
-
-inline void Light::setSpecular(const float r, const float g, const float b, const float a) {
-    m_specular.rgba[0] = r;
-    m_specular.rgba[1] = g;
-    m_specular.rgba[2] = b;
-    m_specular.rgba[3] = a;
 }
 
 #endif // LIGHT_HPP

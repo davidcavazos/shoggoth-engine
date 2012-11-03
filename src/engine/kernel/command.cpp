@@ -57,7 +57,7 @@ bool Command::parseCommand(const string& expression) {
     string object;
     string command;
 
-    short token = 0;
+    unsigned short token = 0;
     bool isDone = false;
     for (size_t i = 0; i < expression.length() && !isDone; ++i) {
         switch (expression[i]) {

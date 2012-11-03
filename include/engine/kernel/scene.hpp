@@ -22,15 +22,25 @@
 #define SCENE_HPP
 
 #include <string>
+#include <boost/property_tree/ptree.hpp>
 #include "commandobject.hpp"
-#include "entity.hpp"
 
+class Entity;
 class Device;
+class Renderer;
+class Resources;
+class PhysicsWorld;
+
 class Scene: public CommandObject {
 public:
     friend class Entity;
 
-    Scene(const std::string& objectName, const std::string& rootNodeName, const Device* device);
+    Scene(const std::string& objectName,
+          const std::string& rootNodeName,
+          const Device* device,
+          Renderer* renderer,
+          Resources* resources,
+          PhysicsWorld* physicsWorld);
     ~Scene();
 
     const Entity* getRoot() const;
@@ -40,13 +50,24 @@ public:
     void initialize();
     void shutdown();
     void saveToXML(const std::string& fileName) const;
-    void loadFromXML(const std::string& fileName);
+    bool loadFromXML(const std::string& fileName);
     bool findEntity(const std::string& name, Entity*& entity);
     std::string sceneGraphToString();
 
 private:
-    Entity m_root;
+    const Device* m_device;
+    Renderer* m_renderer;
+    Resources* m_resources;
+    PhysicsWorld* m_physicsWorld;
+    std::string m_rootName;
+    Entity* m_root;
     static std::map<std::string, Entity*> ms_entities;
+
+    Scene(const Scene& rhs);
+    Scene& operator=(const Scene&);
+
+    void saveToPTree(const std::string& path, boost::property_tree::ptree& tree, const Entity* node) const;
+    bool loadFromPTree(const std::string& path, const boost::property_tree::ptree& tree, Entity* node, Entity* parent, bool& isCameraFound);
 
     void cmdInitialize(const std::string&);
     void cmdShutdown(const std::string&);
@@ -57,12 +78,12 @@ private:
 
 
 inline const Entity* Scene::getRoot() const {
-    return &m_root;
+    return m_root;
 }
 
 
 inline Entity* Scene::root() {
-    return &m_root;
+    return m_root;
 }
 
 

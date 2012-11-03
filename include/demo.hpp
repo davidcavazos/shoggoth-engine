@@ -31,11 +31,11 @@ class Demo: public CommandObject {
 public:
     Demo(const std::string& objectName,
          const std::string& deviceName,
-         const std::string& sceneName,
-         const std::string& rootNodeName,
          const std::string& rendererName,
          const std::string& resourcesName,
-         const std::string& physicsWorldName);
+         const std::string& physicsWorldName,
+         const std::string& sceneName,
+         const std::string& rootNodeName);
     ~Demo();
 
     void loadScene();
@@ -45,10 +45,10 @@ public:
 private:
     bool m_isRunning;
     Device m_device;
-    Scene m_scene;
     Renderer m_renderer;
     Resources m_resources;
     PhysicsWorld m_physicsWorld;
+    Scene m_scene;
 
     void cmdQuit(const std::string&);
     void cmdRunCommand(const std::string& arg);

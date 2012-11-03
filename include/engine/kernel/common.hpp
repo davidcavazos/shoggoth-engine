@@ -29,8 +29,7 @@ const double HALF_PI = PI / 2.0;
 const double DEG_TO_RAD_MULT = PI / 180.0;
 const double RAD_TO_DEG_MULT = 180.0 / PI;
 
-class Vector3;
-class Quaternion;
+
 
 double degToRad(const double deg);
 double radToDeg(const double rad);

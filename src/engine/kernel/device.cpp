@@ -84,8 +84,8 @@ void Device::initialize() {
     SDL_GL_SetAttribute(SDL_GL_ACCUM_BLUE_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_ACCUM_ALPHA_SIZE, 8);
 
-    //     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-    //     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
+//     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+//     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
 
     const SDL_VideoInfo* info = SDL_GetVideoInfo();
     m_width = info->current_w;

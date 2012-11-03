@@ -12,6 +12,8 @@
 - Make input manager into a vector, only one can be active at a time (XML)
 - Binding keys (or other inputs) with a command
 - Possibility of multiple active cameras in different viewports
+- Change Camera viewport data to double (percentage values instead of absolute pixels)
+- Update XML scene reader for viewport default value
 - Animations
 
 BUGS:

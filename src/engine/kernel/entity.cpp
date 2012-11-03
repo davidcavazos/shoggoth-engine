@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <cmath>
+#include "engine/kernel/common.hpp"
 #include "engine/kernel/matrix3x3.hpp"
 #include "engine/kernel/device.hpp"
 #include "engine/kernel/scene.hpp"
@@ -228,13 +229,12 @@ void Entity::applyTransformToPhysicsComponent() {
 
 
 
-void Entity::cmdPositionAbs(const string& arg) {
+void Entity::cmdPositionAbs(const std::string& arg) {
     scalar_t x, y, z;
     stringstream ss(arg);
     ss >> x >> y >> z;
     setPositionAbs(x, y, z);
 }
-
 void Entity::cmdPositionRel(const string& arg) {
     scalar_t x, y, z;
     stringstream ss(arg);

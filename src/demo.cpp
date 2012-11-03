@@ -25,6 +25,7 @@
 #include <fstream>
 #include <iomanip>
 #include <SDL/SDL.h>
+#include "engine/kernel/entity.hpp"
 #include "engine/kernel/terminal.hpp"
 #include "engine/renderer/renderablemesh.hpp"
 #include "engine/renderer/camera.hpp"
@@ -39,18 +40,18 @@ const double MISSILE_SIZE = 0.5;
 
 Demo::Demo(const string& objectName,
            const string& deviceName,
-           const string& sceneName,
-           const string& rootNodeName,
            const string& rendererName,
            const string& resourcesName,
-           const string& physicsWorldName):
+           const string& physicsWorldName,
+           const string& sceneName,
+           const string& rootNodeName):
     CommandObject(objectName),
     m_isRunning(false),
     m_device(deviceName),
-    m_scene(sceneName, rootNodeName, &m_device),
     m_renderer(rendererName, &m_device),
     m_resources(resourcesName, &m_renderer),
-    m_physicsWorld(physicsWorldName)
+    m_physicsWorld(physicsWorldName),
+    m_scene(sceneName, rootNodeName, &m_device, &m_renderer, &m_resources, &m_physicsWorld)
 {
     registerCommand("quit", boost::bind(&Demo::cmdQuit, this, _1));
     registerCommand("run", boost::bind(&Demo::cmdRunCommand, this, _1));
@@ -169,7 +170,7 @@ void Demo::runMainLoop() {
     // test to measure commands performance
 //     startTime = SDL_GetTicks();
 //     for (size_t i = 0; i < 100000; ++i)
-//         Terminal::pushCommand("cube set position-abs 0 0 0");
+//         Terminal::pushCommand("cube set position-abs 0 15 0");
 //     Terminal::processCommandsQueue();
 //     cout << SDL_GetTicks() - startTime << " ms" << endl;
 

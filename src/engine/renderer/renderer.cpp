@@ -59,7 +59,6 @@ Renderer::Renderer(const string& objectName, const Device* device):
 {
     registerCommand("initialize", boost::bind(&Renderer::cmdInitialize, this, _1));
     registerCommand("shutdown", boost::bind(&Renderer::cmdShutdown, this, _1));
-    registerCommand("init-lighting", boost::bind(&Renderer::cmdInitLighting, this, _1));
     registerAttribute("ambient-light", boost::bind(&Renderer::cmdAmbientLight, this, _1));
 }
 
@@ -209,47 +208,6 @@ void Renderer::shutdown() {
     set<RenderableMesh*>::const_iterator itMesh;
     for (itMesh = m_models.begin(); itMesh != m_models.end(); ++itMesh)
         delete *itMesh;
-}
-
-void Renderer::initLighting() const {
-    // enable lighting for legacy lights
-//     glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR); // 1.4
-
-    set<Light*>::const_iterator it = m_lights.begin();
-    for (size_t i = 0; i < m_lights.size(); ++i) {
-        GLenum lightEnum;
-        switch (i) {
-        case 0:
-            lightEnum = GL_LIGHT0;
-            break;
-        case 1:
-            lightEnum = GL_LIGHT1;
-            break;
-        case 2:
-            lightEnum = GL_LIGHT2;
-            break;
-        case 3:
-            lightEnum = GL_LIGHT3;
-            break;
-        case 4:
-            lightEnum = GL_LIGHT4;
-            break;
-        case 5:
-            lightEnum = GL_LIGHT5;
-            break;
-        case 6:
-            lightEnum = GL_LIGHT6;
-            break;
-        case 7: default:
-            lightEnum = GL_LIGHT7;
-            break;
-        }
-        glEnable(lightEnum);
-        glLightfv(lightEnum, GL_AMBIENT, (*it)->getAmbientPtr());
-        glLightfv(lightEnum, GL_DIFFUSE, (*it)->getDiffusePtr());
-        glLightfv(lightEnum, GL_SPECULAR, (*it)->getSpecularPtr());
-        ++it;
-    }
 }
 
 void Renderer::setAmbientLight(const float r, const float g, const float b, const float a) {
@@ -535,6 +493,115 @@ Renderer& Renderer::operator=(const Renderer& rhs) {
     m_lights = rhs.m_lights;
     m_models = rhs.m_models;
     return *this;
+}
+
+void Renderer::initLighting() const {
+    // enable lighting for legacy lights
+    //     glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR); // 1.4
+
+    set<Light*>::const_iterator it = m_lights.begin();
+    for (size_t i = 0; i < m_lights.size(); ++i) {
+        GLenum lightEnum;
+        switch (i) {
+            case 0:
+                lightEnum = GL_LIGHT0;
+                break;
+            case 1:
+                lightEnum = GL_LIGHT1;
+                break;
+            case 2:
+                lightEnum = GL_LIGHT2;
+                break;
+            case 3:
+                lightEnum = GL_LIGHT3;
+                break;
+            case 4:
+                lightEnum = GL_LIGHT4;
+                break;
+            case 5:
+                lightEnum = GL_LIGHT5;
+                break;
+            case 6:
+                lightEnum = GL_LIGHT6;
+                break;
+            case 7: default:
+                lightEnum = GL_LIGHT7;
+                break;
+        }
+        glEnable(lightEnum);
+        glLightfv(lightEnum, GL_AMBIENT, (*it)->getAmbientPtr());
+        glLightfv(lightEnum, GL_DIFFUSE, (*it)->getDiffusePtr());
+        glLightfv(lightEnum, GL_SPECULAR, (*it)->getSpecularPtr());
+        ++it;
+    }
+    // disable unused lights
+    for (size_t i = m_lights.size(); i < 8; ++i) {
+        GLenum lightEnum;
+        switch (i) {
+            case 0:
+                lightEnum = GL_LIGHT0;
+                break;
+            case 1:
+                lightEnum = GL_LIGHT1;
+                break;
+            case 2:
+                lightEnum = GL_LIGHT2;
+                break;
+            case 3:
+                lightEnum = GL_LIGHT3;
+                break;
+            case 4:
+                lightEnum = GL_LIGHT4;
+                break;
+            case 5:
+                lightEnum = GL_LIGHT5;
+                break;
+            case 6:
+                lightEnum = GL_LIGHT6;
+                break;
+            case 7: default:
+                lightEnum = GL_LIGHT7;
+                break;
+        }
+        glDisable(lightEnum);
+    }
+}
+
+void Renderer::updateLights() const {
+    set<Light*>::const_iterator it = m_lights.begin();
+    for (size_t i = 0; i < m_lights.size(); ++i) {
+        GLenum lightEnum;
+        switch (i) {
+            case 0:
+                lightEnum = GL_LIGHT0;
+                break;
+            case 1:
+                lightEnum = GL_LIGHT1;
+                break;
+            case 2:
+                lightEnum = GL_LIGHT2;
+                break;
+            case 3:
+                lightEnum = GL_LIGHT3;
+                break;
+            case 4:
+                lightEnum = GL_LIGHT4;
+                break;
+            case 5:
+                lightEnum = GL_LIGHT5;
+                break;
+            case 6:
+                lightEnum = GL_LIGHT6;
+                break;
+            case 7: default:
+                lightEnum = GL_LIGHT7;
+                break;
+        }
+        glLightfv(lightEnum, GL_AMBIENT, (*it)->getAmbientPtr());
+        glLightfv(lightEnum, GL_DIFFUSE, (*it)->getDiffusePtr());
+        glLightfv(lightEnum, GL_SPECULAR, (*it)->getSpecularPtr());
+        ++it;
+    }
 }
 
 void Renderer::initCamera() const {

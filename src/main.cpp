@@ -7,7 +7,7 @@
 using namespace std;
 
 int main(int, char**) {
-    Demo demo("demo", "device", "scene", "root", "renderer", "resources", "physics-world");
+    Demo demo("demo", "device", "renderer", "resources", "physics-world", "scene", "root");
     demo.loadScene();
     demo.bindInputs();
     demo.runMainLoop();

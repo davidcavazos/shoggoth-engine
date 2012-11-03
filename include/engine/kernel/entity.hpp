@@ -49,6 +49,8 @@ public:
     Entity(Entity* parent, const std::string& objectName, const Device* device);
     ~Entity();
 
+    const Entity* getParent() const;
+    Entity* parent();
     const Vector3& getPositionAbs() const;
     const Vector3& getPositionRel() const;
     const Quaternion& getOrientationAbs() const;
@@ -59,6 +61,7 @@ public:
     const_child_iterator_t getChildrenEnd() const;
     child_iterator_t getChildrenEnd();
 
+    void setParent(Entity* parent);
     void setPositionAbs(const Vector3& position);
     void setPositionAbs(const scalar_t& posX, const scalar_t& posY, const scalar_t& posZ);
     void setPositionRel(const Vector3& position);
@@ -139,6 +142,14 @@ private:
 
 
 
+inline const Entity* Entity::getParent() const {
+    return m_parent;
+}
+
+inline Entity* Entity::parent() {
+    return m_parent;
+}
+
 inline const Vector3& Entity::getPositionAbs() const {
     return m_positionAbs;
 }
@@ -176,6 +187,10 @@ inline Entity::child_iterator_t Entity::getChildrenEnd() {
 }
 
 
+
+inline void Entity::setParent(Entity* parent) {
+    m_parent = parent;
+}
 
 inline void Entity::setPositionAbs(const Vector3& position) {
     m_positionAbs = position;

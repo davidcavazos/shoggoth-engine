@@ -41,13 +41,63 @@ Light::Light(Entity* const entity, Renderer* renderer):
     m_entity->registerAttribute("ambient-color", boost::bind(&Light::cmdAmbient, this, _1));
     m_entity->registerAttribute("diffuse-color", boost::bind(&Light::cmdDiffuse, this, _1));
     m_entity->registerAttribute("specular-color", boost::bind(&Light::cmdSpecular, this, _1));
+
+    m_renderer->initLighting();
 }
 
 Light::~Light() {
-    m_renderer->m_lights.erase(this);
     m_entity->unregisterAttribute("specular-color");
     m_entity->unregisterAttribute("diffuse-color");
     m_entity->unregisterAttribute("ambient-color");
+    m_renderer->m_lights.erase(this);
+    m_renderer->initLighting();
+}
+
+
+void Light::set(const color4_t& ambient, const color4_t& diffuse, const color4_t& specular) {
+    m_ambient = ambient;
+    m_diffuse = diffuse;
+    m_specular = specular;
+    m_renderer->updateLights();
+}
+
+void Light::setAmbient(const color4_t& color) {
+    m_ambient = color;
+    m_renderer->updateLights();
+}
+
+void Light::setAmbient(const float r, const float g, const float b, const float a) {
+    m_ambient.rgba[0] = r;
+    m_ambient.rgba[1] = g;
+    m_ambient.rgba[2] = b;
+    m_ambient.rgba[3] = a;
+    m_renderer->updateLights();
+}
+
+void Light::setDiffuse(const color4_t& color) {
+    m_diffuse = color;
+    m_renderer->updateLights();
+}
+
+void Light::setDiffuse(const float r, const float g, const float b, const float a) {
+    m_diffuse.rgba[0] = r;
+    m_diffuse.rgba[1] = g;
+    m_diffuse.rgba[2] = b;
+    m_diffuse.rgba[3] = a;
+    m_renderer->updateLights();
+}
+
+void Light::setSpecular(const color4_t& color) {
+    m_specular = color;
+    m_renderer->updateLights();
+}
+
+void Light::setSpecular(const float r, const float g, const float b, const float a) {
+    m_specular.rgba[0] = r;
+    m_specular.rgba[1] = g;
+    m_specular.rgba[2] = b;
+    m_specular.rgba[3] = a;
+    m_renderer->updateLights();
 }
 
 
@@ -70,22 +120,22 @@ Light& Light::operator=(const Light&) {
 
 
 void Light::cmdAmbient(const std::string& arg) {
-    double r, g, b, a;
+    color4_t color;
     stringstream ss(arg);
-    ss >> r >> g >> b >> a;
-    setAmbient(r, g, b, a);
+    ss >> color;
+    setAmbient(color);
 }
 
 void Light::cmdDiffuse(const std::string& arg) {
-    double r, g, b, a;
+    color4_t color;
     stringstream ss(arg);
-    ss >> r >> g >> b >> a;
-    setDiffuse(r, g, b, a);
+    ss >> color;
+    setDiffuse(color);
 }
 
 void Light::cmdSpecular(const std::string& arg) {
-    double r, g, b, a;
+    color4_t color;
     stringstream ss(arg);
-    ss >> r >> g >> b >> a;
-    setSpecular(r, g, b, a);
+    ss >> color;
+    setSpecular(color);
 }

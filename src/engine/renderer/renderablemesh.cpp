@@ -28,8 +28,6 @@
 
 using namespace std;
 
-const string BOX_DESCRIPTION = "$box";
-
 RenderableMesh::RenderableMesh(Entity* const entity, Renderer* renderer, Resources* resources):
     Component(COMPONENT_RENDERABLE_MESH, entity),
     m_renderer(renderer),
@@ -52,13 +50,15 @@ RenderableMesh::~RenderableMesh() {
 
 void RenderableMesh::loadBox(const double lengthX, const double lengthY, const double lengthZ) {
     stringstream ss;
-    ss << BOX_DESCRIPTION << " " << lengthX << " " << lengthY << " " << lengthZ;
+    ss << RENDERABLEMESH_BOX_DESCRIPTION << " " << lengthX << " " << lengthY << " " << lengthZ;
     m_description = ss.str();
     m_model = m_resources->generateBox(m_description, lengthX, lengthY, lengthZ);
 }
 
 void RenderableMesh::loadFromFile(const string& fileName) {
-    m_description = fileName;
+    stringstream ss;
+    ss << RENDERABLEMESH_FILE_DESCRIPTION << " " << fileName;
+    m_description = ss.str();
     m_model = m_resources->generateModelFromFile(fileName);
 }
 
