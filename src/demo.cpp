@@ -105,7 +105,7 @@ void Demo::loadScene() {
     cubeBody->init(1.0);
     cubeBody->addBox(0.5, 0.5, 0.5);
 
-    Entity* mesh = cube->addChild("model");
+    Entity* mesh = root->addChild("model");
     mesh->setPositionRel(1.5f, 5.0f, 0.0f);
     RenderableMesh* renderableMesh = new RenderableMesh(mesh, &m_renderer, &m_resources);
     renderableMesh->loadFromFile("assets/meshes/materialtest.dae");
@@ -114,7 +114,7 @@ void Demo::loadScene() {
     meshBody->addBox(2, 2, 2);
 //     meshBody->addConvexHull("assets/meshes/suzanne-lowpoly.dae", &m_resources);
 
-    Entity* camera = root->addChild("camera");
+    Entity* camera = mesh->addChild("camera");
     camera->setPositionAbs(0.0f, 4.0f, 10.0f);
     camera->pitch(-0.2);
 //     camera->lookAt(cube->getPositionAbs(), VECTOR3_UNIT_Y);
