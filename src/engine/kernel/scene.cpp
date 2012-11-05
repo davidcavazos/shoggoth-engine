@@ -123,6 +123,7 @@ void Scene::saveToXML(const string& fileName) const {
 bool Scene::loadFromXML(const string& fileName) {
     cout << "Loading scene from XML file: " << fileName << endl;
     // success flags
+    set<string> names;
     bool isCameraFound = false;
 
     ifstream fin(fileName.c_str());
@@ -137,7 +138,7 @@ bool Scene::loadFromXML(const string& fileName) {
 
     delete m_root;
     m_root = new Entity(0, m_rootName, m_device);
-    if (!loadFromPTree(XML_SCENE + XML_DELIMITER + m_rootName, tree, m_root, 0, isCameraFound)) {
+    if (!loadFromPTree(XML_SCENE + XML_DELIMITER + m_rootName, tree, m_root, 0, names, isCameraFound)) {
         cerr << "Failed to load scene: " << fileName << endl;
         delete m_root;
         m_root = new Entity(0, m_rootName, m_device);
@@ -190,7 +191,9 @@ Scene& Scene::operator=(const Scene&) {
 
 
 
-void Scene::saveToPTree(const string& path, ptree& tree, const Entity* node) const {
+void Scene::saveToPTree(const string& path,
+                        ptree& tree,
+                        const Entity* node) const {
     // save current node
     string curPath = path + XML_DELIMITER + node->getObjectName();
     tree.put(ptree::path_type(curPath, XML_DELIMITER[0]), "");
@@ -305,7 +308,12 @@ void Scene::saveToPTree(const string& path, ptree& tree, const Entity* node) con
         saveToPTree(curPath, tree, *it);
 }
 
-bool Scene::loadFromPTree(const string& path, const ptree& tree, Entity* node, Entity* parent, bool& isCameraFound) {
+bool Scene::loadFromPTree(const string& path,
+                          const ptree& tree,
+                          Entity* node,
+                          Entity* parent,
+                          set<string>& names,
+                          bool& isCameraFound) {
     // temporal variables to read to
     int tmpInt;
     double tmpDouble1;
@@ -335,8 +343,14 @@ bool Scene::loadFromPTree(const string& path, const ptree& tree, Entity* node, E
         attrPath = curPath + XML_DELIMITER + XML_ATTRIBUTE + XML_DELIMITER;
         type = tree.get<string>(ptree::path_type(attrPath + XML_ATTR_TYPE, XML_DELIMITER[0]), "empty");
         if (type.compare(XML_ATTR_TYPE_ENTITY) == 0) {
+            if (names.find(name) != names.end()) {
+                cerr << "Error: ignoring repeated entity name: " << name << endl;
+                continue;
+            }
+            else
+                names.insert(name);
             Entity* child = node->addChild(name);
-            if (!loadFromPTree(curPath, tree, child, node, isCameraFound))
+            if (!loadFromPTree(curPath, tree, child, node, names, isCameraFound))
                 return false;
         }
         else if (type.compare(XML_ATTR_TYPE_COMPONENT) == 0) {

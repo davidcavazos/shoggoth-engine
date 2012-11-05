@@ -22,6 +22,7 @@
 #define SCENE_HPP
 
 #include <string>
+#include <set>
 #include <boost/property_tree/ptree.hpp>
 #include "commandobject.hpp"
 
@@ -66,8 +67,15 @@ private:
     Scene(const Scene& rhs);
     Scene& operator=(const Scene&);
 
-    void saveToPTree(const std::string& path, boost::property_tree::ptree& tree, const Entity* node) const;
-    bool loadFromPTree(const std::string& path, const boost::property_tree::ptree& tree, Entity* node, Entity* parent, bool& isCameraFound);
+    void saveToPTree(const std::string& path,
+                     boost::property_tree::ptree& tree,
+                     const Entity* node) const;
+    bool loadFromPTree(const std::string& path,
+                       const boost::property_tree::ptree& tree,
+                       Entity* node,
+                       Entity* parent,
+                       std::set<std::string>& names,
+                       bool& isCameraFound);
 
     void cmdInitialize(const std::string&);
     void cmdShutdown(const std::string&);
