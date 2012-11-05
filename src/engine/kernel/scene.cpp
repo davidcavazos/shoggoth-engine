@@ -21,6 +21,7 @@
 #include "engine/kernel/scene.hpp"
 
 #include <iostream>
+#include <fstream>
 #include <boost/foreach.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include "engine/kernel/entity.hpp"
@@ -124,7 +125,12 @@ bool Scene::loadFromXML(const string& fileName) {
     // success flags
     bool isCameraFound = false;
 
-    cout << "Scene.loadFromXML: SHOULD CHECK IF FILE EXISTS HERE!!!" << endl;
+    ifstream fin(fileName.c_str());
+    if (!fin.is_open() || !fin.good()) {
+        cerr << "Error: could not open file: " << fileName << endl;
+        return false;
+    }
+    fin.close();
 
     ptree tree;
     read_xml(fileName, tree, xml_parser::trim_whitespace);
