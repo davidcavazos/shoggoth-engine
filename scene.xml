@@ -11,7 +11,7 @@
     </cube>
     <model type="entity" position="1.5 5 0" orientation="1 0 0 0">
       <renderablemesh type="component" model="$file assets/meshes/materialtest.dae"/>
-      <rigidbody type="component" collisionshape="#box 2 2 2" mass="10" damping="0 0" friction="0.5" rollingfriction="0.1" restitution="0" sleepingthresholds="0.8 1" linearfactor="1 1 1" linearvelocity="0 0 0" angularfactor="1 1 1" angularvelocity="0 0 0" gravity="0 -9.8 0"/>
+      <rigidbody type="component" collisionshape="#convex assets/meshes/materialtest.dae" mass="10" damping="0 0" friction="0.5" rollingfriction="0.1" restitution="0" sleepingthresholds="0.8 1" linearfactor="1 1 1" linearvelocity="0 0 0" angularfactor="1 1 1" angularvelocity="0 0 0" gravity="0 -9.8 0"/>
     </model>
     <floor type="entity" position="0 -1 0" orientation="1 0 0 0">
       <renderablemesh type="component" model="$box 100 1 100"/>

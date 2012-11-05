@@ -203,17 +203,20 @@ void Renderer::initialize() {
 }
 
 void Renderer::shutdown() {
-    set<Camera*>::const_iterator itCam;
-    for (itCam = m_cameras.begin(); itCam != m_cameras.end(); ++itCam)
-        delete *itCam;
+    cout << "Destroying all renderable meshes" << endl;
+    set<RenderableMesh*>::const_iterator itMesh;
+    for (itMesh = m_models.begin(); itMesh != m_models.end(); ++itMesh)
+        delete *itMesh;
 
+    cout << "Destroying all lights" << endl;
     set<Light*>::const_iterator itLight;
     for (itLight = m_lights.begin(); itLight != m_lights.end(); ++itLight)
         delete *itLight;
 
-    set<RenderableMesh*>::const_iterator itMesh;
-    for (itMesh = m_models.begin(); itMesh != m_models.end(); ++itMesh)
-        delete *itMesh;
+    cout << "Destroying all cameras" << endl;
+    set<Camera*>::const_iterator itCam;
+    for (itCam = m_cameras.begin(); itCam != m_cameras.end(); ++itCam)
+        delete *itCam;
 }
 
 void Renderer::setAmbientLight(const float r, const float g, const float b, const float a) {

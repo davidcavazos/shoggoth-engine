@@ -114,7 +114,7 @@ void Scene::initialize() {
 }
 
 void Scene::shutdown() {
-    cout << "Removing all entities" << endl;
+    cout << "Removing all entities and their components" << endl;
     m_root->removeAllChildren();
 }
 
@@ -419,7 +419,7 @@ bool Scene::loadFromPTree(const string& path,
                 else if (tmpStr.compare(COLLISION_SHAPE_CONCAVE) == 0) {
                     string file;
                     ss >> file;
-                    rigidbody->addConvexHull(tmpDouble1, file, m_resources);
+                    rigidbody->addConcaveHull(tmpDouble1, file, m_resources);
                 }
                 else
                     cerr << "Error: unknown rigidbody collisionshape: " << tmpStr << endl;

@@ -51,6 +51,12 @@ void Resources::initialize() {
 }
 
 void Resources::shutdown() {
+    cout << "Destroying all textures" << endl;
+    textures_map_t::const_iterator itTexture;
+    for (itTexture = m_texturesMap.begin(); itTexture != m_texturesMap.end(); ++itTexture)
+        delete itTexture->second;
+
+    cout << "Destroying all meshes" << endl;
     models_map_t::const_iterator itMesh;
     for (itMesh = m_modelsMap.begin(); itMesh != m_modelsMap.end(); ++itMesh)
         delete itMesh->second;

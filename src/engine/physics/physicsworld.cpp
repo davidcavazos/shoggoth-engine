@@ -69,8 +69,7 @@ void PhysicsWorld::initialize() {
 }
 
 void PhysicsWorld::shutdown() {
-    cout << "Destroying dynamics world" << endl;
-
+    cout << "Destroying rigid bodies" << endl;
     rigid_bodies_map_t::iterator itRig;
     for (itRig = m_rigidBodies.begin(); itRig != m_rigidBodies.end(); ++itRig) {
         m_dynamicsWorld->removeRigidBody(itRig->second);
@@ -78,10 +77,12 @@ void PhysicsWorld::shutdown() {
         delete itRig->second;
     }
 
+    cout << "Destroying collision shapes" << endl;
     collision_shapes_map_t::iterator itCol;
     for (itCol = m_collisionShapes.begin(); itCol != m_collisionShapes.end(); ++itCol)
         delete itCol->second;
 
+    cout << "Destroying dynamics world" << endl;
     delete m_dynamicsWorld;
     delete m_solver;
     delete m_collisionDispatcher;

@@ -1,4 +1,3 @@
-+ Read scene from XML
 + Save input commands as a replay script
 + Implement OpenGL Core and shaders
 + Advanced lighting (spotlights and directional lights)
@@ -18,7 +17,6 @@
 
 BUGS:
 Concave hulls in RigidBody crash!
-A convex hull RigidBody randomly generates a 0 size low poly hull and crashes (original mesh read correctly)
 
 NOTES:
 All components must remove at destructor ONLY the commands and attributes created by it, all other objects can safely remove all

@@ -312,13 +312,15 @@ void RigidBody::addConvexHull(const double mass, const string& fileName, Resourc
     if (it == collisionShapes.end()) {
         // build original mesh from file
         Model* model = resources->generateModelFromFile(fileName);
+        cout << "Generating convex hull from file: " << fileName << endl;
         vector<float> points;
         for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
             points.reserve(points.size() + model->mesh(n)->getVerticesSize());
-            for (size_t i = 0; i < model->mesh(n)->getVerticesSize(); ++i)
-                points.push_back(model->mesh(n)->getVertices()[i]);
+            for (size_t i = 0; i < model->mesh(n)->getVerticesSize(); ++i) {
+                points.push_back(model->mesh(n)->getVertex(i));
+            }
         }
-        btConvexShape* originalConvexShape = new btConvexHullShape(&points[0], points.size(), sizeof(float) * 3);
+        btConvexShape* originalConvexShape = new btConvexHullShape(&points[0], points.size() / 3, sizeof(float) * 3);
         points.clear();
 
         // convert to low polygon hull
@@ -350,6 +352,7 @@ void RigidBody::addConcaveHull(const double mass, const string& fileName, Resour
     if (it == collisionShapes.end()) {
         // build mesh from file
         Model* model = resources->generateModelFromFile(fileName);
+        cout << "Generating concave hull from file: " << fileName << endl;
         btTriangleIndexVertexArray* triangles = new btTriangleIndexVertexArray();
         for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
             btIndexedMesh indexedMesh;
