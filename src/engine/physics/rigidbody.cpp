@@ -32,14 +32,6 @@
 
 using namespace std;
 
-const string COLLISION_SHAPE_BOX = "#box";
-const string COLLISION_SHAPE_SPHERE = "#sphere";
-const string COLLISION_SHAPE_CYLINDER = "#cylinder";
-const string COLLISION_SHAPE_CAPSULE = "#capsule";
-const string COLLISION_SHAPE_CONE = "#cone";
-const string COLLISION_SHAPE_CONVEX = "#convex";
-const string COLLISION_SHAPE_CONCAVE = "#concave";
-
 btDefaultMotionState* getMotionState(const Entity* entity);
 btVector3 v3(const Vector3& v);
 Vector3 v3(const btVector3& v);
@@ -63,11 +55,11 @@ RigidBody::RigidBody(Entity* const entity, PhysicsWorld* physicsWorld):
     m_restitution(0.0),
     m_linearSleepingThreshold(0.8),
     m_angularSleepingThreshold(1.0),
-    m_linearFactor(VECTOR3_ZERO),
+    m_linearFactor(VECTOR3_UNIT),
     m_linearVelocity(VECTOR3_ZERO),
-    m_angularFactor(VECTOR3_ZERO),
+    m_angularFactor(VECTOR3_UNIT),
     m_angularVelocity(VECTOR3_ZERO),
-    m_gravity(VECTOR3_ZERO)
+    m_gravity(Vector3(0.0, -9.8, 0.0))
 {
     m_entity->registerAttribute("mass", boost::bind(&RigidBody::cmdMass, this, _1));
     m_entity->registerAttribute("damping", boost::bind(&RigidBody::cmdDamping, this, _1));
@@ -472,6 +464,11 @@ void RigidBody::addRigidBody(btCollisionShape* shape) {
         std::pair<Entity*, btRigidBody*>(m_entity, m_rigidBody)
     );
     m_physicsWorld->m_dynamicsWorld->addRigidBody(m_rigidBody);
+    setLinearFactor(m_linearFactor);
+    setLinearVelocity(m_linearVelocity);
+    setAngularFactor(m_angularFactor);
+    setAngularVelocity(m_angularVelocity);
+    setGravity(m_gravity);
 }
 
 

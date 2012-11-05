@@ -43,7 +43,6 @@ PhysicsWorld::PhysicsWorld(const string& objectName):
     registerCommand("initialize", boost::bind(&PhysicsWorld::cmdInitialize, this, _1));
     registerCommand("shutdown", boost::bind(&PhysicsWorld::cmdShutdown, this, _1));
     registerAttribute("min-expected-framerate", boost::bind(&PhysicsWorld::cmdMinExpectedFramerate, this, _1));
-    registerAttribute("gravity", boost::bind(&PhysicsWorld::cmdGravity, this, _1));
 }
 
 PhysicsWorld::~PhysicsWorld() {
@@ -61,9 +60,6 @@ void PhysicsWorld::initialize() {
     m_collisionDispatcher = new btCollisionDispatcher(m_collisionConfiguration);
     m_solver = new btSequentialImpulseConstraintSolver;
     m_dynamicsWorld = new btDiscreteDynamicsWorld(m_collisionDispatcher, m_broadphase, m_solver, m_collisionConfiguration);
-
-    cout << "Setting default gravity as -9.8 in the y-axis" << endl;
-    setGravity(0.0, -9.8, 0.0);
 }
 
 void PhysicsWorld::shutdown() {
@@ -85,12 +81,6 @@ void PhysicsWorld::shutdown() {
     delete m_collisionDispatcher;
     delete m_collisionConfiguration;
     delete m_broadphase;
-}
-
-void PhysicsWorld::setGravity(const double x, const double y, const double z) {
-    m_dynamicsWorld->setGravity(btVector3(static_cast<btScalar>(x),
-                                          static_cast<btScalar>(y),
-                                          static_cast<btScalar>(z)));
 }
 
 void PhysicsWorld::stepSimulation(const double currentTimeSeconds) {
@@ -154,11 +144,4 @@ void PhysicsWorld::cmdMinExpectedFramerate(const std::string& arg) {
     stringstream ss(arg);
     ss >> minFrameRate;
     setMinExpectedFramerate(minFrameRate);
-}
-
-void PhysicsWorld::cmdGravity(const std::string& arg) {
-    double x, y, z;
-    stringstream ss(arg);
-    ss >> x >> y >> z;
-    setGravity(x, y, z);
 }

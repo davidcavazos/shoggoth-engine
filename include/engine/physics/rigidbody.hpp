@@ -24,6 +24,14 @@
 #include "engine/kernel/component.hpp"
 #include "engine/kernel/vector3.hpp"
 
+const std::string COLLISION_SHAPE_BOX = "#box";
+const std::string COLLISION_SHAPE_SPHERE = "#sphere";
+const std::string COLLISION_SHAPE_CYLINDER = "#cylinder";
+const std::string COLLISION_SHAPE_CAPSULE = "#capsule";
+const std::string COLLISION_SHAPE_CONE = "#cone";
+const std::string COLLISION_SHAPE_CONVEX = "#convex";
+const std::string COLLISION_SHAPE_CONCAVE = "#concave";
+
 class PhysicsWorld;
 class Resources;
 class btRigidBody;

@@ -156,6 +156,8 @@ void Entity::removeAllChildren() {
     for (it = m_children.begin(); it != m_children.end(); ++it)
         delete *it;
     m_children.clear();
+
+    Scene::ms_entities.clear();
 }
 
 string Entity::treeToString(const size_t indent) const {

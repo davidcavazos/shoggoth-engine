@@ -31,7 +31,7 @@ TokenTable Terminal::ms_objectsTable = TokenTable();
 TokenTable Terminal::ms_commandsTable = TokenTable();
 TokenTable Terminal::ms_attributesTable = TokenTable();
 Terminal::obj_ptr_table_t Terminal:: ms_objectPointersTable = obj_ptr_table_t();
-deque<Command> Terminal::ms_commandsQueue = deque<Command>();
+deque<string> Terminal::ms_commandsQueue = deque<string>();
 
 enum token_state_t {
     TOKEN_OBJECT,
@@ -64,29 +64,23 @@ const std::string Terminal::getObjectName(const size_t idObject) {
     return ms_objectPointersTable[idObject]->getObjectName();
 }
 
-void Terminal::pushCommand(const Command& cmd) {
+void Terminal::pushCommand(const string& cmd) {
     ms_commandsQueue.push_back(cmd);
 }
 
-void Terminal::pushCommand(const string& cmdStr) {
-    Command cmd(0, 0, "");
-    if (cmd.parseCommand(cmdStr))
-        pushCommand(cmd);
-}
-
 string Terminal::executeScript(const string& fileName) {
-    string cmd;
+    Command cmd;
+    string expression;
     stringstream output;
 
     fstream file(fileName.c_str(), ios::in);
     while (file.good()) {
-        getline(file, cmd);
-        if (!cmd.empty()) {
-            Command command;
-            if (command.parseCommand(cmd)) {
-                cout << "> " << command << endl;
-                output << "> " << command << endl;
-                command.run();
+        getline(file, expression);
+        if (!expression.empty()) {
+            if (cmd.parseCommand(expression)) {
+                cout << "> " << cmd << endl;
+                output << "> " << cmd << endl;
+                cmd.run();
             }
         }
     }
@@ -95,9 +89,10 @@ string Terminal::executeScript(const string& fileName) {
 }
 
 void Terminal::processCommandsQueue() {
+    Command cmd;
     while (!ms_commandsQueue.empty()) {
-//         cout << ms_commandsQueue.front() << endl;
-        ms_commandsQueue.front().run();
+        if (cmd.parseCommand(ms_commandsQueue.front()))
+            cmd.run();
         ms_commandsQueue.pop_front();
     }
 }
@@ -170,12 +165,6 @@ void Terminal::unregisterObject(const std::string& objectName) {
     obj_ptr_table_t::iterator it = ms_objectPointersTable.find(id);
     if (it != ms_objectPointersTable.end()) {
         ms_objectsTable.unregisterToken(objectName);
-        for (size_t i = 0; i < ms_commandsQueue.size(); ++i) {
-            if (ms_commandsQueue[i].getIdObject() == id) {
-                ms_commandsQueue.erase(ms_commandsQueue.begin() + i);
-                --i;
-            }
-        }
         ms_objectPointersTable.erase(it);
     }
 }

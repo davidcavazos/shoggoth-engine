@@ -70,73 +70,72 @@ Demo::~Demo() {
 void Demo::loadScene() {
     cout << "Loading scene..." << endl;
 
-    Entity* root = m_scene.root();
-
-    Entity* floor = root->addChild("floor");
-    floor->setPositionAbs(0.0f, -1.0f, 0.0f);
-    RenderableMesh* floorMesh = new RenderableMesh(floor, &m_renderer, &m_resources);
-    floorMesh->loadBox(100, 1, 100);
-    RigidBody* floorBody = new RigidBody(floor, &m_physicsWorld);
-    floorBody->addBox(100, 1, 100);
-
-    Entity* b1 = root->addChild("b1");
-    b1->setPositionAbs(5.0f, 4.0f, -10.0f);
-    RenderableMesh* b1Mesh = new RenderableMesh(b1, &m_renderer, &m_resources);
-    b1Mesh->loadBox(3.0f, 9.0f, 3.0f);
-    RigidBody* b1Body = new RigidBody(b1, &m_physicsWorld);
-    b1Body->addBox(3, 9, 3);
-
-    // model            faces (triangles)
-    // icosphere1              20
-    // icosphere2              80
-    // icosphere3             320
-    // icosphere4           1,280
-    // icosphere5           5,120
-    // icosphere6          20,480
-    // icosphere7          81,920
-    // icosphere8         327,680
-    // icosphere9       1,310,720
-    // icosphere10      5,242,880
-    Entity* cube = root->addChild("cube");
-    cube->setPositionAbs(-1.0, 8.0, 0.0);
-    cube->setOrientationAbs(0.5, 0.3, 0.2);
-    RenderableMesh* cubeMesh = new RenderableMesh(cube, &m_renderer, &m_resources);
-    cubeMesh->loadBox(0.5, 0.5, 0.5);
-    RigidBody* cubeBody = new RigidBody(cube, &m_physicsWorld);
-    cubeBody->init(1.0);
-    cubeBody->addBox(0.5, 0.5, 0.5);
-
-    Entity* mesh = root->addChild("model");
-    mesh->setPositionRel(1.5f, 5.0f, 0.0f);
-    RenderableMesh* renderableMesh = new RenderableMesh(mesh, &m_renderer, &m_resources);
-    renderableMesh->loadFromFile("assets/meshes/materialtest.dae");
-    RigidBody* meshBody = new RigidBody(mesh, &m_physicsWorld);
-    meshBody->init(10.0);
-    meshBody->addBox(2, 2, 2);
-//     meshBody->addConvexHull("assets/meshes/suzanne-lowpoly.dae", &m_resources);
-
-    Entity* camera = root->addChild("camera");
-    camera->setPositionAbs(0.0f, 4.0f, 10.0f);
-    camera->pitch(-0.2);
-//     camera->lookAt(cube->getPositionAbs(), VECTOR3_UNIT_Y);
-    Camera* camComponent = new Camera(camera, CAMERA_PROJECTION, &m_renderer);
-    camComponent->setPerspectiveFOV(45.0);
-//     RigidBody* cameraBody = new RigidBody(camera);
-//     cameraBody->addSphere(1);
-
-    Entity* light1 = root->addChild("light1");
-    light1->setPositionAbs(5, 5, 5);
-    Light* light1Cmp = new Light(light1, &m_renderer);
-    light1Cmp->setDiffuse(1.0, 1.0, 1.0);
-
-//     cout << Terminal::listsToString() << endl;
-//     cout << m_sceneManager.sceneGraphToString() << endl;
-//     cout << RenderManager::getRenderer().listsToString() << endl;
-//     cout << ResourceManager::listsToString() << endl;
+//     Entity* root = m_scene.root();
+//
+//     Entity* floor = root->addChild("floor");
+//     floor->setPositionAbs(0.0f, -1.0f, 0.0f);
+//     RenderableMesh* floorMesh = new RenderableMesh(floor, &m_renderer, &m_resources);
+//     floorMesh->loadBox(100, 1, 100);
+//     RigidBody* floorBody = new RigidBody(floor, &m_physicsWorld);
+//     floorBody->addBox(100, 1, 100);
+//
+//     Entity* b1 = root->addChild("b1");
+//     b1->setPositionAbs(5.0f, 4.0f, -10.0f);
+//     RenderableMesh* b1Mesh = new RenderableMesh(b1, &m_renderer, &m_resources);
+//     b1Mesh->loadBox(3.0f, 9.0f, 3.0f);
+//     RigidBody* b1Body = new RigidBody(b1, &m_physicsWorld);
+//     b1Body->addBox(3, 9, 3);
+//
+//     // model            faces (triangles)
+//     // icosphere1              20
+//     // icosphere2              80
+//     // icosphere3             320
+//     // icosphere4           1,280
+//     // icosphere5           5,120
+//     // icosphere6          20,480
+//     // icosphere7          81,920
+//     // icosphere8         327,680
+//     // icosphere9       1,310,720
+//     // icosphere10      5,242,880
+//     Entity* cube = root->addChild("cube");
+//     cube->setPositionAbs(-1.0, 8.0, 0.0);
+//     cube->setOrientationAbs(0.5, 0.3, 0.2);
+//     RenderableMesh* cubeMesh = new RenderableMesh(cube, &m_renderer, &m_resources);
+//     cubeMesh->loadBox(0.5, 0.5, 0.5);
+//     RigidBody* cubeBody = new RigidBody(cube, &m_physicsWorld);
+//     cubeBody->init(1.0);
+//     cubeBody->addBox(0.5, 0.5, 0.5);
+//
+//     Entity* mesh = root->addChild("model");
+//     mesh->setPositionRel(1.5f, 5.0f, 0.0f);
+//     RenderableMesh* renderableMesh = new RenderableMesh(mesh, &m_renderer, &m_resources);
+//     renderableMesh->loadFromFile("assets/meshes/materialtest.dae");
+//     RigidBody* meshBody = new RigidBody(mesh, &m_physicsWorld);
+//     meshBody->init(10.0);
+//     meshBody->addBox(2, 2, 2);
+// //     meshBody->addConvexHull("assets/meshes/suzanne-lowpoly.dae", &m_resources);
+//
+//     Entity* camera = root->addChild("camera");
+//     camera->setPositionAbs(0.0f, 4.0f, 10.0f);
+//     camera->pitch(-0.2);
+// //     camera->lookAt(cube->getPositionAbs(), VECTOR3_UNIT_Y);
+//     Camera* camComponent = new Camera(camera, CAMERA_PROJECTION, &m_renderer);
+//     camComponent->setPerspectiveFOV(45.0);
+// //     RigidBody* cameraBody = new RigidBody(camera);
+// //     cameraBody->addSphere(1);
+//
+//     Entity* light1 = root->addChild("light1");
+//     light1->setPositionAbs(5, 5, 5);
+//     Light* light1Cmp = new Light(light1, &m_renderer);
+//     light1Cmp->setDiffuse(1.0, 1.0, 1.0);
+//
+// //     cout << Terminal::listsToString() << endl;
+// //     cout << m_scene.sceneGraphToString() << endl;
 
     Terminal::executeScript("assets/scripts/2-initialize-scene.txt");
 
-    m_scene.saveToXML("scene.xml");
+//     m_scene.saveToXML("scene.xml");
+    m_scene.loadFromXML("scene.xml");
 }
 
 void Demo::bindInputs() {
@@ -215,21 +214,16 @@ void Demo::cmdPrintEntity(const string& arg) {
 }
 
 void Demo::cmdOnMouseMotion(const string&) {
-    static Command moveXCmd("camera yaw-global");
-    static Command moveYCmd("camera pitch");
-
+    float sensitivity = 0.05;
     mouse_motion_t motion = m_device.getInputs()->getLastMouseMotion();
 
-    float sensitivity = 0.05;
     stringstream ssx;
-    ssx << motion.xrel * sensitivity;
-    moveXCmd.setArguments(ssx.str());
-    Terminal::pushCommand(moveXCmd);
+    ssx << "camera yaw-global " << motion.xrel * sensitivity;
+    Terminal::pushCommand(ssx.str());
 
     stringstream ssy;
-    ssy << motion.yrel * sensitivity;
-    moveYCmd.setArguments(ssy.str());
-    Terminal::pushCommand(moveYCmd);
+    ssy << "camera pitch " << motion.yrel * sensitivity;
+    Terminal::pushCommand(ssy.str());
 }
 
 void Demo::cmdFireCube(const std::string&) {

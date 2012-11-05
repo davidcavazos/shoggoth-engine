@@ -35,7 +35,6 @@ public:
     friend std::istream& operator>>(std::istream& in, Command& rhs);
 
     Command();
-    Command(const std::string& expression);
     Command(const size_t idObject, const size_t idCommand, const std::string& arguments = "");
 
     size_t getIdObject() const;

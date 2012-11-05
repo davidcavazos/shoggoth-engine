@@ -124,6 +124,8 @@ bool Scene::loadFromXML(const string& fileName) {
     // success flags
     bool isCameraFound = false;
 
+    cout << "Scene.loadFromXML: SHOULD CHECK IF FILE EXISTS HERE!!!" << endl;
+
     ptree tree;
     read_xml(fileName, tree, xml_parser::trim_whitespace);
 
@@ -131,6 +133,8 @@ bool Scene::loadFromXML(const string& fileName) {
     m_root = new Entity(0, m_rootName, m_device);
     if (!loadFromPTree(XML_SCENE + XML_DELIMITER + m_rootName, tree, m_root, 0, isCameraFound)) {
         cerr << "Failed to load scene: " << fileName << endl;
+        delete m_root;
+        m_root = new Entity(0, m_rootName, m_device);
         return false;
     }
 
@@ -344,42 +348,85 @@ bool Scene::loadFromPTree(const string& path, const ptree& tree, Entity* node, E
                     ss >> file;
                     mesh->loadFromFile(file);
                 }
-                else {
+                else
                     cerr << "Error: unknown renderablemesh model type: " << tmpStr << endl;
-                    continue;
-                }
             }
             else if (name.compare(XML_RIGIDBODY) == 0) {
-//                 RigidBody* rigidbody = new RigidBody(node, m_physicsWorld);
-//                 tmpInt = tree.get<int>(ptree::path_type(attrPath + XML_CAMERA_TYPE, XML_DELIMITER[0]), 1);
-//                 attr = attrPath + XML_RIGIDBODY_COLLISIONSHAPE;
-//                 tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getShapeId());
-//                 attr = attrPath + XML_RIGIDBODY_MASS;
-//                 tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getMass());
-//                 attr = attrPath + XML_RIGIDBODY_DAMPING;
-//                 stringstream damping;
-//                 damping << rigidbody->getLinearDamping() << " " << rigidbody->getAngularDamping();
-//                 tree.put(ptree::path_type(attr, XML_DELIMITER[0]), damping.str());
-//                 attr = attrPath + XML_RIGIDBODY_FRICTION;
-//                 tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getFriction());
-//                 attr = attrPath + XML_RIGIDBODY_ROLLINGFRICTION;
-//                 tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getRollingFriction());
-//                 attr = attrPath + XML_RIGIDBODY_RESTITUTION;
-//                 tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getRestitution());
-//                 attr = attrPath + XML_RIGIDBODY_SLEEPINGTHRESHOLDS;
-//                 stringstream sleeping;
-//                 sleeping << rigidbody->getLinearSleepingThreshold() << " " << rigidbody->getAngularSleepingThreshold();
-//                 tree.put(ptree::path_type(attr, XML_DELIMITER[0]), sleeping.str());
-//                 attr = attrPath + XML_RIGIDBODY_LINEARFACTOR;
-//                 tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getLinearFactor());
-//                 attr = attrPath + XML_RIGIDBODY_LINEARVELOCITY;
-//                 tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getLinearVelocity());
-//                 attr = attrPath + XML_RIGIDBODY_ANGULARFACTOR;
-//                 tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getAngularFactor());
-//                 attr = attrPath + XML_RIGIDBODY_ANGULARVELOCITY;
-//                 tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getAngularVelocity());
-//                 attr = attrPath + XML_RIGIDBODY_GRAVITY;
-//                 tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getGravity());
+                RigidBody* rigidbody = new RigidBody(node, m_physicsWorld);
+
+                double mass = tree.get<double>(ptree::path_type(attrPath + XML_RIGIDBODY_MASS, XML_DELIMITER[0]), 0.0);
+                double friction = tree.get<double>(ptree::path_type(attrPath + XML_RIGIDBODY_FRICTION, XML_DELIMITER[0]), 0.5);
+                double rollingFriction = tree.get<double>(ptree::path_type(attrPath + XML_RIGIDBODY_ROLLINGFRICTION, XML_DELIMITER[0]), 0.1);
+                double linearDamping, angularDamping;
+                tmpStr = tree.get<string>(ptree::path_type(attrPath + XML_RIGIDBODY_DAMPING, XML_DELIMITER[0]), "0 0");
+                stringstream damping;
+                damping >> linearDamping >> angularDamping;
+                double linearSleepingThreshold, angularSleepingThreshold;
+                tmpStr = tree.get<string>(ptree::path_type(attrPath + XML_RIGIDBODY_SLEEPINGTHRESHOLDS, XML_DELIMITER[0]), "0.8 1");
+                stringstream sleeping;
+                sleeping >> linearSleepingThreshold >> angularSleepingThreshold;
+                double restitution = tree.get<double>(ptree::path_type(attrPath + XML_RIGIDBODY_RESTITUTION, XML_DELIMITER[0]), 0.0);
+
+                rigidbody->init(mass,
+                                friction,
+                                rollingFriction,
+                                linearDamping,
+                                angularDamping,
+                                linearSleepingThreshold,
+                                angularSleepingThreshold,
+                                restitution);
+
+                tmpStr = tree.get<string>(ptree::path_type(attrPath + XML_RIGIDBODY_COLLISIONSHAPE, XML_DELIMITER[0]), "empty");
+                stringstream ss(tmpStr);
+                ss >> tmpStr;
+                if (tmpStr.compare(COLLISION_SHAPE_CONVEX) == 0) {
+                    string file;
+                    ss >> file;
+                    rigidbody->addConvexHull(file, m_resources);
+                }
+                else if (tmpStr.compare(COLLISION_SHAPE_BOX) == 0) {
+                    double x, y, z;
+                    ss >> x >> y >> z;
+                    rigidbody->addBox(x, y, z);
+                }
+                else if (tmpStr.compare(COLLISION_SHAPE_SPHERE) == 0) {
+                    double r;
+                    ss >> r;
+                    rigidbody->addSphere(r);
+                }
+                else if (tmpStr.compare(COLLISION_SHAPE_CAPSULE) == 0) {
+                    double r, h;
+                    ss >> r >> h;
+                    rigidbody->addCapsule(r, h);
+                }
+                else if (tmpStr.compare(COLLISION_SHAPE_CYLINDER) == 0) {
+                    double r, h;
+                    ss >> r >> h;
+                    rigidbody->addCylinder(r, h);
+                }
+                else if (tmpStr.compare(COLLISION_SHAPE_CONE) == 0) {
+                    double r, h;
+                    ss >> r >> h;
+                    rigidbody->addCone(r, h);
+                }
+                else if (tmpStr.compare(COLLISION_SHAPE_CONCAVE) == 0) {
+                    string file;
+                    ss >> file;
+                    rigidbody->addConvexHull(file, m_resources);
+                }
+                else
+                    cerr << "Error: unknown rigidbody collisionshape: " << tmpStr << endl;
+
+                tmpVect = tree.get<Vector3>(ptree::path_type(attrPath + XML_RIGIDBODY_LINEARFACTOR, XML_DELIMITER[0]), VECTOR3_UNIT);
+                rigidbody->setLinearFactor(tmpVect);
+                tmpVect = tree.get<Vector3>(ptree::path_type(attrPath + XML_RIGIDBODY_LINEARVELOCITY, XML_DELIMITER[0]), VECTOR3_ZERO);
+                rigidbody->setLinearVelocity(tmpVect);
+                tmpVect = tree.get<Vector3>(ptree::path_type(attrPath + XML_RIGIDBODY_ANGULARFACTOR, XML_DELIMITER[0]), VECTOR3_UNIT);
+                rigidbody->setAngularFactor(tmpVect);
+                tmpVect = tree.get<Vector3>(ptree::path_type(attrPath + XML_RIGIDBODY_ANGULARVELOCITY, XML_DELIMITER[0]), VECTOR3_ZERO);
+                rigidbody->setAngularVelocity(tmpVect);
+                tmpVect = tree.get<Vector3>(ptree::path_type(attrPath + XML_RIGIDBODY_GRAVITY, XML_DELIMITER[0]), Vector3(0.0, -9.8, 0.0));
+                rigidbody->setGravity(tmpVect);
             }
             else if (name.compare(XML_LIGHT) == 0) {
                 Light* light = new Light(node, m_renderer);
@@ -413,6 +460,4 @@ bool Scene::loadFromPTree(const string& path, const ptree& tree, Entity* node, E
             cerr << "Error: unknown node type: " << type << endl;
     }
     return true;
-
-    // must rebind inputs after reloading scene (object names may change)
 }

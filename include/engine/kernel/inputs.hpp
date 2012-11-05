@@ -25,7 +25,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "command.hpp"
 
 typedef enum {
     INPUT_KEY_PRESS,
@@ -62,14 +61,14 @@ public:
     void onMouseMotion(const mouse_motion_t& motion);
 
 private:
-    typedef std::map<size_t, Command> input_map_t;
+    typedef std::map<size_t, std::string> input_map_t;
     input_map_t m_keyPressMap;
     input_map_t m_keyReleaseMap;
     input_map_t m_keyPressedMap;
     input_map_t m_mouseButtonPressMap;
     input_map_t m_mouseButtonReleaseMap;
     input_map_t m_mouseButtonPressedMap;
-    std::vector<Command> m_mouseMotionList;
+    std::vector<std::string> m_mouseMotionList;
     mouse_motion_t m_lastMouseMotion;
 };
 

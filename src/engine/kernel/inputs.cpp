@@ -38,34 +38,31 @@ Inputs::Inputs():
 {}
 
 void Inputs::bindInput(const input_t type, const string& command, const size_t code) {
-    Command cmd(0, 0, "");
-    if (cmd.parseCommand(command)) {
-        pair<size_t, Command> binding(code, cmd);
-        switch (type) {
-        case INPUT_KEY_PRESS:
-            m_keyPressMap.insert(binding);
-            break;
-        case INPUT_KEY_RELEASE:
-            m_keyReleaseMap.insert(binding);
-            break;
-        case INPUT_KEY_PRESSED:
-            m_keyPressedMap.insert(binding);
-            break;
-        case INPUT_MOUSE_BUTTON_PRESS:
-            m_mouseButtonPressMap.insert(binding);
-            break;
-        case INPUT_MOUSE_BUTTON_RELEASE:
-            m_mouseButtonReleaseMap.insert(binding);
-            break;
-        case INPUT_MOUSE_BUTTON_PRESSED:
-            m_mouseButtonPressedMap.insert(binding);
-            break;
-        case INPUT_MOUSE_MOTION:
-            m_mouseMotionList.push_back(cmd);
-            break;
-        default:
-            cerr << "Invalid input_t: " << type << endl;
-        }
+    pair<size_t, string> binding(code, command);
+    switch (type) {
+    case INPUT_KEY_PRESS:
+        m_keyPressMap.insert(binding);
+        break;
+    case INPUT_KEY_RELEASE:
+        m_keyReleaseMap.insert(binding);
+        break;
+    case INPUT_KEY_PRESSED:
+        m_keyPressedMap.insert(binding);
+        break;
+    case INPUT_MOUSE_BUTTON_PRESS:
+        m_mouseButtonPressMap.insert(binding);
+        break;
+    case INPUT_MOUSE_BUTTON_RELEASE:
+        m_mouseButtonReleaseMap.insert(binding);
+        break;
+    case INPUT_MOUSE_BUTTON_PRESSED:
+        m_mouseButtonPressedMap.insert(binding);
+        break;
+    case INPUT_MOUSE_MOTION:
+        m_mouseMotionList.push_back(command);
+        break;
+    default:
+        cerr << "Invalid input_t: " << type << endl;
     }
 }
 
@@ -117,16 +114,12 @@ void Inputs::onMouseButtonPressed(const size_t code) {
 
 void Inputs::onMouseMotion(const mouse_motion_t& motion) {
     m_lastMouseMotion = motion;
-    for (size_t i = 0; i < m_mouseMotionList.size(); ++i) {
-//         stringstream ss;
-//         ss << x << " " << y << " " << xrel << " " << yrel;
-//         m_mouseMotionList[i].setArguments(ss.str());
+    for (size_t i = 0; i < m_mouseMotionList.size(); ++i)
         Terminal::pushCommand(m_mouseMotionList[i]);
-    }
 }
 
 ostream& operator<<(ostream& out, const Inputs& rhs) {
-    map<size_t, Command>::const_iterator it;
+    map<size_t, string>::const_iterator it;
 
     out << "Key Press Map:" << endl;
     for (it = rhs.m_keyPressMap.begin(); it != rhs.m_keyPressMap.end(); ++it)

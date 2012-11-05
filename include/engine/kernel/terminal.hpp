@@ -39,8 +39,7 @@ public:
     static const std::string getObjectName(const size_t idObject);
     static std::string findCommandName(const size_t idCommand);
 
-    static void pushCommand(const Command& cmd);
-    static void pushCommand(const std::string& cmdStr);
+    static void pushCommand(const std::string& cmd);
     static std::string executeScript(const std::string& fileName);
     static void processCommandsQueue();
     static std::vector<std::string> generateObjectsList(const bool shouldIncludeId = false);
@@ -56,7 +55,7 @@ private:
     static TokenTable ms_commandsTable;
     static TokenTable ms_attributesTable;
     static obj_ptr_table_t ms_objectPointersTable;
-    static std::deque<Command> ms_commandsQueue;
+    static std::deque<std::string> ms_commandsQueue;
 
     static size_t registerObject(const std::string& objectName, CommandObject* obj);
     static void unregisterObject(const std::string& objectName);

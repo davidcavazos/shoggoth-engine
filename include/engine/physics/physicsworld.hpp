@@ -48,7 +48,6 @@ public:
     void initialize();
     void shutdown();
     void setMinExpectedFramerate(const double minExpectedFramerate);
-    void setGravity(const double x, const double y, const double z);
     void stepSimulation(const double currentTimeSeconds);
 
 private:
@@ -73,7 +72,6 @@ private:
     void cmdInitialize(const std::string&);
     void cmdShutdown(const std::string&);
     void cmdMinExpectedFramerate(const std::string& arg);
-    void cmdGravity(const std::string& arg);
 };
 
 
