@@ -62,8 +62,8 @@ const string XML_RENDERABLEMESH = "renderablemesh";
 const string XML_RENDERABLEMESH_MODEL = "model";
 
 const string XML_RIGIDBODY = "rigidbody";
-const string XML_RIGIDBODY_COLLISIONSHAPE = "collisionshape";
 const string XML_RIGIDBODY_MASS = "mass";
+const string XML_RIGIDBODY_COLLISIONSHAPE = "collisionshape";
 const string XML_RIGIDBODY_DAMPING = "damping";
 const string XML_RIGIDBODY_FRICTION = "friction";
 const string XML_RIGIDBODY_ROLLINGFRICTION = "rollingfriction";
@@ -263,10 +263,10 @@ void Scene::saveToPTree(const string& path, ptree& tree, const Entity* node) con
                 attrPath = comp + XML_DELIMITER + XML_ATTRIBUTE + XML_DELIMITER;
                 attr = attrPath + XML_ATTR_TYPE;
                 tree.put(ptree::path_type(attr, XML_DELIMITER[0]), XML_ATTR_TYPE_COMPONENT);
-                attr = attrPath + XML_RIGIDBODY_COLLISIONSHAPE;
-                tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getShapeId());
                 attr = attrPath + XML_RIGIDBODY_MASS;
                 tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getMass());
+                attr = attrPath + XML_RIGIDBODY_COLLISIONSHAPE;
+                tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getShapeId());
                 attr = attrPath + XML_RIGIDBODY_DAMPING;
                 stringstream damping;
                 damping << rigidbody->getLinearDamping() << " " << rigidbody->getAngularDamping();
@@ -308,7 +308,8 @@ void Scene::saveToPTree(const string& path, ptree& tree, const Entity* node) con
 bool Scene::loadFromPTree(const string& path, const ptree& tree, Entity* node, Entity* parent, bool& isCameraFound) {
     // temporal variables to read to
     int tmpInt;
-    double tmpDouble;
+    double tmpDouble1;
+    double tmpDouble2;
     string tmpStr;
     Vector3 tmpVect;
     Quaternion tmpQuat;
@@ -360,27 +361,7 @@ bool Scene::loadFromPTree(const string& path, const ptree& tree, Entity* node, E
             else if (name.compare(XML_RIGIDBODY) == 0) {
                 RigidBody* rigidbody = new RigidBody(node, m_physicsWorld);
 
-                double mass = tree.get<double>(ptree::path_type(attrPath + XML_RIGIDBODY_MASS, XML_DELIMITER[0]), 0.0);
-                double friction = tree.get<double>(ptree::path_type(attrPath + XML_RIGIDBODY_FRICTION, XML_DELIMITER[0]), 0.5);
-                double rollingFriction = tree.get<double>(ptree::path_type(attrPath + XML_RIGIDBODY_ROLLINGFRICTION, XML_DELIMITER[0]), 0.1);
-                double linearDamping, angularDamping;
-                tmpStr = tree.get<string>(ptree::path_type(attrPath + XML_RIGIDBODY_DAMPING, XML_DELIMITER[0]), "0 0");
-                stringstream damping;
-                damping >> linearDamping >> angularDamping;
-                double linearSleepingThreshold, angularSleepingThreshold;
-                tmpStr = tree.get<string>(ptree::path_type(attrPath + XML_RIGIDBODY_SLEEPINGTHRESHOLDS, XML_DELIMITER[0]), "0.8 1");
-                stringstream sleeping;
-                sleeping >> linearSleepingThreshold >> angularSleepingThreshold;
-                double restitution = tree.get<double>(ptree::path_type(attrPath + XML_RIGIDBODY_RESTITUTION, XML_DELIMITER[0]), 0.0);
-
-                rigidbody->init(mass,
-                                friction,
-                                rollingFriction,
-                                linearDamping,
-                                angularDamping,
-                                linearSleepingThreshold,
-                                angularSleepingThreshold,
-                                restitution);
+                        tmpDouble1 = tree.get<double>(ptree::path_type(attrPath + XML_RIGIDBODY_MASS, XML_DELIMITER[0]), 0.0);
 
                 tmpStr = tree.get<string>(ptree::path_type(attrPath + XML_RIGIDBODY_COLLISIONSHAPE, XML_DELIMITER[0]), "empty");
                 stringstream ss(tmpStr);
@@ -388,40 +369,58 @@ bool Scene::loadFromPTree(const string& path, const ptree& tree, Entity* node, E
                 if (tmpStr.compare(COLLISION_SHAPE_CONVEX) == 0) {
                     string file;
                     ss >> file;
-                    rigidbody->addConvexHull(file, m_resources);
+                    rigidbody->addConvexHull(tmpDouble1, file, m_resources);
                 }
                 else if (tmpStr.compare(COLLISION_SHAPE_BOX) == 0) {
                     double x, y, z;
                     ss >> x >> y >> z;
-                    rigidbody->addBox(x, y, z);
+                    rigidbody->addBox(tmpDouble1, x, y, z);
                 }
                 else if (tmpStr.compare(COLLISION_SHAPE_SPHERE) == 0) {
                     double r;
                     ss >> r;
-                    rigidbody->addSphere(r);
+                    rigidbody->addSphere(tmpDouble1, r);
                 }
                 else if (tmpStr.compare(COLLISION_SHAPE_CAPSULE) == 0) {
                     double r, h;
                     ss >> r >> h;
-                    rigidbody->addCapsule(r, h);
+                    rigidbody->addCapsule(tmpDouble1, r, h);
                 }
                 else if (tmpStr.compare(COLLISION_SHAPE_CYLINDER) == 0) {
                     double r, h;
                     ss >> r >> h;
-                    rigidbody->addCylinder(r, h);
+                    rigidbody->addCylinder(tmpDouble1, r, h);
                 }
                 else if (tmpStr.compare(COLLISION_SHAPE_CONE) == 0) {
                     double r, h;
                     ss >> r >> h;
-                    rigidbody->addCone(r, h);
+                    rigidbody->addCone(tmpDouble1, r, h);
                 }
                 else if (tmpStr.compare(COLLISION_SHAPE_CONCAVE) == 0) {
                     string file;
                     ss >> file;
-                    rigidbody->addConvexHull(file, m_resources);
+                    rigidbody->addConvexHull(tmpDouble1, file, m_resources);
                 }
                 else
                     cerr << "Error: unknown rigidbody collisionshape: " << tmpStr << endl;
+
+                tmpDouble1 = tree.get<double>(ptree::path_type(attrPath + XML_RIGIDBODY_FRICTION, XML_DELIMITER[0]), 0.5);
+                rigidbody->setFriction(tmpDouble1);
+                tmpDouble1 = tree.get<double>(ptree::path_type(attrPath + XML_RIGIDBODY_ROLLINGFRICTION, XML_DELIMITER[0]), 0.1);
+                rigidbody->setRollingFriction(tmpDouble1);
+
+                tmpStr = tree.get<string>(ptree::path_type(attrPath + XML_RIGIDBODY_DAMPING, XML_DELIMITER[0]), "0 0");
+                stringstream damping;
+                damping >> tmpDouble1 >> tmpDouble2;
+                rigidbody->setDamping(tmpDouble1, tmpDouble2);
+
+                tmpStr = tree.get<string>(ptree::path_type(attrPath + XML_RIGIDBODY_SLEEPINGTHRESHOLDS, XML_DELIMITER[0]), "0.8 1");
+                stringstream sleeping;
+                sleeping >> tmpDouble1 >> tmpDouble2;
+                rigidbody->setSleepingThresholds(tmpDouble1, tmpDouble2);
+
+                tmpDouble1 = tree.get<double>(ptree::path_type(attrPath + XML_RIGIDBODY_RESTITUTION, XML_DELIMITER[0]), 0.0);
+                rigidbody->setRestitution(tmpDouble1);
 
                 tmpVect = tree.get<Vector3>(ptree::path_type(attrPath + XML_RIGIDBODY_LINEARFACTOR, XML_DELIMITER[0]), VECTOR3_UNIT);
                 rigidbody->setLinearFactor(tmpVect);
@@ -449,14 +448,14 @@ bool Scene::loadFromPTree(const string& path, const ptree& tree, Entity* node, E
                 tmpInt = tree.get<int>(ptree::path_type(attrPath + XML_CAMERA_TYPE, XML_DELIMITER[0]), 1);
                 Camera* camera = new Camera(node, (camera_t)tmpInt, m_renderer);
 //                 viewport_t view = tree.get<viewport_t>(ptree::path_type(attrPath + XML_CAMERA_VIEWPORT));
-                tmpDouble = tree.get<double>(ptree::path_type(attrPath + XML_CAMERA_PERSPECTIVEFOV), 45.0);
-                camera->setPerspectiveFOV(tmpDouble);
-                tmpDouble = tree.get<double>(ptree::path_type(attrPath + XML_CAMERA_ORTHOHEIGHT), 10.0);
-                camera->setOrthoHeight(tmpDouble);
-                tmpDouble = tree.get<double>(ptree::path_type(attrPath + XML_CAMERA_NEARDISTANCE), 0.1);
-                camera->setNearDistance(tmpDouble);
-                tmpDouble = tree.get<double>(ptree::path_type(attrPath + XML_CAMERA_FARDISTANCE), 1000.0);
-                camera->setFarDistance(tmpDouble);
+                                tmpDouble1 = tree.get<double>(ptree::path_type(attrPath + XML_CAMERA_PERSPECTIVEFOV), 45.0);
+                camera->setPerspectiveFOV(tmpDouble1);
+                                tmpDouble1 = tree.get<double>(ptree::path_type(attrPath + XML_CAMERA_ORTHOHEIGHT), 10.0);
+                camera->setOrthoHeight(tmpDouble1);
+                                tmpDouble1 = tree.get<double>(ptree::path_type(attrPath + XML_CAMERA_NEARDISTANCE), 0.1);
+                camera->setNearDistance(tmpDouble1);
+                                tmpDouble1 = tree.get<double>(ptree::path_type(attrPath + XML_CAMERA_FARDISTANCE), 1000.0);
+                camera->setFarDistance(tmpDouble1);
             }
         }
         else if (type.compare(XML_ATTR_TYPE_ROOT) == 0) {

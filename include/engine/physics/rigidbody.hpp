@@ -50,8 +50,8 @@ public:
     RigidBody(Entity* const entity, PhysicsWorld* physicsWorld);
     ~RigidBody();
 
-    const Vector3& getPosition();
-    const Quaternion& getOrientation();
+    Vector3 getPosition();
+    Quaternion getOrientation();
     const std::string& getShapeId() const;
     double getMass() const;
     double getLinearDamping() const;
@@ -61,20 +61,12 @@ public:
     double getRestitution() const;
     double getLinearSleepingThreshold() const;
     double getAngularSleepingThreshold() const;
-    const Vector3& getLinearFactor() const;
-    const Vector3& getLinearVelocity();
-    const Vector3& getAngularFactor() const;
-    const Vector3& getAngularVelocity();
-    const Vector3& getGravity() const;
+    Vector3 getLinearFactor() const;
+    Vector3 getLinearVelocity();
+    Vector3 getAngularFactor() const;
+    Vector3 getAngularVelocity();
+    Vector3 getGravity() const;
 
-    void init(const double mass = 0.0,
-              const double friction = 0.5,
-              const double rollingFriction = 0.1,
-              const double linearDamping = 0.0,
-              const double angularDamping = 0.0,
-              const double linearSleepingThreshold = 0.8,
-              const double angularSleepingThreshold = 1.0,
-              const double restitution = 0.0);
     void activate(const bool forceActivate = true);
     void setTransform(const Vector3& position, const Quaternion& orientation);
     void setMass(const double mass);
@@ -89,38 +81,24 @@ public:
     void setAngularVelocity(const Vector3& angularVelocity);
     void setGravity(const Vector3& gravity);
 
-    void addSphere(const double radius);
-    void addBox(const double lengthX, const double lengthY, const double lengthZ);
-    void addCylinder(const double radius, const double height);
-    void addCapsule(const double radius, const double height);
-    void addCone(const double radius, const double height);
-    void addConvexHull(const std::string& fileName, Resources* resources);
-    void addConcaveHull(const std::string& fileName, Resources* resources);
+    void addSphere(const double mass, const double radius);
+    void addBox(const double mass, const double lengthX, const double lengthY, const double lengthZ);
+    void addCylinder(const double mass, const double radius, const double height);
+    void addCapsule(const double mass, const double radius, const double height);
+    void addCone(const double mass, const double radius, const double height);
+    void addConvexHull(const double mass, const std::string& fileName, Resources* resources);
+    void addConcaveHull(const double mass, const std::string& fileName, Resources* resources);
 
 private:
     PhysicsWorld* m_physicsWorld;
     std::string m_shapeId;
     btRigidBody* m_rigidBody;
-    Vector3 m_position;
-    Quaternion m_orientation;
     double m_mass;
-    double m_linearDamping;
-    double m_angularDamping;
-    double m_friction;
-    double m_rollingFriction;
-    double m_restitution;
-    double m_linearSleepingThreshold;
-    double m_angularSleepingThreshold;
-    Vector3 m_linearFactor;
-    Vector3 m_linearVelocity;
-    Vector3 m_angularFactor;
-    Vector3 m_angularVelocity;
-    Vector3 m_gravity;
 
     RigidBody(const RigidBody& rhs);
     RigidBody& operator=(const RigidBody&);
 
-    void addRigidBody(btCollisionShape* shape);
+    void addRigidBody(const double mass, btCollisionShape* shape);
 
     void cmdIsActive(const std::string& arg);
     void cmdMass(const std::string& arg);

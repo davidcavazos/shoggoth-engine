@@ -45,21 +45,7 @@ RigidBody::RigidBody(Entity* const entity, PhysicsWorld* physicsWorld):
     m_physicsWorld(physicsWorld),
     m_shapeId(""),
     m_rigidBody(0),
-    m_position(VECTOR3_ZERO),
-    m_orientation(QUATERNION_IDENTITY),
-    m_mass(0.0),
-    m_linearDamping(0.0),
-    m_angularDamping(0.0),
-    m_friction(0.5),
-    m_rollingFriction(0.0),
-    m_restitution(0.0),
-    m_linearSleepingThreshold(0.8),
-    m_angularSleepingThreshold(1.0),
-    m_linearFactor(VECTOR3_UNIT),
-    m_linearVelocity(VECTOR3_ZERO),
-    m_angularFactor(VECTOR3_UNIT),
-    m_angularVelocity(VECTOR3_ZERO),
-    m_gravity(Vector3(0.0, -9.8, 0.0))
+    m_mass(0.0)
 {
     m_entity->registerAttribute("mass", boost::bind(&RigidBody::cmdMass, this, _1));
     m_entity->registerAttribute("damping", boost::bind(&RigidBody::cmdDamping, this, _1));
@@ -91,14 +77,12 @@ RigidBody::~RigidBody() {
 }
 
 
-const Vector3& RigidBody::getPosition() {
-    m_position = v3(m_rigidBody->getCenterOfMassPosition());
-    return m_position;
+Vector3 RigidBody::getPosition() {
+    return v3(m_rigidBody->getCenterOfMassPosition());
 }
 
-const Quaternion& RigidBody::getOrientation() {
-    m_orientation = quat(m_rigidBody->getOrientation());
-    return m_orientation;
+Quaternion RigidBody::getOrientation() {
+    return quat(m_rigidBody->getOrientation());
 }
 
 const std::string& RigidBody::getShapeId() const {
@@ -110,83 +94,61 @@ double RigidBody::getMass() const {
 }
 
 double RigidBody::getLinearDamping() const {
-    return m_linearDamping;
+    return m_rigidBody->getLinearDamping();
 }
 
 double RigidBody::getAngularDamping() const {
-    return m_angularDamping;
+    return m_rigidBody->getAngularDamping();
 }
 
 double RigidBody::getFriction() const {
-    return m_friction;
+    return m_rigidBody->getFriction();
 }
 
 double RigidBody::getRollingFriction() const {
-    return m_rollingFriction;
+    return m_rigidBody->getRollingFriction();
 }
 
 double RigidBody::getRestitution() const {
-    return m_restitution;
+    return m_rigidBody->getRestitution();
 }
 
 double RigidBody::getLinearSleepingThreshold() const {
-    return m_linearSleepingThreshold;
+    return m_rigidBody->getLinearSleepingThreshold();
 }
 
 double RigidBody::getAngularSleepingThreshold() const {
-    return m_angularSleepingThreshold;
+    return m_rigidBody->getAngularSleepingThreshold();
 }
 
-const Vector3& RigidBody::getLinearFactor() const {
-    return m_linearFactor;
+Vector3 RigidBody::getLinearFactor() const {
+    return v3(m_rigidBody->getLinearFactor());
 }
 
-const Vector3& RigidBody::getLinearVelocity() {
-    m_linearVelocity = v3(m_rigidBody->getLinearVelocity());
-    return m_linearVelocity;
+Vector3 RigidBody::getLinearVelocity() {
+    return v3(m_rigidBody->getLinearVelocity());
 }
 
-const Vector3& RigidBody::getAngularFactor() const {
-    return m_angularFactor;
+Vector3 RigidBody::getAngularFactor() const {
+    return v3(m_rigidBody->getAngularFactor());
 }
 
-const Vector3& RigidBody::getAngularVelocity() {
-    m_angularVelocity = v3(m_rigidBody->getAngularVelocity());
-    return m_angularVelocity;
+Vector3 RigidBody::getAngularVelocity() {
+    return v3(m_rigidBody->getAngularVelocity());
 }
 
-const Vector3& RigidBody::getGravity() const {
-    return m_gravity;
+Vector3 RigidBody::getGravity() const {
+    return v3(m_rigidBody->getGravity());
 }
 
 
-
-void RigidBody::init(const double mass,
-                     const double friction,
-                     const double rollingFriction,
-                     const double linearDamping,
-                     const double angularDamping,
-                     const double linearSleepingThreshold,
-                     const double angularSleepingThreshold,
-                     const double restitution) {
-    m_mass = mass;
-    m_friction = friction;
-    m_rollingFriction = rollingFriction;
-    m_linearDamping = linearDamping;
-    m_angularDamping = angularDamping;
-    m_linearSleepingThreshold = linearSleepingThreshold;
-    m_angularSleepingThreshold = angularSleepingThreshold;
-    m_restitution = restitution;
-}
 
 void RigidBody::activate(const bool forceActivate) {
     m_rigidBody->activate(forceActivate);
 }
 
 void RigidBody::setTransform(const Vector3& position, const Quaternion& orientation) {
-    m_position = position;
-    m_orientation = orientation;
-    m_rigidBody->setWorldTransform(btTransform(quat(m_orientation), v3(m_position)));
+    m_rigidBody->setWorldTransform(btTransform(quat(orientation), v3(position)));
 }
 
 void RigidBody::setMass(const double mass) {
@@ -197,58 +159,46 @@ void RigidBody::setMass(const double mass) {
 }
 
 void RigidBody::setDamping(const double linear, const double angular) {
-    m_linearDamping = linear;
-    m_angularDamping = angular;
-    m_rigidBody->setDamping(m_linearDamping, m_angularDamping);
+    m_rigidBody->setDamping(linear, angular);
 }
 
 void RigidBody::setFriction(const double friction) {
-    m_friction = friction;
-    m_rigidBody->setFriction(m_friction);
+    m_rigidBody->setFriction(friction);
 }
 
 void RigidBody::setRollingFriction(const double rollingFriction) {
-    m_rollingFriction = rollingFriction;
-    m_rigidBody->setRollingFriction(m_rollingFriction);
+    m_rigidBody->setRollingFriction(rollingFriction);
 }
 
 void RigidBody::setRestitution(const double restitution) {
-    m_restitution = restitution;
-    m_rigidBody->setRestitution(m_restitution);
+    m_rigidBody->setRestitution(restitution);
 }
 
 void RigidBody::setSleepingThresholds(const double linear, const double angular) {
-    m_linearSleepingThreshold = linear;
-    m_angularSleepingThreshold = angular;
-    m_rigidBody->setSleepingThresholds(m_linearSleepingThreshold, m_angularSleepingThreshold);
+    m_rigidBody->setSleepingThresholds(linear, angular);
 }
 
 void RigidBody::setLinearFactor(const Vector3& linearFactor) {
-    m_linearFactor = linearFactor;
     m_rigidBody->setLinearFactor(v3(linearFactor));
 }
 
 void RigidBody::setLinearVelocity(const Vector3& linearVelocity) {
-    m_linearVelocity = linearVelocity;
-    m_rigidBody->setLinearVelocity(v3(m_linearVelocity));
+    m_rigidBody->setLinearVelocity(v3(linearVelocity));
 }
 
 void RigidBody::setAngularFactor(const Vector3& angularFactor) {
-    m_angularFactor = angularFactor;
-    m_rigidBody->setAngularFactor(v3(m_angularFactor));
+    m_rigidBody->setAngularFactor(v3(angularFactor));
 }
 
 void RigidBody::setAngularVelocity(const Vector3& angularVelocity) {
-    m_angularVelocity = angularVelocity;
-    m_rigidBody->setAngularVelocity(v3(m_angularVelocity));
+    m_rigidBody->setAngularVelocity(v3(angularVelocity));
 }
 
 void RigidBody::setGravity(const Vector3& gravity) {
-    m_gravity = gravity;
-    m_rigidBody->setGravity(v3(m_gravity));
+    m_rigidBody->setGravity(v3(gravity));
 }
 
-void RigidBody::addSphere(const double radius) {
+void RigidBody::addSphere(const double mass, const double radius) {
     stringstream ss;
     ss << COLLISION_SHAPE_BOX << " " << radius;
     m_shapeId = ss.str();
@@ -264,10 +214,10 @@ void RigidBody::addSphere(const double radius) {
     }
     else
         shape = it->second;
-    addRigidBody(shape);
+    addRigidBody(mass, shape);
 }
 
-void RigidBody::addBox(const double lengthX, const double lengthY, const double lengthZ) {
+void RigidBody::addBox(const double mass, const double lengthX, const double lengthY, const double lengthZ) {
     stringstream ss;
     ss << COLLISION_SHAPE_BOX << " " << lengthX << " " << lengthY << " " << lengthZ;
     m_shapeId = ss.str();
@@ -283,10 +233,10 @@ void RigidBody::addBox(const double lengthX, const double lengthY, const double 
     }
     else
         shape = it->second;
-    addRigidBody(shape);
+    addRigidBody(mass, shape);
 }
 
-void RigidBody::addCylinder(const double radius, const double height) {
+void RigidBody::addCylinder(const double mass, const double radius, const double height) {
     stringstream ss;
     ss << COLLISION_SHAPE_CYLINDER << " " << radius << " " << height;
     m_shapeId = ss.str();
@@ -302,10 +252,10 @@ void RigidBody::addCylinder(const double radius, const double height) {
     }
     else
         shape = it->second;
-    addRigidBody(shape);
+    addRigidBody(mass, shape);
 }
 
-void RigidBody::addCapsule(const double radius, const double height) {
+void RigidBody::addCapsule(const double mass, const double radius, const double height) {
     stringstream ss;
     ss << COLLISION_SHAPE_CAPSULE << " " << radius << " " << height;
     m_shapeId = ss.str();
@@ -321,10 +271,10 @@ void RigidBody::addCapsule(const double radius, const double height) {
     }
     else
         shape = it->second;
-    addRigidBody(shape);
+    addRigidBody(mass, shape);
 }
 
-void RigidBody::addCone(const double radius, const double height) {
+void RigidBody::addCone(const double mass, const double radius, const double height) {
     stringstream ss;
     ss << COLLISION_SHAPE_CONE << " " << radius << " " << height;
     m_shapeId = ss.str();
@@ -340,10 +290,10 @@ void RigidBody::addCone(const double radius, const double height) {
     }
     else
         shape = it->second;
-    addRigidBody(shape);
+    addRigidBody(mass, shape);
 }
 
-void RigidBody::addConvexHull(const string& fileName, Resources* resources) {
+void RigidBody::addConvexHull(const double mass, const string& fileName, Resources* resources) {
     stringstream ss;
     ss << COLLISION_SHAPE_CONVEX << " " << fileName;
     m_shapeId = ss.str();
@@ -378,10 +328,10 @@ void RigidBody::addConvexHull(const string& fileName, Resources* resources) {
     }
     else
         shape = it->second;
-    addRigidBody(shape);
+    addRigidBody(mass, shape);
 }
 
-void RigidBody::addConcaveHull(const string& fileName, Resources* resources) {
+void RigidBody::addConcaveHull(const double mass, const string& fileName, Resources* resources) {
     stringstream ss;
     ss << COLLISION_SHAPE_CONCAVE << " " << fileName;
     m_shapeId = ss.str();
@@ -413,7 +363,7 @@ void RigidBody::addConcaveHull(const string& fileName, Resources* resources) {
     }
     else
         shape = it->second;
-    addRigidBody(shape);
+    addRigidBody(mass, shape);
 }
 
 
@@ -423,21 +373,7 @@ RigidBody::RigidBody(const RigidBody& rhs):
     m_physicsWorld(rhs.m_physicsWorld),
     m_shapeId(rhs.m_shapeId),
     m_rigidBody(rhs.m_rigidBody),
-    m_position(rhs.m_position),
-    m_orientation(rhs.m_orientation),
-    m_mass(rhs.m_mass),
-    m_linearDamping(rhs.m_linearDamping),
-    m_angularDamping(rhs.m_angularDamping),
-    m_friction(rhs.m_friction),
-    m_rollingFriction(rhs.m_rollingFriction),
-    m_restitution(rhs.m_restitution),
-    m_linearSleepingThreshold(rhs.m_linearSleepingThreshold),
-    m_angularSleepingThreshold(rhs.m_angularSleepingThreshold),
-    m_linearFactor(rhs.m_linearFactor),
-    m_linearVelocity(rhs.m_linearVelocity),
-    m_angularFactor(rhs.m_angularFactor),
-    m_angularVelocity(rhs.m_angularVelocity),
-    m_gravity(rhs.m_gravity)
+    m_mass(rhs.m_mass)
 {
     cerr << "Error: RigidBody copy constructor should not be called!" << endl;
 }
@@ -447,28 +383,15 @@ RigidBody& RigidBody::operator=(const RigidBody&) {
     return *this;
 }
 
-void RigidBody::addRigidBody(btCollisionShape* shape) {
+void RigidBody::addRigidBody(const double mass, btCollisionShape* shape) {
+    m_mass = mass;
     btVector3 inertia;
     shape->calculateLocalInertia(m_mass, inertia);
     btDefaultMotionState* motion = getMotionState(m_entity);
-    btRigidBody::btRigidBodyConstructionInfo constructionInfo(m_mass, motion, shape, inertia);
-    constructionInfo.m_friction = m_friction;
-    constructionInfo.m_rollingFriction = m_rollingFriction;
-    constructionInfo.m_linearDamping = m_linearDamping;
-    constructionInfo.m_angularDamping = m_angularDamping;
-    constructionInfo.m_linearSleepingThreshold = m_linearSleepingThreshold;
-    constructionInfo.m_angularSleepingThreshold = m_angularSleepingThreshold;
-    constructionInfo.m_restitution = m_restitution;
-    m_rigidBody = new btRigidBody(constructionInfo);
+    m_rigidBody = new btRigidBody(m_mass, motion, shape, inertia);
     m_physicsWorld->m_rigidBodies.insert(
-        std::pair<Entity*, btRigidBody*>(m_entity, m_rigidBody)
-    );
+        std::pair<Entity*, btRigidBody*>(m_entity, m_rigidBody));
     m_physicsWorld->m_dynamicsWorld->addRigidBody(m_rigidBody);
-    setLinearFactor(m_linearFactor);
-    setLinearVelocity(m_linearVelocity);
-    setAngularFactor(m_angularFactor);
-    setAngularVelocity(m_angularVelocity);
-    setGravity(m_gravity);
 }
 
 

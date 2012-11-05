@@ -188,8 +188,7 @@ void Demo::cmdFireCube(const std::string&) {
         cubeMesh->loadBox(MISSILE_SIZE, MISSILE_SIZE, MISSILE_SIZE);
 
         RigidBody* cubeBody = new RigidBody(cube, &m_physicsWorld);
-        cubeBody->init(1.0, 0.8);
-        cubeBody->addBox(MISSILE_SIZE, MISSILE_SIZE, MISSILE_SIZE);
+        cubeBody->addBox(1.0, MISSILE_SIZE, MISSILE_SIZE, MISSILE_SIZE);
         cubeBody->setLinearVelocity(orientationUnit * FIRE_SPEED);
     }
 }
@@ -210,8 +209,7 @@ void Demo::cmdFireSphere(const std::string&) {
         cubeMesh->loadFromFile("assets/meshes/icosphere3.dae");
 
         RigidBody* cubeBody = new RigidBody(sphere, &m_physicsWorld);
-        cubeBody->init(1.0, 0.8);
-        cubeBody->addSphere(1.0);
+        cubeBody->addSphere(1.0, 1.0);
 //         cubeBody->addConvexHull("assets/meshes/icosphere1.dae");
         cubeBody->setLinearVelocity(orientationUnit * FIRE_SPEED);
     }
