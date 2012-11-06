@@ -30,6 +30,7 @@
 #include <fstream>
 #include <boost/foreach.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include "engine/kernel/xmlinfo.hpp"
 #include "engine/kernel/entity.hpp"
 #include "engine/renderer/camera.hpp"
 #include "engine/renderer/light.hpp"
@@ -39,44 +40,6 @@
 
 using namespace std;
 using namespace boost::property_tree;
-
-const string XML_SCENE = "scene";
-const string XML_DELIMITER = "/";
-const string XML_ATTRIBUTE = "<xmlattr>";
-const string XML_ATTR_POSITION = "position";
-const string XML_ATTR_ORIENTATION = "orientation";
-const string XML_ATTR_TYPE = "type";
-const string XML_ATTR_TYPE_ROOT = "root-node";
-const string XML_ATTR_TYPE_ENTITY = "entity";
-const string XML_ATTR_TYPE_COMPONENT = "component";
-
-const string XML_CAMERA_TYPE = "cameratype";
-const string XML_CAMERA_VIEWPORT = "viewport";
-const string XML_CAMERA_ASPECTRATIO = "aspectratio";
-const string XML_CAMERA_PERSPECTIVEFOV = "perspectivefov";
-const string XML_CAMERA_ORTHOHEIGHT = "orthoheight";
-const string XML_CAMERA_NEARDISTANCE = "neardistance";
-const string XML_CAMERA_FARDISTANCE = "fardistance";
-
-const string XML_LIGHT_AMBIENT = "ambient";
-const string XML_LIGHT_DIFFUSE = "diffuse";
-const string XML_LIGHT_SPECULAR = "specular";
-
-const string XML_RENDERABLEMESH_MODEL = "model";
-
-const string XML_RIGIDBODY_MASS = "mass";
-const string XML_RIGIDBODY_COLLISIONSHAPE = "collisionshape";
-const string XML_RIGIDBODY_DAMPING = "damping";
-const string XML_RIGIDBODY_FRICTION = "friction";
-const string XML_RIGIDBODY_ROLLINGFRICTION = "rollingfriction";
-const string XML_RIGIDBODY_RESTITUTION = "restitution";
-const string XML_RIGIDBODY_SLEEPINGTHRESHOLDS = "sleepingthresholds";
-const string XML_RIGIDBODY_LINEARFACTOR = "linearfactor";
-const string XML_RIGIDBODY_LINEARVELOCITY = "linearvelocity";
-const string XML_RIGIDBODY_ANGULARFACTOR = "angularfactor";
-const string XML_RIGIDBODY_ANGULARVELOCITY = "angularvelocity";
-const string XML_RIGIDBODY_GRAVITY = "gravity";
-
 
 map<string, Entity*> Scene::ms_entities = map<string, Entity*>();
 
@@ -220,84 +183,11 @@ void Scene::saveToPTree(const string& path,
     map<string, Component*>::const_iterator it;
     for (it = node->getComponentBegin(); it != node->getComponentEnd(); ++it) {
         const Component* component = it->second;
-        if (component->getType().compare(COMPONENT_RENDERABLEMESH) == 0) {
-            RenderableMesh* mesh = (RenderableMesh*)component;
-            comp = compPath + COMPONENT_RENDERABLEMESH;
-            attrPath = comp + XML_DELIMITER + XML_ATTRIBUTE + XML_DELIMITER;
-            attr = attrPath + XML_ATTR_TYPE;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), XML_ATTR_TYPE_COMPONENT);
-            attr = attrPath + XML_RENDERABLEMESH_MODEL;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), mesh->getDescription());
-        }
-        else if (component->getType().compare(COMPONENT_RIGIDBODY) == 0) {
-            RigidBody* rigidbody = (RigidBody*)component;
-            comp = compPath + COMPONENT_RIGIDBODY;
-            attrPath = comp + XML_DELIMITER + XML_ATTRIBUTE + XML_DELIMITER;
-            attr = attrPath + XML_ATTR_TYPE;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), XML_ATTR_TYPE_COMPONENT);
-            attr = attrPath + XML_RIGIDBODY_MASS;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getMass());
-            attr = attrPath + XML_RIGIDBODY_COLLISIONSHAPE;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getShapeId());
-            attr = attrPath + XML_RIGIDBODY_DAMPING;
-            stringstream damping;
-            damping << rigidbody->getLinearDamping() << " " << rigidbody->getAngularDamping();
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), damping.str());
-            attr = attrPath + XML_RIGIDBODY_FRICTION;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getFriction());
-            attr = attrPath + XML_RIGIDBODY_ROLLINGFRICTION;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getRollingFriction());
-            attr = attrPath + XML_RIGIDBODY_RESTITUTION;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getRestitution());
-            attr = attrPath + XML_RIGIDBODY_SLEEPINGTHRESHOLDS;
-            stringstream sleeping;
-            sleeping << rigidbody->getLinearSleepingThreshold() << " " << rigidbody->getAngularSleepingThreshold();
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), sleeping.str());
-            attr = attrPath + XML_RIGIDBODY_LINEARFACTOR;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getLinearFactor());
-            attr = attrPath + XML_RIGIDBODY_LINEARVELOCITY;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getLinearVelocity());
-            attr = attrPath + XML_RIGIDBODY_ANGULARFACTOR;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getAngularFactor());
-            attr = attrPath + XML_RIGIDBODY_ANGULARVELOCITY;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getAngularVelocity());
-            attr = attrPath + XML_RIGIDBODY_GRAVITY;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), rigidbody->getGravity());
-        }
-        else if (component->getType().compare(COMPONENT_LIGHT) == 0) {
-            Light* light = (Light*)component;
-            comp = compPath + COMPONENT_LIGHT;
-            attrPath = comp + XML_DELIMITER + XML_ATTRIBUTE + XML_DELIMITER;
-            attr = attrPath + XML_ATTR_TYPE;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), XML_ATTR_TYPE_COMPONENT);
-            attr = attrPath + XML_LIGHT_AMBIENT;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), light->getAmbient());
-            attr = attrPath + XML_LIGHT_DIFFUSE;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), light->getDiffuse());
-            attr = attrPath + XML_LIGHT_SPECULAR;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), light->getSpecular());
-        }
-        else if (component->getType().compare(COMPONENT_CAMERA) == 0) {
-            Camera* camera = (Camera*)component;
-            comp = compPath + COMPONENT_CAMERA;
-            attrPath = comp + XML_DELIMITER + XML_ATTRIBUTE + XML_DELIMITER;
-            attr = attrPath + XML_ATTR_TYPE;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), XML_ATTR_TYPE_COMPONENT);
-            attr = attrPath + XML_CAMERA_TYPE;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), camera->getCameraType());
-            //                 attr = attrPath + XML_CAMERA_VIEWPORT;
-            //                 tree.put(ptree::path_type(attr, XML_DELIMITER[0]), camera->getViewport());
-            attr = attrPath + XML_CAMERA_PERSPECTIVEFOV;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), camera->getPerspectiveFOV());
-            attr = attrPath + XML_CAMERA_ORTHOHEIGHT;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), camera->getOrthoHeight());
-            attr = attrPath + XML_CAMERA_NEARDISTANCE;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), camera->getNearDistance());
-            attr = attrPath + XML_CAMERA_FARDISTANCE;
-            tree.put(ptree::path_type(attr, XML_DELIMITER[0]), camera->getFarDistance());
-        }
-        else
-            cerr << "Error: invalid component: " << component->getType() << endl;
+        comp = compPath + component->getType();
+        attrPath = comp + XML_DELIMITER + XML_ATTRIBUTE + XML_DELIMITER;
+        attr = attrPath + XML_ATTR_TYPE;
+        tree.put(ptree::path_type(attr, XML_DELIMITER[0]), XML_ATTR_TYPE_COMPONENT);
+        component->saveToPtree(attrPath, tree);
         tree.put(ptree::path_type(comp, XML_DELIMITER[0]), "");
     }
 
@@ -313,21 +203,15 @@ bool Scene::loadFromPTree(const string& path,
                           Entity* parent,
                           set<string>& names,
                           bool& isCameraFound) {
-    // temporal variables to read to
-    int tmpInt;
-    double tmpDouble1;
-    double tmpDouble2;
-    string tmpStr;
-    Vector3 tmpVect;
-    Quaternion tmpQuat;
-
     // load attributes
     string attrPath = path + XML_DELIMITER + XML_ATTRIBUTE + XML_DELIMITER;
     if (parent != 0) {
-        tmpVect = tree.get<Vector3>(ptree::path_type(attrPath + XML_ATTR_POSITION, XML_DELIMITER[0]));
-        node->setPositionAbs(tmpVect);
-        tmpQuat = tree.get<Quaternion>(ptree::path_type(attrPath + XML_ATTR_ORIENTATION, XML_DELIMITER[0]));
-        node->setOrientationAbs(tmpQuat);
+        Vector3 vect;
+        Quaternion quat;
+        vect = tree.get<Vector3>(ptree::path_type(attrPath + XML_ATTR_POSITION, XML_DELIMITER[0]));
+        node->setPositionAbs(vect);
+        quat = tree.get<Quaternion>(ptree::path_type(attrPath + XML_ATTR_ORIENTATION, XML_DELIMITER[0]));
+        node->setOrientationAbs(quat);
     }
 
     // traverse all children
@@ -353,127 +237,24 @@ bool Scene::loadFromPTree(const string& path,
                 return false;
         }
         else if (type.compare(XML_ATTR_TYPE_COMPONENT) == 0) {
-            if (name.compare(COMPONENT_RENDERABLEMESH) == 0) {
-                tmpStr = tree.get<string>(ptree::path_type(attrPath + XML_RENDERABLEMESH_MODEL, XML_DELIMITER[0]), "empty");
-                stringstream ss(tmpStr);
-                ss >> tmpStr;
-                RenderableMesh* mesh = new RenderableMesh(node, m_renderer, m_resources);
-                if (tmpStr.compare(RENDERABLEMESH_BOX_DESCRIPTION) == 0) {
-                    double x, y, z;
-                    ss >> x >> y >> z;
-                    mesh->loadBox(x, y, z);
-                }
-                else if (tmpStr.compare(RENDERABLEMESH_FILE_DESCRIPTION) == 0) {
-                    string file;
-                    ss >> file;
-                    mesh->loadFromFile(file);
-                }
-                else
-                    cerr << "Error: unknown renderablemesh model type: " << tmpStr << endl;
-            }
-            else if (name.compare(COMPONENT_RIGIDBODY) == 0) {
-                RigidBody* rigidbody = new RigidBody(node, m_physicsWorld);
-
-                        tmpDouble1 = tree.get<double>(ptree::path_type(attrPath + XML_RIGIDBODY_MASS, XML_DELIMITER[0]), 0.0);
-
-                tmpStr = tree.get<string>(ptree::path_type(attrPath + XML_RIGIDBODY_COLLISIONSHAPE, XML_DELIMITER[0]), "empty");
-                stringstream ss(tmpStr);
-                ss >> tmpStr;
-                if (tmpStr.compare(COLLISION_SHAPE_CONVEX) == 0) {
-                    string file;
-                    ss >> file;
-                    rigidbody->addConvexHull(tmpDouble1, file, m_resources);
-                }
-                else if (tmpStr.compare(COLLISION_SHAPE_BOX) == 0) {
-                    double x, y, z;
-                    ss >> x >> y >> z;
-                    rigidbody->addBox(tmpDouble1, x, y, z);
-                }
-                else if (tmpStr.compare(COLLISION_SHAPE_SPHERE) == 0) {
-                    double r;
-                    ss >> r;
-                    rigidbody->addSphere(tmpDouble1, r);
-                }
-                else if (tmpStr.compare(COLLISION_SHAPE_CAPSULE) == 0) {
-                    double r, h;
-                    ss >> r >> h;
-                    rigidbody->addCapsule(tmpDouble1, r, h);
-                }
-                else if (tmpStr.compare(COLLISION_SHAPE_CYLINDER) == 0) {
-                    double r, h;
-                    ss >> r >> h;
-                    rigidbody->addCylinder(tmpDouble1, r, h);
-                }
-                else if (tmpStr.compare(COLLISION_SHAPE_CONE) == 0) {
-                    double r, h;
-                    ss >> r >> h;
-                    rigidbody->addCone(tmpDouble1, r, h);
-                }
-                else if (tmpStr.compare(COLLISION_SHAPE_CONCAVE) == 0) {
-                    string file;
-                    ss >> file;
-                    rigidbody->addConcaveHull(tmpDouble1, file, m_resources);
-                }
-                else
-                    cerr << "Error: unknown rigidbody collisionshape: " << tmpStr << endl;
-
-                tmpDouble1 = tree.get<double>(ptree::path_type(attrPath + XML_RIGIDBODY_FRICTION, XML_DELIMITER[0]), 0.5);
-                rigidbody->setFriction(tmpDouble1);
-                tmpDouble1 = tree.get<double>(ptree::path_type(attrPath + XML_RIGIDBODY_ROLLINGFRICTION, XML_DELIMITER[0]), 0.1);
-                rigidbody->setRollingFriction(tmpDouble1);
-
-                tmpStr = tree.get<string>(ptree::path_type(attrPath + XML_RIGIDBODY_DAMPING, XML_DELIMITER[0]), "0 0");
-                stringstream damping;
-                damping >> tmpDouble1 >> tmpDouble2;
-                rigidbody->setDamping(tmpDouble1, tmpDouble2);
-
-                tmpStr = tree.get<string>(ptree::path_type(attrPath + XML_RIGIDBODY_SLEEPINGTHRESHOLDS, XML_DELIMITER[0]), "0.8 1");
-                stringstream sleeping;
-                sleeping >> tmpDouble1 >> tmpDouble2;
-                rigidbody->setSleepingThresholds(tmpDouble1, tmpDouble2);
-
-                tmpDouble1 = tree.get<double>(ptree::path_type(attrPath + XML_RIGIDBODY_RESTITUTION, XML_DELIMITER[0]), 0.0);
-                rigidbody->setRestitution(tmpDouble1);
-
-                tmpVect = tree.get<Vector3>(ptree::path_type(attrPath + XML_RIGIDBODY_LINEARFACTOR, XML_DELIMITER[0]), VECTOR3_UNIT);
-                rigidbody->setLinearFactor(tmpVect);
-                tmpVect = tree.get<Vector3>(ptree::path_type(attrPath + XML_RIGIDBODY_LINEARVELOCITY, XML_DELIMITER[0]), VECTOR3_ZERO);
-                rigidbody->setLinearVelocity(tmpVect);
-                tmpVect = tree.get<Vector3>(ptree::path_type(attrPath + XML_RIGIDBODY_ANGULARFACTOR, XML_DELIMITER[0]), VECTOR3_UNIT);
-                rigidbody->setAngularFactor(tmpVect);
-                tmpVect = tree.get<Vector3>(ptree::path_type(attrPath + XML_RIGIDBODY_ANGULARVELOCITY, XML_DELIMITER[0]), VECTOR3_ZERO);
-                rigidbody->setAngularVelocity(tmpVect);
-                tmpVect = tree.get<Vector3>(ptree::path_type(attrPath + XML_RIGIDBODY_GRAVITY, XML_DELIMITER[0]), Vector3(0.0, -9.8, 0.0));
-                rigidbody->setGravity(tmpVect);
-            }
-            else if (name.compare(COMPONENT_LIGHT) == 0) {
-                Light* light = new Light(node, m_renderer);
-                color4_t ambient = tree.get<color4_t>(ptree::path_type(attrPath + XML_LIGHT_AMBIENT, XML_DELIMITER[0]),
-                                                      color4_t(0.0f, 0.0f, 0.0f, 1.0f));
-                color4_t diffuse = tree.get<color4_t>(ptree::path_type(attrPath + XML_LIGHT_DIFFUSE, XML_DELIMITER[0]),
-                                                      color4_t(1.0f, 1.0f, 1.0f, 1.0f));
-                color4_t specular = tree.get<color4_t>(ptree::path_type(attrPath + XML_LIGHT_SPECULAR, XML_DELIMITER[0]),
-                                                      color4_t(1.0f, 1.0f, 1.0f, 1.0f));
-                light->set(ambient, diffuse, specular);
-            }
+            Component* component = 0;
+            if (name.compare(COMPONENT_RENDERABLEMESH) == 0)
+                component = new RenderableMesh(node, m_renderer, m_resources);
+            else if (name.compare(COMPONENT_RIGIDBODY) == 0)
+                component = new RigidBody(node, m_resources, m_physicsWorld);
+            else if (name.compare(COMPONENT_LIGHT) == 0)
+                component = new Light(node, m_renderer);
             else if (name.compare(COMPONENT_CAMERA) == 0) {
+                component = new Camera(node, m_renderer);
                 isCameraFound = true;
-                tmpInt = tree.get<int>(ptree::path_type(attrPath + XML_CAMERA_TYPE, XML_DELIMITER[0]), 1);
-                Camera* camera = new Camera(node, (camera_t)tmpInt, m_renderer);
-//                 viewport_t view = tree.get<viewport_t>(ptree::path_type(attrPath + XML_CAMERA_VIEWPORT));
-                                tmpDouble1 = tree.get<double>(ptree::path_type(attrPath + XML_CAMERA_PERSPECTIVEFOV), 45.0);
-                camera->setPerspectiveFOV(tmpDouble1);
-                                tmpDouble1 = tree.get<double>(ptree::path_type(attrPath + XML_CAMERA_ORTHOHEIGHT), 10.0);
-                camera->setOrthoHeight(tmpDouble1);
-                                tmpDouble1 = tree.get<double>(ptree::path_type(attrPath + XML_CAMERA_NEARDISTANCE), 0.1);
-                camera->setNearDistance(tmpDouble1);
-                                tmpDouble1 = tree.get<double>(ptree::path_type(attrPath + XML_CAMERA_FARDISTANCE), 1000.0);
-                camera->setFarDistance(tmpDouble1);
             }
+            else
+                cerr << "Error: unknown component: " << name << endl;
+            if (component != 0)
+                component->loadFromPtree(attrPath, tree);
         }
-        else if (type.compare(XML_ATTR_TYPE_ROOT) == 0) {
+        else if (type.compare(XML_ATTR_TYPE_ROOT) == 0)
             cerr << "Error: invalid root node path: " << path << endl;
-        }
         else
             cerr << "Error: unknown node type: " << type << endl;
     }

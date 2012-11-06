@@ -48,7 +48,7 @@ typedef struct {
 
 class Camera: public Component {
 public:
-    Camera(Entity* const entity, const camera_t cameraType, Renderer* renderer);
+    Camera(Entity*const entity, Renderer* renderer);
     ~Camera();
 
     camera_t getCameraType() const;
@@ -67,6 +67,9 @@ public:
     void setOrthoHeight(const float orthoHeight);
     void setNearDistance(const float nearDistance);
     void setFarDistance(const float farDistance);
+
+    void loadFromPtree(const std::string& path, const boost::property_tree::ptree& tree);
+    void saveToPtree(const std::string& path, boost::property_tree::ptree& tree) const;
 
 private:
     camera_t m_cameraType;

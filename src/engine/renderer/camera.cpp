@@ -30,6 +30,7 @@
 #include "engine/renderer/renderer.hpp"
 
 using namespace std;
+using namespace boost::property_tree;
 
 const string CAMERA_DESCRIPTION = "$camera";
 const float DEFAULT_PERSP_FOV = 45.0f;
@@ -37,9 +38,18 @@ const float DEFAULT_ORTHO_HEIGHT = 10.0f;
 const float DEFAULT_NEAR_DISTANCE = 0.1f;
 const float DEFAULT_FAR_DISTANCE = 1000.0f;
 
-Camera::Camera(Entity* const entity, const camera_t cameraType, Renderer* renderer):
+const string XML_CAMERA_TYPE = "cameratype";
+const string XML_CAMERA_VIEWPORT = "viewport";
+const string XML_CAMERA_ASPECTRATIO = "aspectratio";
+const string XML_CAMERA_PERSPECTIVEFOV = "perspectivefov";
+const string XML_CAMERA_ORTHOHEIGHT = "orthoheight";
+const string XML_CAMERA_NEARDISTANCE = "neardistance";
+const string XML_CAMERA_FARDISTANCE = "fardistance";
+
+
+Camera::Camera(Entity* const entity, Renderer* renderer):
     Component(COMPONENT_CAMERA, entity),
-    m_cameraType(cameraType),
+    m_cameraType(CAMERA_PROJECTION),
     m_renderer(renderer),
     m_hasChanged(true),
     m_viewport(),
@@ -49,17 +59,7 @@ Camera::Camera(Entity* const entity, const camera_t cameraType, Renderer* render
     m_nearDistance(DEFAULT_NEAR_DISTANCE),
     m_farDistance(DEFAULT_FAR_DISTANCE)
 {
-    m_description = CAMERA_DESCRIPTION + "_";
-    switch (m_cameraType) {
-    case CAMERA_ORTHOGRAPHIC:
-        m_description.append("ORTHOGRAPHIC");
-        break;
-    case CAMERA_PROJECTION:
-        m_description.append("PROJECTION");
-        break;
-    default:
-        m_description.append("INVALID");
-    }
+    m_description = CAMERA_DESCRIPTION;
 
     m_renderer->m_cameras.insert(this);
     m_renderer->m_activeCamera = this;
@@ -78,6 +78,31 @@ Camera::~Camera() {
     m_entity->unregisterAttribute("ortho-height");
     m_entity->unregisterAttribute("perspective-fov");
     m_entity->unregisterAttribute("type");
+}
+
+void Camera::loadFromPtree(const string& path, const ptree& tree) {
+//     viewport_t view = tree.get<viewport_t>(ptree::path_type(path + XML_CAMERA_VIEWPORT));
+    m_cameraType = (camera_t)tree.get<int>(ptree::path_type(path + XML_CAMERA_TYPE, XML_DELIMITER[0]), 1);
+    m_perspectiveFOV = tree.get<double>(ptree::path_type(path + XML_CAMERA_PERSPECTIVEFOV), 45.0);
+    m_orthoHeight = tree.get<double>(ptree::path_type(path + XML_CAMERA_ORTHOHEIGHT), 10.0);
+    m_nearDistance = tree.get<double>(ptree::path_type(path + XML_CAMERA_NEARDISTANCE), 0.1);
+    m_farDistance = tree.get<double>(ptree::path_type(path + XML_CAMERA_FARDISTANCE), 1000.0);
+}
+
+void Camera::saveToPtree(const string& path, ptree& tree) const {
+    string attr;
+//     attr = attrPath + XML_CAMERA_VIEWPORT;
+//     tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getViewport());
+    attr = path + XML_CAMERA_TYPE;
+    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), (int)getCameraType());
+    attr = path + XML_CAMERA_PERSPECTIVEFOV;
+    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getPerspectiveFOV());
+    attr = path + XML_CAMERA_ORTHOHEIGHT;
+    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getOrthoHeight());
+    attr = path + XML_CAMERA_NEARDISTANCE;
+    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getNearDistance());
+    attr = path + XML_CAMERA_FARDISTANCE;
+    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getFarDistance());
 }
 
 

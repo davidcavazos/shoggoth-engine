@@ -37,6 +37,21 @@
 #include "engine/resources/resources.hpp"
 
 using namespace std;
+using namespace boost::property_tree;
+
+const string XML_RIGIDBODY_MASS = "mass";
+const string XML_RIGIDBODY_COLLISIONSHAPE = "collisionshape";
+const string XML_RIGIDBODY_DAMPING = "damping";
+const string XML_RIGIDBODY_FRICTION = "friction";
+const string XML_RIGIDBODY_ROLLINGFRICTION = "rollingfriction";
+const string XML_RIGIDBODY_RESTITUTION = "restitution";
+const string XML_RIGIDBODY_SLEEPINGTHRESHOLDS = "sleepingthresholds";
+const string XML_RIGIDBODY_LINEARFACTOR = "linearfactor";
+const string XML_RIGIDBODY_LINEARVELOCITY = "linearvelocity";
+const string XML_RIGIDBODY_ANGULARFACTOR = "angularfactor";
+const string XML_RIGIDBODY_ANGULARVELOCITY = "angularvelocity";
+const string XML_RIGIDBODY_GRAVITY = "gravity";
+
 
 btDefaultMotionState* getMotionState(const Entity* entity);
 btVector3 v3(const Vector3& v);
@@ -46,8 +61,9 @@ Quaternion quat(const btQuaternion& q);
 
 
 
-RigidBody::RigidBody(Entity* const entity, PhysicsWorld* physicsWorld):
+RigidBody::RigidBody(Entity* const entity, Resources* resources, PhysicsWorld* physicsWorld):
     Component(COMPONENT_RIGIDBODY, entity),
+    m_resources(resources),
     m_physicsWorld(physicsWorld),
     m_shapeId(""),
     m_rigidBody(0),
@@ -131,7 +147,7 @@ Vector3 RigidBody::getLinearFactor() const {
     return v3(m_rigidBody->getLinearFactor());
 }
 
-Vector3 RigidBody::getLinearVelocity() {
+Vector3 RigidBody::getLinearVelocity() const {
     return v3(m_rigidBody->getLinearVelocity());
 }
 
@@ -139,7 +155,7 @@ Vector3 RigidBody::getAngularFactor() const {
     return v3(m_rigidBody->getAngularFactor());
 }
 
-Vector3 RigidBody::getAngularVelocity() {
+Vector3 RigidBody::getAngularVelocity() const {
     return v3(m_rigidBody->getAngularVelocity());
 }
 
@@ -299,7 +315,7 @@ void RigidBody::addCone(const double mass, const double radius, const double hei
     addRigidBody(mass, shape);
 }
 
-void RigidBody::addConvexHull(const double mass, const string& fileName, Resources* resources) {
+void RigidBody::addConvexHull(const double mass, const string& fileName) {
     stringstream ss;
     ss << COLLISION_SHAPE_CONVEX << " " << fileName;
     m_shapeId = ss.str();
@@ -311,7 +327,7 @@ void RigidBody::addConvexHull(const double mass, const string& fileName, Resourc
     it = collisionShapes.find(m_shapeId);
     if (it == collisionShapes.end()) {
         // build original mesh from file
-        Model* model = resources->generateModelFromFile(fileName);
+        Model* model = m_resources->generateModelFromFile(fileName);
         cout << "Generating convex hull from file: " << fileName << endl;
         vector<float> points;
         for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
@@ -339,7 +355,7 @@ void RigidBody::addConvexHull(const double mass, const string& fileName, Resourc
     addRigidBody(mass, shape);
 }
 
-void RigidBody::addConcaveHull(const double mass, const string& fileName, Resources* resources) {
+void RigidBody::addConcaveHull(const double mass, const string& fileName) {
     stringstream ss;
     ss << COLLISION_SHAPE_CONCAVE << " " << fileName;
     m_shapeId = ss.str();
@@ -351,7 +367,7 @@ void RigidBody::addConcaveHull(const double mass, const string& fileName, Resour
     it = collisionShapes.find(m_shapeId);
     if (it == collisionShapes.end()) {
         // build mesh from file
-        Model* model = resources->generateModelFromFile(fileName);
+        Model* model = m_resources->generateModelFromFile(fileName);
         cout << "Generating concave hull from file: " << fileName << endl;
         btTriangleIndexVertexArray* triangles = new btTriangleIndexVertexArray();
         for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
@@ -375,10 +391,119 @@ void RigidBody::addConcaveHull(const double mass, const string& fileName, Resour
     addRigidBody(mass, shape);
 }
 
+void RigidBody::loadFromPtree(const string& path, const ptree& tree) {
+    m_mass = tree.get<double>(ptree::path_type(path + XML_RIGIDBODY_MASS, XML_DELIMITER[0]), 0.0);
+    string shape = tree.get<string>(ptree::path_type(path + XML_RIGIDBODY_COLLISIONSHAPE, XML_DELIMITER[0]), "empty");
+    stringstream ss(shape);
+    ss >> shape;
+    if (shape.compare(COLLISION_SHAPE_CONVEX) == 0) {
+        string file;
+        ss >> file;
+        addConvexHull(m_mass, file);
+    }
+    else if (shape.compare(COLLISION_SHAPE_BOX) == 0) {
+        double x, y, z;
+        ss >> x >> y >> z;
+        addBox(m_mass, x, y, z);
+    }
+    else if (shape.compare(COLLISION_SHAPE_SPHERE) == 0) {
+        double r;
+        ss >> r;
+        addSphere(m_mass, r);
+    }
+    else if (shape.compare(COLLISION_SHAPE_CAPSULE) == 0) {
+        double r, h;
+        ss >> r >> h;
+        addCapsule(m_mass, r, h);
+    }
+    else if (shape.compare(COLLISION_SHAPE_CYLINDER) == 0) {
+        double r, h;
+        ss >> r >> h;
+        addCylinder(m_mass, r, h);
+    }
+    else if (shape.compare(COLLISION_SHAPE_CONE) == 0) {
+        double r, h;
+        ss >> r >> h;
+        addCone(m_mass, r, h);
+    }
+    else if (shape.compare(COLLISION_SHAPE_CONCAVE) == 0) {
+        string file;
+        ss >> file;
+        addConcaveHull(m_mass, file);
+    }
+    else
+        cerr << "Error: unknown rigidbody collisionshape: " << shape << endl;
+
+    double x, y;
+    x = tree.get<double>(ptree::path_type(path + XML_RIGIDBODY_FRICTION, XML_DELIMITER[0]), 0.5);
+    setFriction(x);
+    x = tree.get<double>(ptree::path_type(path + XML_RIGIDBODY_ROLLINGFRICTION, XML_DELIMITER[0]), 0.1);
+    setRollingFriction(x);
+
+    string str;
+    str = tree.get<string>(ptree::path_type(path + XML_RIGIDBODY_DAMPING, XML_DELIMITER[0]), "0 0");
+    stringstream damping(str);
+    damping >> x >> y;
+    setDamping(x, y);
+
+    str = tree.get<string>(ptree::path_type(path + XML_RIGIDBODY_SLEEPINGTHRESHOLDS, XML_DELIMITER[0]), "0.8 1");
+    stringstream sleeping(str);
+    sleeping >> x >> y;
+    setSleepingThresholds(x, y);
+
+    x = tree.get<double>(ptree::path_type(path + XML_RIGIDBODY_RESTITUTION, XML_DELIMITER[0]), 0.0);
+    setRestitution(x);
+
+    Vector3 vect;
+    vect = tree.get<Vector3>(ptree::path_type(path + XML_RIGIDBODY_LINEARFACTOR, XML_DELIMITER[0]), VECTOR3_UNIT);
+    setLinearFactor(vect);
+    vect = tree.get<Vector3>(ptree::path_type(path + XML_RIGIDBODY_LINEARVELOCITY, XML_DELIMITER[0]), VECTOR3_ZERO);
+    setLinearVelocity(vect);
+    vect = tree.get<Vector3>(ptree::path_type(path + XML_RIGIDBODY_ANGULARFACTOR, XML_DELIMITER[0]), VECTOR3_UNIT);
+    setAngularFactor(vect);
+    vect = tree.get<Vector3>(ptree::path_type(path + XML_RIGIDBODY_ANGULARVELOCITY, XML_DELIMITER[0]), VECTOR3_ZERO);
+    setAngularVelocity(vect);
+    vect = tree.get<Vector3>(ptree::path_type(path + XML_RIGIDBODY_GRAVITY, XML_DELIMITER[0]), Vector3(0.0, -9.8, 0.0));
+    setGravity(vect);
+}
+
+void RigidBody::saveToPtree(const string& path, ptree& tree) const {
+    string attr;
+    attr = path + XML_RIGIDBODY_MASS;
+    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getMass());
+    attr = path + XML_RIGIDBODY_COLLISIONSHAPE;
+    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getShapeId());
+    attr = path + XML_RIGIDBODY_DAMPING;
+    stringstream damping;
+    damping << getLinearDamping() << " " << getAngularDamping();
+    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), damping.str());
+    attr = path + XML_RIGIDBODY_FRICTION;
+    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getFriction());
+    attr = path + XML_RIGIDBODY_ROLLINGFRICTION;
+    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getRollingFriction());
+    attr = path + XML_RIGIDBODY_RESTITUTION;
+    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getRestitution());
+    attr = path + XML_RIGIDBODY_SLEEPINGTHRESHOLDS;
+    stringstream sleeping;
+    sleeping << getLinearSleepingThreshold() << " " << getAngularSleepingThreshold();
+    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), sleeping.str());
+    attr = path + XML_RIGIDBODY_LINEARFACTOR;
+    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getLinearFactor());
+    attr = path + XML_RIGIDBODY_LINEARVELOCITY;
+    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getLinearVelocity());
+    attr = path + XML_RIGIDBODY_ANGULARFACTOR;
+    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getAngularFactor());
+    attr = path + XML_RIGIDBODY_ANGULARVELOCITY;
+    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getAngularVelocity());
+    attr = path + XML_RIGIDBODY_GRAVITY;
+    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getGravity());
+}
+
 
 
 RigidBody::RigidBody(const RigidBody& rhs):
     Component(rhs.m_type, rhs.m_entity),
+    m_resources(rhs.m_resources),
     m_physicsWorld(rhs.m_physicsWorld),
     m_shapeId(rhs.m_shapeId),
     m_rigidBody(rhs.m_rigidBody),

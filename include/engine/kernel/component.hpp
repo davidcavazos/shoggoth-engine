@@ -28,6 +28,7 @@
 #define COMPONENT_HPP
 
 #include <string>
+#include "xmlinfo.hpp"
 
 class Entity;
 
@@ -40,6 +41,9 @@ public:
     Entity* entity();
     const std::string& getType() const;
     const std::string& getDescription() const;
+
+    virtual void loadFromPtree(const std::string& path, const boost::property_tree::ptree& tree) = 0;
+    virtual void saveToPtree(const std::string& path, boost::property_tree::ptree& tree) const = 0;
 
 protected:
     Entity* m_entity;

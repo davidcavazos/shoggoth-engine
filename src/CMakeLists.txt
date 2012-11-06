@@ -2,6 +2,7 @@ set(EXE_NAME marble-madness-3d)
 
 # Target
 set(SRC_FILES
+    testcomponent.cpp
     demo.cpp
     main.cpp
 )

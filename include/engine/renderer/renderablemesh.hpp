@@ -50,6 +50,9 @@ public:
     void loadBox(const double lengthX, const double lengthY, const double lengthZ);
     void loadFromFile(const std::string& fileName);
 
+    void loadFromPtree(const std::string& path, const boost::property_tree::ptree& tree);
+    void saveToPtree(const std::string& path, boost::property_tree::ptree& tree) const;
+
 private:
     Renderer* m_renderer;
     Resources* m_resources;

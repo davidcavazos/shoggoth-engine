@@ -33,6 +33,10 @@
 #include "engine/resources/resources.hpp"
 
 using namespace std;
+using namespace boost::property_tree;
+
+const string XML_RENDERABLEMESH_MODEL = "model";
+
 
 RenderableMesh::RenderableMesh(Entity* const entity, Renderer* renderer, Resources* resources):
     Component(COMPONENT_RENDERABLEMESH, entity),
@@ -68,6 +72,29 @@ void RenderableMesh::loadFromFile(const string& fileName) {
     m_model = m_resources->generateModelFromFile(fileName);
 }
 
+void RenderableMesh::loadFromPtree(const string& path, const ptree& tree) {
+    string model = tree.get<string>(ptree::path_type(path + XML_RENDERABLEMESH_MODEL, XML_DELIMITER[0]), "empty");
+    stringstream ss(model);
+    ss >> model;
+    if (model.compare(RENDERABLEMESH_BOX_DESCRIPTION) == 0) {
+        double x, y, z;
+        ss >> x >> y >> z;
+        loadBox(x, y, z);
+    }
+    else if (model.compare(RENDERABLEMESH_FILE_DESCRIPTION) == 0) {
+        string file;
+        ss >> file;
+        loadFromFile(file);
+    }
+    else
+        cerr << "Error: unknown renderablemesh model type: " << model << endl;
+}
+
+void RenderableMesh::saveToPtree(const string& path, ptree& tree) const {
+    string attr;
+    attr = path + XML_RENDERABLEMESH_MODEL;
+    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getDescription());
+}
 
 
 RenderableMesh::RenderableMesh(const RenderableMesh& rhs):

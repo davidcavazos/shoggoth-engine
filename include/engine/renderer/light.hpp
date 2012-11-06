@@ -66,6 +66,9 @@ public:
     void setSpecular(const color4_t& color);
     void setSpecular(const float r, const float g, const float b, const float a = 1.0f);
 
+    void loadFromPtree(const std::string& path, const boost::property_tree::ptree& tree);
+    void saveToPtree(const std::string& path, boost::property_tree::ptree& tree) const;
+
 private:
     Renderer* m_renderer;
     color4_t m_ambient;

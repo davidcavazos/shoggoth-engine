@@ -55,7 +55,7 @@ typedef enum {
 
 class RigidBody: public Component {
 public:
-    RigidBody(Entity* const entity, PhysicsWorld* physicsWorld);
+    RigidBody(Entity* const entity, Resources* resources, PhysicsWorld* physicsWorld);
     ~RigidBody();
 
     Vector3 getPosition();
@@ -70,9 +70,9 @@ public:
     double getLinearSleepingThreshold() const;
     double getAngularSleepingThreshold() const;
     Vector3 getLinearFactor() const;
-    Vector3 getLinearVelocity();
+    Vector3 getLinearVelocity() const;
     Vector3 getAngularFactor() const;
-    Vector3 getAngularVelocity();
+    Vector3 getAngularVelocity() const;
     Vector3 getGravity() const;
 
     void activate(const bool forceActivate = true);
@@ -94,10 +94,14 @@ public:
     void addCylinder(const double mass, const double radius, const double height);
     void addCapsule(const double mass, const double radius, const double height);
     void addCone(const double mass, const double radius, const double height);
-    void addConvexHull(const double mass, const std::string& fileName, Resources* resources);
-    void addConcaveHull(const double mass, const std::string& fileName, Resources* resources);
+    void addConvexHull(const double mass, const std::string& fileName);
+    void addConcaveHull(const double mass, const std::string& fileName);
+
+    void loadFromPtree(const std::string& path, const boost::property_tree::ptree& tree);
+    void saveToPtree(const std::string& path, boost::property_tree::ptree& tree) const;
 
 private:
+    Resources* m_resources;
     PhysicsWorld* m_physicsWorld;
     std::string m_shapeId;
     btRigidBody* m_rigidBody;
