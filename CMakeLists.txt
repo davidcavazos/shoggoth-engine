@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(marble-madness-3d)
+project(shoggoth-engine)
 
 # Compiler flags
 if (CMAKE_COMPILER_IS_GNUCXX)

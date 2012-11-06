@@ -1,4 +1,4 @@
-set(EXE_NAME marble-madness-3d)
+set(EXE_NAME shoggoth-demo)
 
 # Target
 set(SRC_FILES
