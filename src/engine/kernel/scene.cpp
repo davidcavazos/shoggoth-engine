@@ -238,16 +238,16 @@ bool Scene::loadFromPTree(const string& path,
         }
         else if (type.compare(XML_ATTR_TYPE_COMPONENT) == 0) {
             Component* component = 0;
+            if (name.compare(COMPONENT_CAMERA) == 0)
+                isCameraFound = true;
             if (name.compare(COMPONENT_RENDERABLEMESH) == 0)
                 component = new RenderableMesh(node, m_renderer, m_resources);
             else if (name.compare(COMPONENT_RIGIDBODY) == 0)
                 component = new RigidBody(node, m_resources, m_physicsWorld);
             else if (name.compare(COMPONENT_LIGHT) == 0)
                 component = new Light(node, m_renderer);
-            else if (name.compare(COMPONENT_CAMERA) == 0) {
+            else if (name.compare(COMPONENT_CAMERA) == 0)
                 component = new Camera(node, m_renderer);
-                isCameraFound = true;
-            }
             else
                 cerr << "Error: unknown component: " << name << endl;
             if (component != 0)

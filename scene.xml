@@ -23,5 +23,10 @@
     <camera type="entity" position="0 4 10" orientation="0.995004 -0.0998334 0 0">
       <camera type="component" cameratype="1" perspectivefov="45" orthoheight="10" neardistance="0.1" fardistance="1000"/>
     </camera>
+    <test type="entity" position="0 8 -3" orientation="1 0 0 0">
+      <renderablemesh type="component" model="$box 3 3 3"/>
+      <rigidbody type="component" collisionshape="#box 3 3 3" mass="10" friction="1"/>
+      <testcomponent type="component" health="100"/>
+    </test>
   </root>
 </scene>
