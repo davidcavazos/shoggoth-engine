@@ -30,6 +30,8 @@
 #include <iostream>
 #include "engine/kernel/component.hpp"
 
+const std::string COMPONENT_LIGHT = "light";
+
 class Renderer;
 
 class color4_t {

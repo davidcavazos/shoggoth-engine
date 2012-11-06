@@ -28,8 +28,8 @@
 #define ENTITY_HPP
 
 #include <ostream>
-#include <vector>
 #include <set>
+#include <map>
 #include "commandobject.hpp"
 #include "vector3.hpp"
 #include "quaternion.hpp"
@@ -47,10 +47,11 @@ typedef enum {
 class Entity: public CommandObject {
 public:
     friend class Component;
-    friend std::ostream& operator<<(std::ostream& out, const Entity& rhs);
 
     typedef std::set<Entity*>::const_iterator const_child_iterator_t;
     typedef std::set<Entity*>::iterator child_iterator_t;
+    typedef std::map<std::string, Component*>::const_iterator const_component_iterator_t;
+    typedef std::map<std::string, Component*>::iterator component_iterator_t;
 
     Entity(Entity* parent, const std::string& objectName, const Device* device);
     ~Entity();
@@ -61,11 +62,16 @@ public:
     const Vector3& getPositionRel() const;
     const Quaternion& getOrientationAbs() const;
     const Quaternion& getOrientationRel() const;
-    const Component* getComponent(const component_t i) const;
+    const Component* getComponent(const std::string& componentName) const;
+    Component* component(const std::string& componentName);
     const_child_iterator_t getChildrenBegin() const;
     child_iterator_t getChildrenBegin();
     const_child_iterator_t getChildrenEnd() const;
     child_iterator_t getChildrenEnd();
+    const_component_iterator_t getComponentBegin() const;
+    component_iterator_t getComponentBegin();
+    const_component_iterator_t getComponentEnd() const;
+    component_iterator_t getComponentEnd();
 
     void setParent(Entity* parent);
     void setPositionAbs(const Vector3& position);
@@ -104,7 +110,7 @@ private:
     Entity* m_parent;
     const Device* m_device;
     std::set<Entity*> m_children;
-    std::vector<Component*> m_components;
+    std::map<std::string, Component*> m_components;
     Vector3 m_positionAbs;
     Vector3 m_positionRel;
     Quaternion m_orientationAbs;
@@ -172,8 +178,22 @@ inline const Quaternion& Entity::getOrientationRel() const {
     return m_orientationRel;
 }
 
-inline const Component* Entity::getComponent(const component_t i) const {
-    return m_components[i];
+inline const Component* Entity::getComponent(const std::string& componentName) const {
+    std::map<std::string, Component*>::const_iterator it;
+    it = m_components.find(componentName);
+    if (it != m_components.end())
+        return it->second;
+    else
+        return 0;
+}
+
+inline Component* Entity::component(const std::string& componentName) {
+    std::map<std::string, Component*>::iterator it;
+    it = m_components.find(componentName);
+    if (it != m_components.end())
+        return it->second;
+    else
+        return 0;
 }
 
 inline Entity::const_child_iterator_t Entity::getChildrenBegin() const {
@@ -190,6 +210,22 @@ inline Entity::const_child_iterator_t Entity::getChildrenEnd() const {
 
 inline Entity::child_iterator_t Entity::getChildrenEnd() {
     return m_children.end();
+}
+
+inline Entity::const_component_iterator_t Entity::getComponentBegin() const {
+    return m_components.begin();
+}
+
+inline Entity::component_iterator_t Entity::getComponentBegin() {
+    return m_components.begin();
+}
+
+inline Entity::const_component_iterator_t Entity::getComponentEnd() const {
+    return m_components.end();
+}
+
+inline Entity::component_iterator_t Entity::getComponentEnd() {
+    return m_components.end();
 }
 
 

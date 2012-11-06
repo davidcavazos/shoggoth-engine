@@ -35,7 +35,7 @@
 using namespace std;
 
 RenderableMesh::RenderableMesh(Entity* const entity, Renderer* renderer, Resources* resources):
-    Component(COMPONENT_RENDERABLE_MESH, entity),
+    Component(COMPONENT_RENDERABLEMESH, entity),
     m_renderer(renderer),
     m_resources(resources),
     m_model(0)

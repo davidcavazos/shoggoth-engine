@@ -378,7 +378,7 @@ void RigidBody::addConcaveHull(const double mass, const string& fileName, Resour
 
 
 RigidBody::RigidBody(const RigidBody& rhs):
-    Component(COMPONENT_RIGIDBODY, rhs.m_entity),
+    Component(rhs.m_type, rhs.m_entity),
     m_physicsWorld(rhs.m_physicsWorld),
     m_shapeId(rhs.m_shapeId),
     m_rigidBody(rhs.m_rigidBody),

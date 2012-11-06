@@ -30,6 +30,8 @@
 #include <iostream>
 #include "engine/kernel/component.hpp"
 
+const std::string COMPONENT_CAMERA = "camera";
+
 class Renderer;
 
 typedef enum {
@@ -46,10 +48,10 @@ typedef struct {
 
 class Camera: public Component {
 public:
-    Camera(Entity* const entity, const camera_t type, Renderer* renderer);
+    Camera(Entity* const entity, const camera_t cameraType, Renderer* renderer);
     ~Camera();
 
-    camera_t getType() const;
+    camera_t getCameraType() const;
     bool hasChanged() const;
     const viewport_t& getViewport() const;
     float getAspectRatio() const;
@@ -58,7 +60,7 @@ public:
     float getOrthoHeight() const;
     float getNearDistance() const;
     float getFarDistance() const;
-    void setType(const camera_t type);
+    void setCameraType(const camera_t cameraType);
     void setHasChanged(const bool hasChanged);
     void setViewport(const int posX, const int posY, const size_t width, const size_t height);
     void setPerspectiveFOV(const float fov);
@@ -67,7 +69,7 @@ public:
     void setFarDistance(const float farDistance);
 
 private:
-    camera_t m_type;
+    camera_t m_cameraType;
     Renderer* m_renderer;
     bool m_hasChanged;
     viewport_t m_viewport;
@@ -101,8 +103,8 @@ inline std::istream& operator>>(std::istream& in, viewport_t& rhs) {
 
 
 
-inline camera_t Camera::getType() const {
-    return m_type;
+inline camera_t Camera::getCameraType() const {
+    return m_cameraType;
 }
 
 inline bool Camera::hasChanged() const {
@@ -137,8 +139,8 @@ inline float Camera::getFarDistance() const {
     return m_farDistance;
 }
 
-inline void Camera::setType(const camera_t type) {
-    m_type = type;
+inline void Camera::setCameraType(const camera_t cameraType) {
+    m_cameraType = cameraType;
     m_hasChanged = true;
 }
 

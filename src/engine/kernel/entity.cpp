@@ -43,7 +43,7 @@ Entity::Entity(Entity* parent, const string& objectName, const Device* device):
     m_parent(parent),
     m_device(device),
     m_children(),
-    m_components(TOTAL_COMPONENTS_CONTAINER_SIZE, 0),
+    m_components(),
     m_positionAbs(VECTOR3_ZERO),
     m_positionRel(VECTOR3_ZERO),
     m_orientationAbs(QUATERNION_IDENTITY),
@@ -153,14 +153,14 @@ void Entity::removeChild(Entity* const child) {
 }
 
 void Entity::removeAllChildren() {
-    for (size_t i = 0; i < m_components.size(); ++i) {
-        delete m_components[i];
-        m_components[i] = 0;
-    }
+    map<string, Component*>::iterator itComp;
+    for (itComp = m_components.begin(); itComp != m_components.end(); ++itComp)
+        delete itComp->second;
+    m_components.clear();
 
-    set<Entity*>::iterator it;
-    for (it = m_children.begin(); it != m_children.end(); ++it)
-        delete *it;
+    set<Entity*>::iterator itEntity;
+    for (itEntity = m_children.begin(); itEntity != m_children.end(); ++itEntity)
+        delete *itEntity;
     m_children.clear();
 
     Scene::ms_entities.clear();
@@ -228,8 +228,9 @@ void Entity::applyOrientationToChildren() {
 }
 
 void Entity::applyTransformToPhysicsComponent() {
-    if (m_components[COMPONENT_RIGIDBODY] != 0) {
-        RigidBody* rigidBody = dynamic_cast<RigidBody*>(m_components[COMPONENT_RIGIDBODY]);
+    Component* comp = component(COMPONENT_RIGIDBODY);
+    if (comp != 0) {
+        RigidBody* rigidBody = dynamic_cast<RigidBody*>(comp);
         rigidBody->activate();
         rigidBody->setTransform(m_positionAbs, m_orientationAbs);
     }
@@ -419,21 +420,4 @@ void Entity::cmdRoll_global(const std::string& arg) {
     stringstream ss(arg);
     ss >> radians;
     roll(radians * m_device->getDeltaTime(), SPACE_GLOBAL);
-}
-
-ostream& operator<<(ostream& out, const Entity& rhs) {
-    out << "position(" << rhs.getPositionAbs().getX() << ", " <<
-            rhs.getPositionAbs().getY() << ", " <<
-            rhs.getPositionAbs().getZ() << ")" << endl;
-
-    out << "rotation(" << rhs.getOrientationAbs().getW() << ", " <<
-            rhs.getOrientationAbs().getX() << ", " <<
-            rhs.getOrientationAbs().getY() << ", " <<
-            rhs.getOrientationAbs().getZ() << ")" << endl;
-
-    for (size_t i = 0; i < rhs.m_components.size(); ++i) {
-        if (rhs.m_components[i] != 0)
-            out << "    " << *rhs.m_components[i] << endl;
-    }
-    return out;
 }

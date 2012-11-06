@@ -30,6 +30,8 @@
 #include "engine/kernel/component.hpp"
 #include "engine/kernel/vector3.hpp"
 
+const std::string COMPONENT_RIGIDBODY = "rigidbody";
+
 const std::string COLLISION_SHAPE_BOX = "#box";
 const std::string COLLISION_SHAPE_SPHERE = "#sphere";
 const std::string COLLISION_SHAPE_CYLINDER = "#cylinder";

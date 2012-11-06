@@ -29,6 +29,8 @@
 
 #include "engine/kernel/component.hpp"
 
+const std::string COMPONENT_RENDERABLEMESH = "renderablemesh";
+
 const std::string RENDERABLEMESH_BOX_DESCRIPTION = "$box";
 const std::string RENDERABLEMESH_FILE_DESCRIPTION = "$file";
 

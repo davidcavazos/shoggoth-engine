@@ -620,7 +620,7 @@ void Renderer::initCamera() const {
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    switch (m_activeCamera->getType()) {
+    switch (m_activeCamera->getCameraType()) {
         case CAMERA_ORTHOGRAPHIC:
             glOrtho(
                 -m_activeCamera->getOrthoWidth(),

@@ -31,27 +31,19 @@
 
 class Entity;
 
-typedef enum {
-    COMPONENT_CAMERA,
-    COMPONENT_LIGHT,
-    COMPONENT_RENDERABLE_MESH,
-    COMPONENT_RIGIDBODY,
-    TOTAL_COMPONENTS_CONTAINER_SIZE // Do not use as a component, gives size to component container
-} component_t;
-
 class Component {
 public:
-    Component(const component_t type, Entity* const entity);
+    Component(const std::string& type, Entity* const entity);
     virtual ~Component();
 
     const Entity* getEntity() const;
     Entity* entity();
-    const component_t& getType() const;
+    const std::string& getType() const;
     const std::string& getDescription() const;
 
 protected:
     Entity* m_entity;
-    const component_t m_type;
+    std::string m_type;
     std::string m_description;
 
 private:
@@ -71,7 +63,7 @@ inline Entity* Component::entity() {
     return m_entity;
 }
 
-inline const component_t& Component::getType() const {
+inline const std::string& Component::getType() const {
     return m_type;
 }
 

@@ -37,9 +37,9 @@ const float DEFAULT_ORTHO_HEIGHT = 10.0f;
 const float DEFAULT_NEAR_DISTANCE = 0.1f;
 const float DEFAULT_FAR_DISTANCE = 1000.0f;
 
-Camera::Camera(Entity* const entity, const camera_t type, Renderer* renderer):
+Camera::Camera(Entity* const entity, const camera_t cameraType, Renderer* renderer):
     Component(COMPONENT_CAMERA, entity),
-    m_type(type),
+    m_cameraType(cameraType),
     m_renderer(renderer),
     m_hasChanged(true),
     m_viewport(),
@@ -50,7 +50,7 @@ Camera::Camera(Entity* const entity, const camera_t type, Renderer* renderer):
     m_farDistance(DEFAULT_FAR_DISTANCE)
 {
     m_description = CAMERA_DESCRIPTION + "_";
-    switch (m_type) {
+    switch (m_cameraType) {
     case CAMERA_ORTHOGRAPHIC:
         m_description.append("ORTHOGRAPHIC");
         break;
@@ -83,8 +83,8 @@ Camera::~Camera() {
 
 
 Camera::Camera(const Camera& rhs):
-    Component(COMPONENT_CAMERA, rhs.m_entity),
-    m_type(rhs.m_type),
+    Component(rhs.m_type, rhs.m_entity),
+    m_cameraType(rhs.m_cameraType),
     m_renderer(rhs.m_renderer),
     m_hasChanged(rhs.m_hasChanged),
     m_viewport(rhs.m_viewport),
@@ -106,7 +106,7 @@ void Camera::cmdType(const std::string& arg) {
     int type;
     stringstream ss(arg);
     ss >> type;
-    setType(static_cast<camera_t>(type));
+    setCameraType(static_cast<camera_t>(type));
 }
 
 void Camera::cmdPerspectiveFOV(const std::string& arg) {

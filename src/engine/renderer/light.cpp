@@ -109,7 +109,7 @@ void Light::setSpecular(const float r, const float g, const float b, const float
 
 
 Light::Light(const Light& rhs):
-    Component(COMPONENT_LIGHT, rhs.m_entity),
+    Component(rhs.m_type, rhs.m_entity),
     m_renderer(rhs.m_renderer),
     m_ambient(rhs.m_ambient),
     m_diffuse(rhs.m_diffuse),

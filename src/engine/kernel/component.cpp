@@ -32,16 +32,16 @@
 
 using namespace std;
 
-Component::Component(const component_t type, Entity* const entity):
+Component::Component(const string& type, Entity* const entity):
     m_entity(entity),
     m_type(type),
     m_description()
 {
-    m_entity->m_components[m_type] = this;
+    m_entity->m_components.insert(pair<string, Component*>(m_type, this));
 }
 
 Component::~Component() {
-    m_entity->m_components[m_type] = 0;
+    m_entity->m_components.erase(m_type);
 }
 
 Component::Component(const Component& rhs):
@@ -55,21 +55,4 @@ Component::Component(const Component& rhs):
 Component& Component::operator=(const Component&) {
     cerr << "Error: Component assignment operator should not be called!" << endl;
     return *this;
-}
-
-ostream& operator<<(ostream& out, const Component& rhs) {
-    switch (rhs.getType()) {
-    case COMPONENT_CAMERA:
-        out << "CAMERA";
-        break;
-    case COMPONENT_RENDERABLE_MESH:
-        out << "RENDERABLE_MESH";
-        break;
-    case COMPONENT_RIGIDBODY:
-        out << "PHYSICS";
-        break;
-    default:
-        out << "INVALID";
-    }
-    return out;
 }
