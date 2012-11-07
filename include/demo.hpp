@@ -32,6 +32,7 @@
 #include "engine/renderer/renderer.hpp"
 #include "engine/physics/physicsworld.hpp"
 #include "engine/resources/resources.hpp"
+#include "testcomponentfactory.hpp"
 
 class Demo: public CommandObject {
 public:
@@ -54,6 +55,7 @@ private:
     Renderer m_renderer;
     Resources m_resources;
     PhysicsWorld m_physicsWorld;
+    TestComponentFactory m_componentFactory;
     Scene m_scene;
 
     void cmdQuit(const std::string&);

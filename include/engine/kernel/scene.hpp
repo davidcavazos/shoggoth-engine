@@ -33,6 +33,8 @@
 #include "commandobject.hpp"
 
 class Entity;
+class Component;
+class ComponentFactory;
 class Device;
 class Renderer;
 class Resources;
@@ -44,6 +46,7 @@ public:
 
     Scene(const std::string& objectName,
           const std::string& rootNodeName,
+          const ComponentFactory* componentFactory,
           const Device* device,
           Renderer* renderer,
           Resources* resources,
@@ -61,7 +64,8 @@ public:
     bool findEntity(const std::string& name, Entity*& entity);
     std::string sceneGraphToString();
 
-private:
+protected:
+    const ComponentFactory* m_componentFactory;
     const Device* m_device;
     Renderer* m_renderer;
     Resources* m_resources;
@@ -70,6 +74,7 @@ private:
     Entity* m_root;
     static std::map<std::string, Entity*> ms_entities;
 
+private:
     Scene(const Scene& rhs);
     Scene& operator=(const Scene&);
 

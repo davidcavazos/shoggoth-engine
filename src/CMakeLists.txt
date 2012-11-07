@@ -2,6 +2,7 @@ set(EXE_NAME shoggoth-demo)
 
 # Target
 set(SRC_FILES
+    testcomponentfactory.cpp
     testcomponent.cpp
     demo.cpp
     main.cpp

@@ -29,6 +29,9 @@
 #include "engine/kernel/entity.hpp"
 
 using namespace std;
+using namespace boost::property_tree;
+
+const string XML_HEALTH = "health";
 
 TestComponent::TestComponent(Entity* const entity):
     Component(COMPONENT_TESTCOMPONENT, entity),
@@ -40,6 +43,19 @@ TestComponent::TestComponent(Entity* const entity):
 TestComponent::~TestComponent() {
     m_entity->unregisterAttribute("health");
 }
+
+
+void TestComponent::loadFromPtree(const string& path, const ptree& tree) {
+    m_health = tree.get<double>(ptree::path_type(path + XML_HEALTH, XML_DELIMITER[0]), 100.0);
+}
+
+void TestComponent::saveToPtree(const string& path, ptree& tree) const {
+    string attr;
+    attr = path + XML_HEALTH;
+    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getHealth());
+}
+
+
 
 void TestComponent::cmdHealth(const string& arg) {
     stringstream ss(arg);

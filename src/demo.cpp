@@ -57,7 +57,8 @@ Demo::Demo(const string& objectName,
     m_renderer(rendererName, &m_device),
     m_resources(resourcesName, &m_renderer),
     m_physicsWorld(physicsWorldName),
-    m_scene(sceneName, rootNodeName, &m_device, &m_renderer, &m_resources, &m_physicsWorld)
+    m_componentFactory(&m_renderer, &m_resources, &m_physicsWorld),
+    m_scene(sceneName, rootNodeName, &m_componentFactory, &m_device, &m_renderer, &m_resources, &m_physicsWorld)
 {
     registerCommand("quit", boost::bind(&Demo::cmdQuit, this, _1));
     registerCommand("run", boost::bind(&Demo::cmdRunCommand, this, _1));

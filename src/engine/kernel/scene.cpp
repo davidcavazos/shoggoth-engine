@@ -32,11 +32,8 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include "engine/kernel/xmlinfo.hpp"
 #include "engine/kernel/entity.hpp"
+#include <engine/kernel/componentfactory.hpp>
 #include "engine/renderer/camera.hpp"
-#include "engine/renderer/light.hpp"
-#include "engine/renderer/renderablemesh.hpp"
-#include "engine/resources/model.hpp"
-#include "engine/physics/rigidbody.hpp"
 
 using namespace std;
 using namespace boost::property_tree;
@@ -45,11 +42,13 @@ map<string, Entity*> Scene::ms_entities = map<string, Entity*>();
 
 Scene::Scene(const std::string& objectName,
              const std::string& rootNodeName,
+             const ComponentFactory* componentFactory,
              const Device* device,
              Renderer* renderer,
              Resources* resources,
              PhysicsWorld* physicsWorld):
     CommandObject(objectName),
+    m_componentFactory(componentFactory),
     m_device(device),
     m_renderer(renderer),
     m_resources(resources),
@@ -139,6 +138,7 @@ string Scene::sceneGraphToString() {
 
 Scene::Scene(const Scene& rhs):
     CommandObject(rhs.m_objectName),
+    m_componentFactory(rhs.m_componentFactory),
     m_device(rhs.m_device),
     m_renderer(rhs.m_renderer),
     m_resources(rhs.m_resources),
@@ -237,21 +237,13 @@ bool Scene::loadFromPTree(const string& path,
                 return false;
         }
         else if (type.compare(XML_ATTR_TYPE_COMPONENT) == 0) {
-            Component* component = 0;
             if (name.compare(COMPONENT_CAMERA) == 0)
                 isCameraFound = true;
-            if (name.compare(COMPONENT_RENDERABLEMESH) == 0)
-                component = new RenderableMesh(node, m_renderer, m_resources);
-            else if (name.compare(COMPONENT_RIGIDBODY) == 0)
-                component = new RigidBody(node, m_resources, m_physicsWorld);
-            else if (name.compare(COMPONENT_LIGHT) == 0)
-                component = new Light(node, m_renderer);
-            else if (name.compare(COMPONENT_CAMERA) == 0)
-                component = new Camera(node, m_renderer);
-            else
-                cerr << "Error: unknown component: " << name << endl;
+            Component* component = m_componentFactory->create(name, node);
             if (component != 0)
                 component->loadFromPtree(attrPath, tree);
+            else
+                cerr << "Error: unknown component: " << name << endl;
         }
         else if (type.compare(XML_ATTR_TYPE_ROOT) == 0)
             cerr << "Error: invalid root node path: " << path << endl;

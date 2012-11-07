@@ -38,6 +38,9 @@ public:
 
     double getHealth() const;
 
+    void loadFromPtree(const std::string& path, const boost::property_tree::ptree& tree);
+    void saveToPtree(const std::string& path, boost::property_tree::ptree& tree) const;
+
 private:
     double m_health;
 

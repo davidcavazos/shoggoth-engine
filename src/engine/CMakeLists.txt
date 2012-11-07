@@ -11,6 +11,7 @@ set(KERNEL_SRC_FILES
 
     kernel/entity.cpp
     kernel/component.cpp
+    kernel/componentfactory.cpp
     kernel/scene.cpp
 
     kernel/inputs.cpp

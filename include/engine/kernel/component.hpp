@@ -31,6 +31,9 @@
 #include "xmlinfo.hpp"
 
 class Entity;
+class Renderer;
+class Resources;
+class PhysicsWorld;
 
 class Component {
 public:
