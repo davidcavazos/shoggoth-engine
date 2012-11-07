@@ -20,3 +20,10 @@ Concave hulls in RigidBody crash!
 
 NOTES:
 All components must remove at destructor ONLY the commands and attributes created by it, all other objects can safely remove all
+
+Wiki:
+Complete Design pages https://github.com/davido262/shoggoth-engine/wiki/Design
+Describe all managers and components (in separate pages) https://github.com/davido262/shoggoth-engine/wiki/Entity-Component-Model
+Describe all commands https://github.com/davido262/shoggoth-engine/wiki/List-of-Commands
+Complete installation guides
+Add tutorials
