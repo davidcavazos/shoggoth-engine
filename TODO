@@ -25,5 +25,9 @@ Wiki:
 Complete Design pages https://github.com/davido262/shoggoth-engine/wiki/Design
 Describe all managers and components (in separate pages) https://github.com/davido262/shoggoth-engine/wiki/Entity-Component-Model
 Describe all commands https://github.com/davido262/shoggoth-engine/wiki/List-of-Commands
-Complete installation guides
-Add tutorials
+Complete installation guides https://github.com/davido262/shoggoth-engine/wiki/Installation
+
+Finish OpenGL Renderer https://github.com/davido262/shoggoth-engine/wiki/OpenGL-Renderer
+Finish Data Structures and Organization https://github.com/davido262/shoggoth-engine/wiki/Data-Structures-and-Organization
+Finish Source Code Organization https://github.com/davido262/shoggoth-engine/wiki/Source-Code-Organization
+Finish Tutorials https://github.com/davido262/shoggoth-engine/wiki/Tutorials

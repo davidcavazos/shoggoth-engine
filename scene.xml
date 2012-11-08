@@ -25,7 +25,7 @@
     </camera>
     <test type="entity" position="0 8 -3" orientation="1 0 0 0">
       <renderablemesh type="component" model="$box 3 3 3"/>
-      <rigidbody type="component" collisionshape="#box 3 3 3" mass="10" friction="1"/>
+      <rigidbody type="component" collisionshape="#box 3 3 3" mass="20" friction="1"/>
       <testcomponent type="component" health="100"/>
     </test>
   </root>
