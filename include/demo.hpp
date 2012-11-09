@@ -60,7 +60,7 @@ private:
 
     void cmdQuit(const std::string&);
     void cmdRunCommand(const std::string& arg);
-    void cmdPrintEntity(const std::string& arg);
+    void cmdPrint(const std::string& arg);
     void cmdOnMouseMotion(const std::string&);
     void cmdFireCube(const std::string&);
     void cmdFireSphere(const std::string&);

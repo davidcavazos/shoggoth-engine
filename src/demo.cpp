@@ -37,6 +37,7 @@
 #include "engine/renderer/camera.hpp"
 #include "engine/renderer/light.hpp"
 #include "engine/physics/rigidbody.hpp"
+#include "testcomponent.hpp"
 
 using namespace std;
 
@@ -62,7 +63,7 @@ Demo::Demo(const string& objectName,
 {
     registerCommand("quit", boost::bind(&Demo::cmdQuit, this, _1));
     registerCommand("run", boost::bind(&Demo::cmdRunCommand, this, _1));
-    registerCommand("print-entity", boost::bind(&Demo::cmdPrintEntity, this, _1));
+    registerCommand("print-entity", boost::bind(&Demo::cmdPrint, this, _1));
     registerCommand("on-mouse-motion", boost::bind(&Demo::cmdOnMouseMotion, this, _1));
     registerCommand("fire-cube", boost::bind(&Demo::cmdFireCube, this, _1));
     registerCommand("fire-sphere", boost::bind(&Demo::cmdFireSphere, this, _1));
@@ -160,10 +161,12 @@ void Demo::cmdRunCommand(const string& arg) {
     Terminal::executeScript(arg);
 }
 
-void Demo::cmdPrintEntity(const string& arg) {
+void Demo::cmdPrint(const string& arg) {
     Entity* entity;
-    if (m_scene.findEntity(arg, entity))
-        cout << *entity << endl;
+    if (m_scene.findEntity(arg, entity)) {
+        TestComponent* test = dynamic_cast<TestComponent*>(entity->component(COMPONENT_TESTCOMPONENT));
+        cout << "Health: " << test->getHealth() << endl;
+    }
 }
 
 void Demo::cmdOnMouseMotion(const string&) {
