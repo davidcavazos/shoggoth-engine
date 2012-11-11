@@ -75,19 +75,21 @@ private:
     void displayLegacyLights() const;
     void setOpenGLMatrix(float* const m, const Vector3& pos, const Quaternion& rot) const;
 
-    void cmdInitialize(const std::string&);
-    void cmdShutdown(const std::string&);
-    void cmdAmbientLight(const std::string& arg);
+    std::string cmdInitialize(std::deque<std::string>&);
+    std::string cmdShutdown(std::deque<std::string>&);
+    std::string cmdAmbientLight(std::deque<std::string>& args);
 };
 
 
 
-inline void Renderer::cmdInitialize(const std::string&) {
+inline std::string Renderer::cmdInitialize(std::deque<std::string>&) {
     initialize();
+    return "";
 }
 
-inline void Renderer::cmdShutdown(const std::string&) {
+inline std::string Renderer::cmdShutdown(std::deque<std::string>&) {
     shutdown();
+    return "";
 }
 
 #endif // RENDERER_HPP

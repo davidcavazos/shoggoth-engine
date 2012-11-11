@@ -58,12 +58,12 @@ private:
     TestComponentFactory m_componentFactory;
     Scene m_scene;
 
-    void cmdQuit(const std::string&);
-    void cmdRunCommand(const std::string& arg);
-    void cmdPrint(const std::string& arg);
-    void cmdOnMouseMotion(const std::string&);
-    void cmdFireCube(const std::string&);
-    void cmdFireSphere(const std::string&);
+    std::string cmdQuit(std::deque<std::string>&);
+    std::string cmdRunCommand(std::deque<std::string>& args);
+    std::string cmdPrint(std::deque<std::string>& args);
+    std::string cmdOnMouseMotion(std::deque<std::string>&);
+    std::string cmdFireCube(std::deque<std::string>&);
+    std::string cmdFireSphere(std::deque<std::string>&);
 };
 
 #endif // GAME_HPP

@@ -75,9 +75,9 @@ private:
     collision_shapes_map_t m_collisionShapes;
     rigid_bodies_map_t m_rigidBodies;
 
-    void cmdInitialize(const std::string&);
-    void cmdShutdown(const std::string&);
-    void cmdMinExpectedFramerate(const std::string& arg);
+    std::string cmdInitialize(std::deque<std::string>&);
+    std::string cmdShutdown(std::deque<std::string>&);
+    std::string cmdMinExpectedFramerate(std::deque<std::string>& args);
 };
 
 
@@ -88,12 +88,14 @@ inline void PhysicsWorld::setMinExpectedFramerate(const double minExpectedFramer
 
 
 
-inline void PhysicsWorld::cmdInitialize(const std::string&) {
+inline std::string PhysicsWorld::cmdInitialize(std::deque<std::string>&) {
     initialize();
+    return "";
 }
 
-inline void PhysicsWorld::cmdShutdown(const std::string&) {
+inline std::string PhysicsWorld::cmdShutdown(std::deque<std::string>&) {
     shutdown();
+    return "";
 }
 
 #endif // PHYSICSWORLD_HPP

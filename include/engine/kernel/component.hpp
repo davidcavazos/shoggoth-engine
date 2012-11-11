@@ -28,6 +28,8 @@
 #define COMPONENT_HPP
 
 #include <string>
+#include <deque>
+#include <boost/lexical_cast.hpp>
 #include "xmlinfo.hpp"
 
 class Entity;

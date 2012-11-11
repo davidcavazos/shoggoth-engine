@@ -205,17 +205,20 @@ void Device::processEvents(bool& isRunning) {
 
 
 
-void Device::cmdFullscreen(const std::string& arg) {
-    bool useFullscreen;
-    stringstream ss(arg);
-    ss >> useFullscreen;
+string Device::cmdFullscreen(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    bool useFullscreen = boost::lexical_cast<bool>(args[0]);
     setFullscreen(useFullscreen);
+    return string("Video mode to ") + (useFullscreen? "fullscreen" : "windowed");
 }
 
-void Device::cmdResolution(const std::string& arg) {
-    size_t w, h;
-    stringstream ss(arg);
-    ss >> w >> h;
+string Device::cmdResolution(deque<string>& args) {
+    if (args.size() < 2)
+        return "Error: too few arguments";
+    size_t w = boost::lexical_cast<size_t>(args[0]);
+    size_t h = boost::lexical_cast<size_t>(args[1]);
     if (w != 0 && h != 0)
         setResolution(w, h);
+    return string("Resolution changed to: ") + args[0] + "x" + args[1];
 }

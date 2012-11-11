@@ -70,12 +70,12 @@ protected:
     double m_deltaTime;
     double m_fps;
 
-    void cmdInitialize(const std::string&);
-    void cmdShutdown(const std::string&);
-    void cmdSwapBuffers(const std::string&);
-    void cmdTitle(const std::string& arg);
-    void cmdFullscreen(const std::string& arg);
-    void cmdResolution(const std::string& arg);
+    std::string cmdInitialize(std::deque<std::string>&);
+    std::string cmdShutdown(std::deque<std::string>&);
+    std::string cmdSwapBuffers(std::deque<std::string>&);
+    std::string cmdTitle(std::deque<std::string>& args);
+    std::string cmdFullscreen(std::deque<std::string>& args);
+    std::string cmdResolution(std::deque<std::string>& args);
 };
 
 
@@ -94,20 +94,26 @@ inline double Device::getFps() const {
 
 
 
-inline void Device::cmdInitialize(const std::string&) {
+inline std::string Device::cmdInitialize(std::deque<std::string>&) {
     initialize();
+    return "";
 }
 
-inline void Device::cmdShutdown(const std::string&) {
+inline std::string Device::cmdShutdown(std::deque<std::string>&) {
     shutdown();
+    return "";
 }
 
-inline void Device::cmdSwapBuffers(const std::string&) {
+inline std::string Device::cmdSwapBuffers(std::deque<std::string>&) {
     swapBuffers();
+    return "";
 }
 
-inline void Device::cmdTitle(const std::string& arg) {
-    setTitle(arg);
+inline std::string Device::cmdTitle(std::deque< std::string >& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    setTitle(args[0]);
+    return std::string("New title: ") + args[0];
 }
 
 #endif // DEVICE_HPP

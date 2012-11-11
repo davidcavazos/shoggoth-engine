@@ -529,88 +529,112 @@ void RigidBody::addRigidBody(const double mass, btCollisionShape* shape) {
 }
 
 
-void RigidBody::cmdIsActive(const string& arg) {
-    bool isActive;
-    stringstream ss(arg);
-    ss >> isActive;
+string RigidBody::cmdIsActive(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    bool isActive = boost::lexical_cast<bool>(args[0]);
     activate(isActive);
+    return "";
 }
 
-void RigidBody::cmdMass(const string& arg) {
-    double mass;
-    stringstream ss(arg);
-    ss >> mass;
+string RigidBody::cmdMass(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    double mass = boost::lexical_cast<double>(args[0]);
     setMass(mass);
+    return "";
 }
 
-void RigidBody::cmdDamping(const string& arg) {
-    double linear, angular;
-    stringstream ss(arg);
-    ss >> linear >> angular;
+string RigidBody::cmdDamping(deque<string>& args) {
+    if (args.size() < 2)
+        return "Error: too few arguments";
+    double linear = boost::lexical_cast<double>(args[0]);
+    double angular = boost::lexical_cast<double>(args[1]);
     setDamping(linear, angular);
+    return "";
 }
 
-void RigidBody::cmdFriction(const string& arg) {
-    double friction;
-    stringstream ss(arg);
-    ss >> friction;
+string RigidBody::cmdFriction(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    double friction = boost::lexical_cast<double>(args[0]);
     setFriction(friction);
+    return "";
 }
 
-void RigidBody::cmdRollingFriction(const string& arg) {
-    double rollingFriction;
-    stringstream ss(arg);
-    ss >> rollingFriction;
+string RigidBody::cmdRollingFriction(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    double rollingFriction = boost::lexical_cast<double>(args[0]);
     setRollingFriction(rollingFriction);
+    return "";
 }
 
-void RigidBody::cmdRestitution(const string& arg) {
-    double restitution;
-    stringstream ss(arg);
-    ss >> restitution;
+string RigidBody::cmdRestitution(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    double restitution = boost::lexical_cast<double>(args[0]);
     setRestitution(restitution);
+    return "";
 }
 
-void RigidBody::cmdSleepingThresholds(const string& arg) {
-    double linear, angular;
-    stringstream ss(arg);
-    ss >> linear >> angular;
+string RigidBody::cmdSleepingThresholds(deque<string>& args) {
+    if (args.size() < 2)
+        return "Error: too few arguments";
+    double linear = boost::lexical_cast<double>(args[0]);
+    double angular = boost::lexical_cast<double>(args[1]);
     setSleepingThresholds(linear, angular);
+    return "";
 }
 
-void RigidBody::cmdLinearFactor(const string& arg) {
-    double x, y, z;
-    stringstream ss(arg);
-    ss >> x >> y >> z;
+string RigidBody::cmdLinearFactor(deque<string>& args) {
+    if (args.size() < 3)
+        return "Error: too few arguments";
+    double x = boost::lexical_cast<double>(args[0]);
+    double y = boost::lexical_cast<double>(args[1]);
+    double z = boost::lexical_cast<double>(args[2]);
     setLinearFactor(Vector3(x, y, z));
+    return "";
 }
 
-void RigidBody::cmdLinearVelocity(const string& arg) {
-    double x, y, z;
-    stringstream ss(arg);
-    ss >> x >> y >> z;
+string RigidBody::cmdLinearVelocity(deque<string>& args) {
+    if (args.size() < 3)
+        return "Error: too few arguments";
+    double x = boost::lexical_cast<double>(args[0]);
+    double y = boost::lexical_cast<double>(args[1]);
+    double z = boost::lexical_cast<double>(args[2]);
     setLinearVelocity(Vector3(x, y, z));
+    return "";
 }
 
-void RigidBody::cmdAngularFactor(const string& arg) {
-    double x, y, z;
-    stringstream ss(arg);
-    ss >> x >> y >> z;
+string RigidBody::cmdAngularFactor(deque<string>& args) {
+    if (args.size() < 3)
+        return "Error: too few arguments";
+    double x = boost::lexical_cast<double>(args[0]);
+    double y = boost::lexical_cast<double>(args[1]);
+    double z = boost::lexical_cast<double>(args[2]);
     setAngularFactor(Vector3(x, y, z));
+    return "";
 }
 
-void RigidBody::cmdAngularVelocity(const string& arg) {
-    double x, y, z;
-    stringstream ss(arg);
-    ss >> x >> y >> z;
+string RigidBody::cmdAngularVelocity(deque<string>& args) {
+    if (args.size() < 3)
+        return "Error: too few arguments";
+    double x = boost::lexical_cast<double>(args[0]);
+    double y = boost::lexical_cast<double>(args[1]);
+    double z = boost::lexical_cast<double>(args[2]);
     setAngularVelocity(Vector3(x, y, z));
+    return "";
 }
 
-void RigidBody::cmdGravity(const string& arg) {
-    double x, y, z;
-    stringstream ss(arg);
-    ss >> x >> y >> z;
+string RigidBody::cmdGravity(deque<string>& args) {
+    if (args.size() < 3)
+        return "Error: too few arguments";
+    double x = boost::lexical_cast<double>(args[0]);
+    double y = boost::lexical_cast<double>(args[1]);
+    double z = boost::lexical_cast<double>(args[2]);
     setGravity(Vector3(x, y, z));
+    return "";
 }
 
 

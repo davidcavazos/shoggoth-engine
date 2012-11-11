@@ -75,8 +75,8 @@ void Terminal::pushCommand(const string& cmd) {
 }
 
 string Terminal::runScript(const string& fileName) {
-    Command cmd;
     string expression;
+    Command cmd;
     deque<Command> commands;
     stringstream output;
 
@@ -84,8 +84,9 @@ string Terminal::runScript(const string& fileName) {
     fstream file(fileName.c_str(), ios::in);
     while (file.good()) {
         getline(file, expression);
-        if (!expression.empty() && cmd.parseCommand(expression))
+        if (!expression.empty() && cmd.parseCommand(expression)) {
             commands.push_back(cmd);
+        }
     }
     file.close();
 

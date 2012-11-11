@@ -64,7 +64,7 @@ Camera::Camera(Entity* const entity, Renderer* renderer):
     m_renderer->m_cameras.insert(this);
     m_renderer->m_activeCamera = this;
 
-    m_entity->registerAttribute("type", boost::bind(&Camera::cmdType, this, _1));
+    m_entity->registerAttribute("type", boost::bind(&Camera::cmdCameraType, this, _1));
     m_entity->registerAttribute("perspective-fov", boost::bind(&Camera::cmdPerspectiveFOV, this, _1));
     m_entity->registerAttribute("ortho-height", boost::bind(&Camera::cmdOrthoHeight, this, _1));
     m_entity->registerAttribute("near-distance", boost::bind(&Camera::cmdNearDistance, this, _1));
@@ -127,37 +127,42 @@ Camera& Camera::operator=(const Camera&) {
     return *this;
 }
 
-void Camera::cmdType(const std::string& arg) {
-    int type;
-    stringstream ss(arg);
-    ss >> type;
+string Camera::cmdCameraType(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    int type = boost::lexical_cast<int>(args[0]);
     setCameraType(static_cast<camera_t>(type));
+    return "";
 }
 
-void Camera::cmdPerspectiveFOV(const std::string& arg) {
-    float perspectiveFOV;
-    stringstream ss(arg);
-    ss >> perspectiveFOV;
+string Camera::cmdPerspectiveFOV(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    float perspectiveFOV = boost::lexical_cast<float>(args[0]);
     setPerspectiveFOV(perspectiveFOV);
+    return "";
 }
 
-void Camera::cmdOrthoHeight(const std::string& arg) {
-    float orthoHeight;
-    stringstream ss(arg);
-    ss >> orthoHeight;
+string Camera::cmdOrthoHeight(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    float orthoHeight = boost::lexical_cast<float>(args[0]);
     setOrthoHeight(orthoHeight);
+    return "";
 }
 
-void Camera::cmdNearDistance(const std::string& arg) {
-    float nearDistance;
-    stringstream ss(arg);
-    ss >> nearDistance;
+string Camera::cmdNearDistance(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    float nearDistance = boost::lexical_cast<float>(args[0]);
     setNearDistance(nearDistance);
+    return "";
 }
 
-void Camera::cmdFarDistance(const std::string& arg) {
-    float farDistance;
-    stringstream ss(arg);
-    ss >> farDistance;
+string Camera::cmdFarDistance(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    float farDistance = boost::lexical_cast<float>(args[0]);
     setFarDistance(farDistance);
+    return "";
 }

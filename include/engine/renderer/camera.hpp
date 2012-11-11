@@ -85,11 +85,11 @@ private:
     Camera(const Camera& rhs);
     Camera& operator=(const Camera&);
 
-    void cmdType(const std::string& arg);
-    void cmdPerspectiveFOV(const std::string& arg);
-    void cmdOrthoHeight(const std::string& arg);
-    void cmdNearDistance(const std::string& arg);
-    void cmdFarDistance(const std::string& arg);
+    std::string cmdCameraType(std::deque<std::string>& args);
+    std::string cmdPerspectiveFOV(std::deque<std::string>& args);
+    std::string cmdOrthoHeight(std::deque<std::string>& args);
+    std::string cmdNearDistance(std::deque<std::string>& args);
+    std::string cmdFarDistance(std::deque<std::string>& args);
 };
 
 

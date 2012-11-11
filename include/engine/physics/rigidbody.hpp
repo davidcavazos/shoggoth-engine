@@ -112,18 +112,18 @@ private:
 
     void addRigidBody(const double mass, btCollisionShape* shape);
 
-    void cmdIsActive(const std::string& arg);
-    void cmdMass(const std::string& arg);
-    void cmdDamping(const std::string& arg);
-    void cmdFriction(const std::string& arg);
-    void cmdRollingFriction(const std::string& arg);
-    void cmdRestitution(const std::string& arg);
-    void cmdSleepingThresholds(const std::string& arg);
-    void cmdLinearFactor(const std::string& arg);
-    void cmdLinearVelocity(const std::string& arg);
-    void cmdAngularFactor(const std::string& arg);
-    void cmdAngularVelocity(const std::string& arg);
-    void cmdGravity(const std::string& arg);
+    std::string cmdIsActive(std::deque<std::string>& args);
+    std::string cmdMass(std::deque<std::string>& args);
+    std::string cmdDamping(std::deque<std::string>& args);
+    std::string cmdFriction(std::deque<std::string>& args);
+    std::string cmdRollingFriction(std::deque<std::string>& args);
+    std::string cmdRestitution(std::deque<std::string>& args);
+    std::string cmdSleepingThresholds(std::deque<std::string>& args);
+    std::string cmdLinearFactor(std::deque<std::string>& args);
+    std::string cmdLinearVelocity(std::deque<std::string>& args);
+    std::string cmdAngularFactor(std::deque<std::string>& args);
+    std::string cmdAngularVelocity(std::deque<std::string>& args);
+    std::string cmdGravity(std::deque<std::string>& args);
 };
 
 #endif // RIGIDBODY_HPP

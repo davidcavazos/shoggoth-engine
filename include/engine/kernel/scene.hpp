@@ -88,10 +88,10 @@ private:
                        std::set<std::string>& names,
                        bool& isCameraFound);
 
-    void cmdInitialize(const std::string&);
-    void cmdShutdown(const std::string&);
-    void cmdSaveXML(const std::string& arg);
-    void cmdLoadXML(const std::string& arg);
+    std::string cmdInitialize(std::deque<std::string>&);
+    std::string cmdShutdown(std::deque<std::string>&);
+    std::string cmdSaveXML(std::deque<std::string>& args);
+    std::string cmdLoadXML(std::deque<std::string>& args);
 };
 
 
@@ -107,20 +107,28 @@ inline Entity* Scene::root() {
 
 
 
-inline void Scene::cmdInitialize(const std::string&) {
+inline std::string Scene::cmdInitialize(std::deque<std::string>&) {
     initialize();
+    return "";
 }
 
-inline void Scene::cmdShutdown(const std::string&) {
+inline std::string Scene::cmdShutdown(std::deque<std::string>&) {
     shutdown();
+    return "";
 }
 
-inline void Scene::cmdSaveXML(const std::string& arg) {
-    saveToXML(arg);
+inline std::string Scene::cmdSaveXML(std::deque<std::string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    saveToXML(args[0]);
+    return "";
 }
 
-inline void Scene::cmdLoadXML(const std::string& arg) {
-    loadFromXML(arg);
+inline std::string Scene::cmdLoadXML(std::deque<std::string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    loadFromXML(args[0]);
+    return "";
 }
 
 #endif // SCENE_HPP

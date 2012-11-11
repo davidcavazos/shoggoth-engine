@@ -124,32 +124,32 @@ private:
     void applyOrientationToChildren();
     void applyTransformToPhysicsComponent();
 
-    void cmdPositionAbs(const std::string& arg);
-    void cmdPositionRel(const std::string& arg);
-    void cmdOrientationAbsYPR(const std::string& arg);
-    void cmdOrientationRelYPR(const std::string& arg);
-    void cmdMoveXYZ(const std::string& arg);
-    void cmdMoveX(const std::string& arg);
-    void cmdMoveY(const std::string& arg);
-    void cmdMoveZ(const std::string& arg);
-    void cmdMoveXYZ_parent(const std::string& arg);
-    void cmdMoveX_parent(const std::string& arg);
-    void cmdMoveY_parent(const std::string& arg);
-    void cmdMoveZ_parent(const std::string& arg);
-    void cmdMoveXYZ_global(const std::string& arg);
-    void cmdMoveX_global(const std::string& arg);
-    void cmdMoveY_global(const std::string& arg);
-    void cmdMoveZ_global(const std::string& arg);
-    void cmdYaw(const std::string& arg);
-    void cmdPitch(const std::string& arg);
-    void cmdRoll(const std::string& arg);
-    void cmdYaw_parent(const std::string& arg);
-    void cmdPitch_parent(const std::string& arg);
-    void cmdRoll_parent(const std::string& arg);
-    void cmdYaw_global(const std::string& arg);
-    void cmdPitch_global(const std::string& arg);
-    void cmdRoll_global(const std::string& arg);
-    void cmdRemoveAllChildren(const std::string&);
+    std::string cmdPositionAbs(std::deque<std::string>& args);
+    std::string cmdPositionRel(std::deque<std::string>& args);
+    std::string cmdOrientationAbsYPR(std::deque<std::string>& args);
+    std::string cmdOrientationRelYPR(std::deque<std::string>& args);
+    std::string cmdMoveXYZ(std::deque<std::string>& args);
+    std::string cmdMoveX(std::deque<std::string>& args);
+    std::string cmdMoveY(std::deque<std::string>& args);
+    std::string cmdMoveZ(std::deque<std::string>& args);
+    std::string cmdMoveXYZ_parent(std::deque<std::string>& args);
+    std::string cmdMoveX_parent(std::deque<std::string>& args);
+    std::string cmdMoveY_parent(std::deque<std::string>& args);
+    std::string cmdMoveZ_parent(std::deque<std::string>& args);
+    std::string cmdMoveXYZ_global(std::deque<std::string>& args);
+    std::string cmdMoveX_global(std::deque<std::string>& args);
+    std::string cmdMoveY_global(std::deque<std::string>& args);
+    std::string cmdMoveZ_global(std::deque<std::string>& args);
+    std::string cmdYaw(std::deque<std::string>& args);
+    std::string cmdPitch(std::deque<std::string>& args);
+    std::string cmdRoll(std::deque<std::string>& args);
+    std::string cmdYaw_parent(std::deque<std::string>& args);
+    std::string cmdPitch_parent(std::deque<std::string>& args);
+    std::string cmdRoll_parent(std::deque<std::string>& args);
+    std::string cmdYaw_global(std::deque<std::string>& args);
+    std::string cmdPitch_global(std::deque<std::string>& args);
+    std::string cmdRoll_global(std::deque<std::string>& args);
+    std::string cmdRemoveAllChildren(std::deque<std::string>&);
 };
 
 
@@ -336,8 +336,9 @@ inline void Entity::roll(const scalar_t& radians, const transform_space_t& relat
 
 
 
-inline void Entity::cmdRemoveAllChildren(const std::string&) {
+inline std::string Entity::cmdRemoveAllChildren(std::deque<std::string>&) {
     removeAllChildren();
+    return "";
 }
 
 #endif // ENTITY_HPP

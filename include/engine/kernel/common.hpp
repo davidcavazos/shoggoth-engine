@@ -27,8 +27,10 @@
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
-#include <boost/math/constants/constants.hpp>
+#include <sstream>
+#include <cstring>
 #include <cmath>
+#include <boost/math/constants/constants.hpp>
 
 const double PI = boost::math::constants::pi<double>();
 const double HALF_PI = PI / 2.0;

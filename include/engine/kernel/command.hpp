@@ -31,6 +31,7 @@
 #include <istream>
 #include <sstream>
 #include <string>
+#include <deque>
 
 class Terminal;
 
@@ -41,25 +42,24 @@ public:
     friend std::istream& operator>>(std::istream& in, Command& rhs);
 
     Command();
-    Command(const size_t idObject, const size_t idCommand, const std::string& arguments = "");
 
     size_t getIdObject() const;
     size_t getIdCommand() const;
-    const std::string& getArguments() const;
-    template <typename T>
-    void setArguments(const T& arguments);
-    void setArguments(const char* const arguments);
-    void setArguments(const std::string& arguments);
+    const std::deque<std::string>& getArguments() const;
+    std::deque<std::string>& arguments();
+    const std::string& getArgument(const size_t i) const;
+    void setArguments(const std::deque<std::string>& arguments);
 
-    void appendToArguments(const std::string& argsAppended);
+    void appendToArguments(const std::string& newArg);
     bool parseCommand(const std::string& expression);
 
 private:
     size_t m_idObject;
     size_t m_idCommand;
-    std::string m_arguments;
+    std::deque<std::string> m_arguments;
+    std::string m_empty;
 
-    bool run() const;
+    bool run();
 };
 
 
@@ -72,22 +72,21 @@ inline size_t Command::getIdCommand() const {
     return m_idCommand;
 }
 
-inline const std::string& Command::getArguments() const {
+inline const std::deque<std::string>& Command::getArguments() const {
     return m_arguments;
 }
 
-template <typename T>
-void Command::setArguments(const T& arguments) {
-    std::ostringstream ss;
-    ss << arguments;
-    m_arguments = ss.str();
+inline std::deque<std::string>& Command::arguments() {
+    return m_arguments;
 }
 
-inline void Command::setArguments(const char* const arguments) {
-    m_arguments = std::string(arguments);
+inline const std::string& Command::getArgument(const size_t i) const {
+    if (i < m_arguments.size())
+        return m_arguments[i];
+    return m_empty;
 }
 
-inline void Command::setArguments(const std::string& arguments) {
+inline void Command::setArguments(const std::deque<std::string>& arguments) {
     m_arguments = arguments;
 }
 

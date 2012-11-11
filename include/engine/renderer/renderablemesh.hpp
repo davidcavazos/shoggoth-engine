@@ -61,8 +61,8 @@ private:
     RenderableMesh(const RenderableMesh& rhs);
     RenderableMesh& operator=(const RenderableMesh&);
 
-    void cmdLoadModelBox(const std::string& arg);
-    void cmdLoadModelFile(const std::string& arg);
+    std::string cmdLoadModelBox(std::deque<std::string>& args);
+    std::string cmdLoadModelFile(std::deque<std::string>& args);
 };
 
 
@@ -75,6 +75,15 @@ inline const Model* RenderableMesh::getModel() const {
 
 inline Model* RenderableMesh::model() {
     return m_model;
+}
+
+
+
+inline std::string RenderableMesh::cmdLoadModelFile(std::deque<std::string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    loadFromFile(args[0]);
+    return "";
 }
 
 #endif // RENDERABLEMESH_HPP

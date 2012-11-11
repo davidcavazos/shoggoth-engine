@@ -62,18 +62,20 @@ private:
     Model* findModel(const std::string& identifier);
     Texture* findTexture(const std::string& fileName);
 
-    void cmdInitialize(const std::string&);
-    void cmdShutdown(const std::string&);
+    std::string cmdInitialize(std::deque<std::string>&);
+    std::string cmdShutdown(std::deque<std::string>&);
 };
 
 
 
-inline void Resources::cmdInitialize(const std::string&) {
+inline std::string Resources::cmdInitialize(std::deque<std::string>&) {
     initialize();
+    return std::string();
 }
 
-inline void Resources::cmdShutdown(const std::string&) {
+inline std::string Resources::cmdShutdown(std::deque<std::string>&) {
     shutdown();
+    return std::string();
 }
 
 #endif // RESOURCES_HPP

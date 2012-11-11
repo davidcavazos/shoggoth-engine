@@ -28,7 +28,6 @@
 
 #include <iostream>
 #include <cmath>
-#include "engine/kernel/common.hpp"
 #include "engine/kernel/matrix3x3.hpp"
 #include "engine/kernel/device.hpp"
 #include "engine/kernel/scene.hpp"
@@ -238,186 +237,225 @@ void Entity::applyTransformToPhysicsComponent() {
 
 
 
-void Entity::cmdPositionAbs(const std::string& arg) {
-    scalar_t x, y, z;
-    stringstream ss(arg);
-    ss >> x >> y >> z;
+string Entity::cmdPositionAbs(deque<string>& args) {
+    if (args.size() < 3)
+        return "Error: too few arguments";
+    scalar_t x = boost::lexical_cast<scalar_t>(args[0]);
+    scalar_t y = boost::lexical_cast<scalar_t>(args[1]);
+    scalar_t z = boost::lexical_cast<scalar_t>(args[2]);
     setPositionAbs(x, y, z);
+    return "";
 }
-void Entity::cmdPositionRel(const string& arg) {
-    scalar_t x, y, z;
-    stringstream ss(arg);
-    ss >> x >> y >> z;
+string Entity::cmdPositionRel(deque<string>& args) {
+    if (args.size() < 3)
+        return "Error: too few arguments";
+    scalar_t x = boost::lexical_cast<scalar_t>(args[0]);
+    scalar_t y = boost::lexical_cast<scalar_t>(args[1]);
+    scalar_t z = boost::lexical_cast<scalar_t>(args[2]);
     setPositionRel(x, y, z);
+    return "";
 }
 
-void Entity::cmdOrientationAbsYPR(const string& arg) {
-    scalar_t yaw, pitch, roll;
-    stringstream ss(arg);
-    ss >> yaw >> pitch >> roll;
+string Entity::cmdOrientationAbsYPR(deque<string>& args) {
+    if (args.size() < 3)
+        return "Error: too few arguments";
+    scalar_t yaw = boost::lexical_cast<scalar_t>(args[0]);
+    scalar_t pitch = boost::lexical_cast<scalar_t>(args[1]);
+    scalar_t roll = boost::lexical_cast<scalar_t>(args[2]);
     setOrientationAbs(yaw, pitch, roll);
+    return "";
 }
 
-void Entity::cmdOrientationRelYPR(const string& arg) {
-    scalar_t yaw, pitch, roll;
-    stringstream ss(arg);
-    ss >> yaw >> pitch >> roll;
+string Entity::cmdOrientationRelYPR(deque<string>& args) {
+    if (args.size() < 3)
+        return "Error: too few arguments";
+    scalar_t yaw = boost::lexical_cast<scalar_t>(args[0]);
+    scalar_t pitch = boost::lexical_cast<scalar_t>(args[1]);
+    scalar_t roll = boost::lexical_cast<scalar_t>(args[2]);
     setOrientationRel(yaw, pitch, roll);
+    return "";
 }
 
-void Entity::cmdMoveXYZ(const std::string& arg) {
-    scalar_t x, y, z;
-    stringstream ss(arg);
-    ss >> x >> y >> z;
+string Entity::cmdMoveXYZ(deque<string>& args) {
+    if (args.size() < 3)
+        return "Error: too few arguments";
+    scalar_t x = boost::lexical_cast<scalar_t>(args[0]);
+    scalar_t y = boost::lexical_cast<scalar_t>(args[1]);
+    scalar_t z = boost::lexical_cast<scalar_t>(args[2]);
     translate(x, y, z);
+    return "";
 }
 
-void Entity::cmdMoveX(const std::string& arg) {
-    scalar_t dist;
-    stringstream ss(arg);
-    ss >> dist;
+string Entity::cmdMoveX(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    scalar_t dist = boost::lexical_cast<scalar_t>(args[0]);
     translateX(dist * m_device->getDeltaTime());
+    return "";
 }
 
-void Entity::cmdMoveY(const std::string& arg) {
-    scalar_t dist;
-    stringstream ss(arg);
-    ss >> dist;
+string Entity::cmdMoveY(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    scalar_t dist = boost::lexical_cast<scalar_t>(args[0]);
     translateY(dist * m_device->getDeltaTime());
+    return "";
 }
 
-void Entity::cmdMoveZ(const std::string& arg) {
-    scalar_t dist;
-    stringstream ss(arg);
-    ss >> dist;
+string Entity::cmdMoveZ(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    scalar_t dist = boost::lexical_cast<scalar_t>(args[0]);
     translateZ(dist * m_device->getDeltaTime());
+    return "";
 }
 
-void Entity::cmdMoveXYZ_parent(const std::string& arg) {
-    scalar_t x, y, z;
-    stringstream ss(arg);
-    ss >> x >> y >> z;
+string Entity::cmdMoveXYZ_parent(deque<string>& args) {
+    if (args.size() < 3)
+        return "Error: too few arguments";
+    scalar_t x = boost::lexical_cast<scalar_t>(args[0]);
+    scalar_t y = boost::lexical_cast<scalar_t>(args[1]);
+    scalar_t z = boost::lexical_cast<scalar_t>(args[2]);
     translate(
         x * m_device->getDeltaTime(),
         y * m_device->getDeltaTime(),
         z * m_device->getDeltaTime(),
         SPACE_PARENT
     );
+    return "";
 }
 
-void Entity::cmdMoveX_parent(const std::string& arg) {
-    scalar_t dist;
-    stringstream ss(arg);
-    ss >> dist;
+string Entity::cmdMoveX_parent(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    scalar_t dist = boost::lexical_cast<scalar_t>(args[0]);
     translateX(dist * m_device->getDeltaTime(), SPACE_PARENT);
+    return "";
 }
 
-void Entity::cmdMoveY_parent(const std::string& arg) {
-    scalar_t dist;
-    stringstream ss(arg);
-    ss >> dist;
+string Entity::cmdMoveY_parent(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    scalar_t dist = boost::lexical_cast<scalar_t>(args[0]);
     translateY(dist * m_device->getDeltaTime(), SPACE_PARENT);
+    return "";
 }
 
-void Entity::cmdMoveZ_parent(const std::string& arg) {
-    scalar_t dist;
-    stringstream ss(arg);
-    ss >> dist;
+string Entity::cmdMoveZ_parent(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    scalar_t dist = boost::lexical_cast<scalar_t>(args[0]);
     translateZ(dist * m_device->getDeltaTime(), SPACE_PARENT);
+    return "";
 }
 
-void Entity::cmdMoveXYZ_global(const std::string& arg) {
-    scalar_t x, y, z;
-    stringstream ss(arg);
-    ss >> x >> y >> z;
+string Entity::cmdMoveXYZ_global(deque<string>& args) {
+    if (args.size() < 3)
+        return "Error: too few arguments";
+    scalar_t x = boost::lexical_cast<scalar_t>(args[0]);
+    scalar_t y = boost::lexical_cast<scalar_t>(args[1]);
+    scalar_t z = boost::lexical_cast<scalar_t>(args[2]);
     translate(
         x * m_device->getDeltaTime(),
         y * m_device->getDeltaTime(),
         z * m_device->getDeltaTime(),
         SPACE_GLOBAL
     );
+    return "";
 }
 
-void Entity::cmdMoveX_global(const std::string& arg) {
-    scalar_t dist;
-    stringstream ss(arg);
-    ss >> dist;
+string Entity::cmdMoveX_global(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    scalar_t dist = boost::lexical_cast<scalar_t>(args[0]);
     translateX(dist * m_device->getDeltaTime(), SPACE_GLOBAL);
+    return "";
 }
 
-void Entity::cmdMoveY_global(const std::string& arg) {
-    scalar_t dist;
-    stringstream ss(arg);
-    ss >> dist;
+string Entity::cmdMoveY_global(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    scalar_t dist = boost::lexical_cast<scalar_t>(args[0]);
     translateY(dist * m_device->getDeltaTime(), SPACE_GLOBAL);
+    return "";
 }
 
-void Entity::cmdMoveZ_global(const std::string& arg) {
-    scalar_t dist;
-    stringstream ss(arg);
-    ss >> dist;
+string Entity::cmdMoveZ_global(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    scalar_t dist = boost::lexical_cast<scalar_t>(args[0]);
     translateZ(dist * m_device->getDeltaTime(), SPACE_GLOBAL);
+    return "";
 }
 
-void Entity::cmdYaw(const std::string& arg) {
-    scalar_t radians;
-    stringstream ss(arg);
-    ss >> radians;
+string Entity::cmdYaw(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    scalar_t radians = boost::lexical_cast<scalar_t>(args[0]);
     yaw(radians * m_device->getDeltaTime());
+    return "";
 }
 
-void Entity::cmdPitch(const std::string& arg) {
-    scalar_t radians;
-    stringstream ss(arg);
-    ss >> radians;
+string Entity::cmdPitch(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    scalar_t radians = boost::lexical_cast<scalar_t>(args[0]);
     pitch(radians * m_device->getDeltaTime());
+    return "";
 }
 
-void Entity::cmdRoll(const std::string& arg) {
-    scalar_t radians;
-    stringstream ss(arg);
-    ss >> radians;
+string Entity::cmdRoll(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    scalar_t radians = boost::lexical_cast<scalar_t>(args[0]);
     roll(radians * m_device->getDeltaTime());
+    return "";
 }
 
-void Entity::cmdYaw_parent(const std::string& arg) {
-    scalar_t radians;
-    stringstream ss(arg);
-    ss >> radians;
+string Entity::cmdYaw_parent(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    scalar_t radians = boost::lexical_cast<scalar_t>(args[0]);
     yaw(radians * m_device->getDeltaTime(), SPACE_PARENT);
+    return "";
 }
 
-void Entity::cmdPitch_parent(const std::string& arg) {
-    scalar_t radians;
-    stringstream ss(arg);
-    ss >> radians;
+string Entity::cmdPitch_parent(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    scalar_t radians = boost::lexical_cast<scalar_t>(args[0]);
     pitch(radians * m_device->getDeltaTime(), SPACE_PARENT);
+    return "";
 }
 
-void Entity::cmdRoll_parent(const std::string& arg) {
-    scalar_t radians;
-    stringstream ss(arg);
-    ss >> radians;
+string Entity::cmdRoll_parent(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    scalar_t radians = boost::lexical_cast<scalar_t>(args[0]);
     roll(radians * m_device->getDeltaTime(), SPACE_PARENT);
+    return "";
 }
 
-void Entity::cmdYaw_global(const std::string& arg) {
-    scalar_t radians;
-    stringstream ss(arg);
-    ss >> radians;
+string Entity::cmdYaw_global(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    scalar_t radians = boost::lexical_cast<scalar_t>(args[0]);
     yaw(radians * m_device->getDeltaTime(), SPACE_GLOBAL);
+    return "";
 }
 
-void Entity::cmdPitch_global(const std::string& arg) {
-    scalar_t radians;
-    stringstream ss(arg);
-    ss >> radians;
+string Entity::cmdPitch_global(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    scalar_t radians = boost::lexical_cast<scalar_t>(args[0]);
     pitch(radians * m_device->getDeltaTime(), SPACE_GLOBAL);
+    return "";
 }
 
-void Entity::cmdRoll_global(const std::string& arg) {
-    scalar_t radians;
-    stringstream ss(arg);
-    ss >> radians;
+string Entity::cmdRoll_global(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    scalar_t radians = boost::lexical_cast<scalar_t>(args[0]);
     roll(radians * m_device->getDeltaTime(), SPACE_GLOBAL);
+    return "";
 }

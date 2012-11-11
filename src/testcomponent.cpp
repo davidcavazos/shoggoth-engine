@@ -57,7 +57,8 @@ void TestComponent::saveToPtree(const string& path, ptree& tree) const {
 
 
 
-void TestComponent::cmdHealth(const string& arg) {
-    stringstream ss(arg);
+string TestComponent::cmdHealth(deque<string>& arg) {
+    stringstream ss(arg[0]);
     ss >> m_health;
+    return string();
 }

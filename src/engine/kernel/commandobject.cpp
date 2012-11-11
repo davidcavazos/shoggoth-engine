@@ -57,7 +57,7 @@ bool CommandObject::operator>(const CommandObject& rhs) const {
     return m_idObject > rhs.m_idObject;
 }
 
-bool CommandObject::runObjectCommand(const size_t idCommand, const std::string& arguments) {
+bool CommandObject::runObjectCommand(const size_t idCommand, deque<string>& arguments) {
     cmd_table_t::iterator it = m_commands.find(idCommand);
     if (it != m_commands.end()) {
         (it->second)(arguments);
@@ -80,7 +80,7 @@ size_t CommandObject::registerAttribute(const string& attrName, const slot_t& sl
     cmd_table_t::iterator it = m_attributes.find(id);
     if (it == m_attributes.end())
         m_attributes.insert(pair<size_t, slot_t>(id, slot));
-    registerCommand(SET_COMMAND, boost::bind(&CommandObject::setAttribute, this, _1));
+    registerCommand(SET_COMMAND, boost::bind(&CommandObject::cmdSetAttribute, this, _1));
     return id;
 }
 
@@ -104,21 +104,23 @@ void CommandObject::unregisterAllAttributes() {
     m_attributes.clear();
 }
 
-void CommandObject::setAttribute(const string& arg) {
+string CommandObject::cmdSetAttribute(deque<string>& args) {
     size_t id;
-    string attrName;
-    stringstream ss(arg);
-    ss >> attrName;
-    if (Terminal::ms_attributesTable.findId(id, attrName)) {
+    if (args.size() == 0)
+        return "Error: no attribute specified";
+    if (Terminal::ms_attributesTable.findId(id, args[0])) {
         cmd_table_t::iterator it = m_attributes.find(id);
-        if (it != m_attributes.end())
-            (it->second)(arg.substr(static_cast<size_t>(ss.tellg())));
+        if (it != m_attributes.end()) {
+            args.pop_front();
+            return (it->second)(args);
+        }
     }
+    return "";
 }
 
 ostream& operator<<(ostream& out, const CommandObject& rhs) {
     out << setw(MAX_EXPECTED_ID_DIGITS) << rhs.m_idObject << " " << rhs.m_objectName << "   ";
-    std::map<size_t, boost::function<void (const std::string&)> >::const_iterator it;
+    std::map<size_t, boost::function<std::string (deque<string>&)> >::const_iterator it;
     for (it = rhs.m_commands.begin(); it != rhs.m_commands.end(); ++it)
         out << it->first << " ";
     return out;

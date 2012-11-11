@@ -702,9 +702,13 @@ void Renderer::setOpenGLMatrix(float*const m, const Vector3& pos, const Quaterni
 
 
 
-void Renderer::cmdAmbientLight(const std::string& arg) {
-    float r, g, b, a;
-    stringstream ss(arg);
-    ss >> r >> g >> b >> a;
+string Renderer::cmdAmbientLight(deque<string>& args) {
+    if (args.size() < 4)
+        return "Error: too few arguments";
+    double r = boost::lexical_cast<double>(args[0]);
+    double g = boost::lexical_cast<double>(args[1]);
+    double b = boost::lexical_cast<double>(args[2]);
+    double a = boost::lexical_cast<double>(args[3]);
     setAmbientLight(r, g, b, a);
+    return "";
 }

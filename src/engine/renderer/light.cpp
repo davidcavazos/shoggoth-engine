@@ -150,23 +150,35 @@ Light& Light::operator=(const Light&) {
 
 
 
-void Light::cmdAmbient(const std::string& arg) {
-    color4_t color;
-    stringstream ss(arg);
-    ss >> color;
-    setAmbient(color);
+string Light::cmdAmbient(deque<string>& args) {
+    if (args.size() < 4)
+        return "Error: too few arguments";
+    float r = boost::lexical_cast<float>(args[0]);
+    float g = boost::lexical_cast<float>(args[1]);
+    float b = boost::lexical_cast<float>(args[2]);
+    float a = boost::lexical_cast<float>(args[3]);
+    setAmbient(r, g, b, a);
+    return "";
 }
 
-void Light::cmdDiffuse(const std::string& arg) {
-    color4_t color;
-    stringstream ss(arg);
-    ss >> color;
-    setDiffuse(color);
+string Light::cmdDiffuse(deque<string>& args) {
+    if (args.size() < 4)
+        return "Error: too few arguments";
+    float r = boost::lexical_cast<float>(args[0]);
+    float g = boost::lexical_cast<float>(args[1]);
+    float b = boost::lexical_cast<float>(args[2]);
+    float a = boost::lexical_cast<float>(args[3]);
+    setDiffuse(r, g, b, a);
+    return "";
 }
 
-void Light::cmdSpecular(const std::string& arg) {
-    color4_t color;
-    stringstream ss(arg);
-    ss >> color;
-    setSpecular(color);
+string Light::cmdSpecular(deque<string>& args) {
+    if (args.size() < 4)
+        return "Error: too few arguments";
+    float r = boost::lexical_cast<float>(args[0]);
+    float g = boost::lexical_cast<float>(args[1]);
+    float b = boost::lexical_cast<float>(args[2]);
+    float a = boost::lexical_cast<float>(args[3]);
+    setSpecular(r, g, b, a);
+    return "";
 }

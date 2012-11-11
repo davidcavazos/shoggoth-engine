@@ -78,9 +78,9 @@ private:
     Light(const Light& rhs);
     Light& operator=(const Light&);
 
-    void cmdAmbient(const std::string& arg);
-    void cmdDiffuse(const std::string& arg);
-    void cmdSpecular(const std::string& arg);
+    std::string cmdAmbient(std::deque<std::string>& args);
+    std::string cmdDiffuse(std::deque<std::string>& args);
+    std::string cmdSpecular(std::deque<std::string>& args);
 };
 
 

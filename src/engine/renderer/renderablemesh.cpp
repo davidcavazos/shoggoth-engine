@@ -112,14 +112,12 @@ RenderableMesh& RenderableMesh::operator=(const RenderableMesh&) {
 }
 
 
-void RenderableMesh::cmdLoadModelBox(const std::string& arg) {
-    double x, y, z;
-    stringstream ss(arg);
-    ss >> x >> y >> z;
+string RenderableMesh::cmdLoadModelBox(deque<string>& args) {
+    if (args.size() < 3)
+        return "Error: too few arguments";
+    double x = boost::lexical_cast<double>(args[0]);
+    double y = boost::lexical_cast<double>(args[1]);
+    double z = boost::lexical_cast<double>(args[2]);
     loadBox(x, y, z);
+    return "";
 }
-
-void RenderableMesh::cmdLoadModelFile(const std::string& arg) {
-    loadFromFile(arg);
-}
-

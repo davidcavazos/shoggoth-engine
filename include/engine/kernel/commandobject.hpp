@@ -28,10 +28,11 @@
 #define COMMANDOBJECT_HPP
 
 #include <string>
-#include <sstream>
+#include <deque>
 #include <map>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
+#include <boost/lexical_cast.hpp>
 
 class Command;
 
@@ -40,7 +41,7 @@ class CommandObject {
 public:
     friend std::ostream& operator<<(std::ostream& out, const CommandObject& rhs);
 
-    typedef boost::function<void (const std::string&)> slot_t;
+    typedef boost::function<std::string (std::deque<std::string>&)> slot_t;
     typedef std::map<size_t, slot_t> cmd_table_t;
 
     CommandObject(const std::string& objectName);
@@ -54,7 +55,7 @@ public:
     bool isCommandFound(const size_t idCommand) const;
     bool isAttributeFound(const size_t idAttribute) const;
 
-    bool runObjectCommand(const size_t idCommand, const std::string& arguments);
+    bool runObjectCommand(const size_t idCommand, std::deque<std::string>& arguments);
 
     size_t registerCommand(const std::string& cmd, const slot_t& slot);
     size_t registerAttribute(const std::string& attrName, const slot_t& slot);
@@ -71,7 +72,7 @@ private:
     cmd_table_t m_commands;
     cmd_table_t m_attributes;
 
-    void setAttribute(const std::string& arg);
+    std::string cmdSetAttribute(std::deque<std::string>& arg);
 };
 
 
@@ -96,12 +97,6 @@ inline bool CommandObject::isAttributeFound(const size_t idAttribute) const {
     if (it != m_attributes.end())
         return true;
     return false;
-}
-
-template <typename T>
-inline void strToVal(const std::string& str, T& val) {
-    std::stringstream ss(str);
-    ss >> val;
 }
 
 #endif // COMMANDOBJECT_HPP

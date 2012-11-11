@@ -146,9 +146,10 @@ void PhysicsWorld::updateRigidBodies() {
 
 
 
-void PhysicsWorld::cmdMinExpectedFramerate(const std::string& arg) {
-    double minFrameRate;
-    stringstream ss(arg);
-    ss >> minFrameRate;
+string PhysicsWorld::cmdMinExpectedFramerate(std::deque<std::string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    double minFrameRate = boost::lexical_cast<double>(args[0]);
     setMinExpectedFramerate(minFrameRate);
+    return "";
 }

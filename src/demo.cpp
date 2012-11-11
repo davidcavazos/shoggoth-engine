@@ -123,7 +123,7 @@ void Demo::runMainLoop() {
     // test to measure commands performance
 //     startTime = SDL_GetTicks();
 //     for (size_t i = 0; i < 100000; ++i)
-//         Terminal::pushCommand("cube set position-abs 0 15 0");
+//         Terminal::pushCommand("cube set position-abs 1 15 3");
 //     Terminal::processCommandsQueue();
 //     cout << SDL_GetTicks() - startTime << " ms" << endl;
 
@@ -153,23 +153,30 @@ void Demo::runMainLoop() {
     }
 }
 
-void Demo::cmdQuit(const string&) {
+string Demo::cmdQuit(std::deque<std::string>&) {
     m_isRunning = false;
+    return "";
 }
 
-void Demo::cmdRunCommand(const string& arg) {
-    Terminal::runScript(arg);
+string Demo::cmdRunCommand(std::deque<std::string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    Terminal::runScript(args[0]);
+    return "";
 }
 
-void Demo::cmdPrint(const string& arg) {
+string Demo::cmdPrint(std::deque<std::string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
     Entity* entity;
-    if (m_scene.findEntity(arg, entity)) {
+    if (m_scene.findEntity(args[0], entity)) {
         TestComponent* test = dynamic_cast<TestComponent*>(entity->component(COMPONENT_TESTCOMPONENT));
         cout << "Health: " << test->getHealth() << endl;
     }
+    return "";
 }
 
-void Demo::cmdOnMouseMotion(const string&) {
+string Demo::cmdOnMouseMotion(std::deque<std::string>&) {
     float sensitivity = 0.05;
     mouse_motion_t motion = m_device.getInputs()->getLastMouseMotion();
 
@@ -180,9 +187,10 @@ void Demo::cmdOnMouseMotion(const string&) {
     stringstream ssy;
     ssy << "camera pitch " << motion.yrel * sensitivity;
     Terminal::pushCommand(ssy.str());
+    return "";
 }
 
-void Demo::cmdFireCube(const std::string&) {
+string Demo::cmdFireCube(std::deque<std::string>&) {
     Entity* camera;
     if (m_scene.findEntity("camera", camera)) {
         static size_t n = 0;
@@ -201,9 +209,10 @@ void Demo::cmdFireCube(const std::string&) {
         cubeBody->addBox(1.0, MISSILE_SIZE, MISSILE_SIZE, MISSILE_SIZE);
         cubeBody->setLinearVelocity(orientationUnit * FIRE_SPEED);
     }
+    return "";
 }
 
-void Demo::cmdFireSphere(const std::string&) {
+string Demo::cmdFireSphere(std::deque<std::string>&) {
     Entity* camera;
     if (m_scene.findEntity("camera", camera)) {
         static size_t n = 0;
@@ -223,4 +232,5 @@ void Demo::cmdFireSphere(const std::string&) {
 //         cubeBody->addConvexHull("assets/meshes/icosphere1.dae");
         cubeBody->setLinearVelocity(orientationUnit * FIRE_SPEED);
     }
+    return "";
 }

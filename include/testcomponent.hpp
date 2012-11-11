@@ -44,7 +44,7 @@ public:
 private:
     double m_health;
 
-    void cmdHealth(const std::string& arg);
+    std::string cmdHealth(std::deque<std::string>& arg);
 };
 
 
