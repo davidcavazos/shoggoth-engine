@@ -52,7 +52,7 @@ bool Command::parseCommand(const string& expression) {
     string argument;
 
     m_arguments.resize(0);
-    m_output.clear();
+    m_output.resize(0);
     bool isComment = false;
     unsigned short token = 0;
     for (size_t i = 0; i < expression.length() && !isComment; ++i) {
