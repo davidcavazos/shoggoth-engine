@@ -68,16 +68,16 @@ Demo::Demo(const string& objectName,
     registerCommand("fire-cube", boost::bind(&Demo::cmdFireCube, this, _1));
     registerCommand("fire-sphere", boost::bind(&Demo::cmdFireSphere, this, _1));
 
-    Terminal::executeScript("assets/scripts/1-initialization.txt");
+    Terminal::runScript("assets/scripts/1-initialization.txt");
 }
 
 Demo::~Demo() {
-    Terminal::executeScript("assets/scripts/4-shutdown.txt");
+    Terminal::runScript("assets/scripts/4-shutdown.txt");
 }
 
 void Demo::loadScene() {
     cout << "Loading scene..." << endl;
-    Terminal::executeScript("assets/scripts/2-initialize-scene.txt");
+    Terminal::runScript("assets/scripts/2-initialize-scene.txt");
 
 //     // model            faces (triangles)
 //     // icosphere1              20
@@ -94,7 +94,7 @@ void Demo::loadScene() {
 
 void Demo::bindInputs() {
     cout << "Binding inputs..." << endl;
-    Terminal::executeScript("assets/scripts/3-bind-inputs.txt");
+    Terminal::runScript("assets/scripts/3-bind-inputs.txt");
 
     Inputs* inputs = m_device.getInputs();
     inputs->bindInput(INPUT_KEY_RELEASE, "demo quit", SDLK_ESCAPE);
@@ -158,7 +158,7 @@ void Demo::cmdQuit(const string&) {
 }
 
 void Demo::cmdRunCommand(const string& arg) {
-    Terminal::executeScript(arg);
+    Terminal::runScript(arg);
 }
 
 void Demo::cmdPrint(const string& arg) {

@@ -74,23 +74,27 @@ void Terminal::pushCommand(const string& cmd) {
     ms_commandsQueue.push_back(cmd);
 }
 
-string Terminal::executeScript(const string& fileName) {
+string Terminal::runScript(const string& fileName) {
     Command cmd;
     string expression;
+    deque<Command> commands;
     stringstream output;
 
+    // read script
     fstream file(fileName.c_str(), ios::in);
     while (file.good()) {
         getline(file, expression);
-        if (!expression.empty()) {
-            if (cmd.parseCommand(expression)) {
-                cout << "> " << cmd << endl;
-                output << "> " << cmd << endl;
-                cmd.run();
-            }
-        }
+        if (!expression.empty() && cmd.parseCommand(expression))
+            commands.push_back(cmd);
     }
     file.close();
+
+    // run commands
+    for (size_t i = 0; i < commands.size(); ++i) {
+        cout << "> " << commands[i] << endl;
+        output << "> " << commands[i] << endl;
+        commands[i].run();
+    }
     return output.str();
 }
 

@@ -46,7 +46,7 @@ public:
     static std::string findCommandName(const size_t idCommand);
 
     static void pushCommand(const std::string& cmd);
-    static std::string executeScript(const std::string& fileName);
+    static std::string runScript(const std::string& fileName);
     static void processCommandsQueue();
     static std::vector<std::string> generateObjectsList(const bool shouldIncludeId = false);
     static std::vector<std::string> generateCommandsList(const bool shouldIncludeId = false);
