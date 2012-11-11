@@ -180,13 +180,11 @@ string Demo::cmdOnMouseMotion(std::deque<std::string>&) {
     float sensitivity = 0.05;
     mouse_motion_t motion = m_device.getInputs()->getLastMouseMotion();
 
-    stringstream ssx;
-    ssx << "camera yaw-global " << motion.xrel * sensitivity;
-    Terminal::pushCommand(ssx.str());
+    string x = string("camera yaw-global ") + boost::lexical_cast<string>(motion.xrel * sensitivity);
+    Terminal::pushCommand(x);
 
-    stringstream ssy;
-    ssy << "camera pitch " << motion.yrel * sensitivity;
-    Terminal::pushCommand(ssy.str());
+    string y = string("camera pitch ") + boost::lexical_cast<string>(motion.yrel * sensitivity);
+    Terminal::pushCommand(y);
     return "";
 }
 
@@ -194,10 +192,9 @@ string Demo::cmdFireCube(std::deque<std::string>&) {
     Entity* camera;
     if (m_scene.findEntity("camera", camera)) {
         static size_t n = 0;
-        stringstream ss;
-        ss << "missile-cube-" << ++n;
+        string name = string("missile-cube-") + boost::lexical_cast<string>(++n);
 
-        Entity* cube = m_scene.root()->addChild(ss.str());
+        Entity* cube = m_scene.root()->addChild(name);
         Vector3 orientationUnit = VECTOR3_UNIT_Z_NEG.rotate(camera->getOrientationAbs());
         cube->setPositionAbs(camera->getPositionAbs() + orientationUnit);
         cube->setOrientationAbs(camera->getOrientationAbs());
@@ -216,20 +213,19 @@ string Demo::cmdFireSphere(std::deque<std::string>&) {
     Entity* camera;
     if (m_scene.findEntity("camera", camera)) {
         static size_t n = 0;
-        stringstream ss;
-        ss << "missile-sphere-" << ++n;
+        string name = string("missile-model-") + boost::lexical_cast<string>(++n);
 
-        Entity* sphere = m_scene.root()->addChild(ss.str());
+        Entity* model = m_scene.root()->addChild(name);
         Vector3 orientationUnit = VECTOR3_UNIT_Z_NEG.rotate(camera->getOrientationAbs());
-        sphere->setPositionAbs(camera->getPositionAbs() + orientationUnit);
-        sphere->setOrientationAbs(camera->getOrientationAbs());
+        model->setPositionAbs(camera->getPositionAbs() + orientationUnit);
+        model->setOrientationAbs(camera->getOrientationAbs());
 
-        RenderableMesh* cubeMesh = new RenderableMesh(sphere, &m_renderer, &m_resources);
-        cubeMesh->loadFromFile("assets/meshes/icosphere3.dae");
+        string modelName = "assets/meshes/materialtest.dae";
+        RenderableMesh* cubeMesh = new RenderableMesh(model, &m_renderer, &m_resources);
+        cubeMesh->loadFromFile(modelName);
 
-        RigidBody* cubeBody = new RigidBody(sphere, &m_resources, &m_physicsWorld);
-        cubeBody->addSphere(1.0, 1.0);
-//         cubeBody->addConvexHull("assets/meshes/icosphere1.dae");
+        RigidBody* cubeBody = new RigidBody(model, &m_resources, &m_physicsWorld);
+        cubeBody->addConvexHull(1.0, modelName);
         cubeBody->setLinearVelocity(orientationUnit * FIRE_SPEED);
     }
     return "";

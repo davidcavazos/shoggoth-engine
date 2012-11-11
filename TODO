@@ -1,16 +1,17 @@
++ Viewport & Occlusion Culling (BulletPhysics DbvtCullingDemo)
 + Save input commands as a replay script
 + Implement OpenGL Core and shaders
 + Advanced lighting (spotlights and directional lights)
-+ Debug camera
-+ Viewport & Occlusion Culling (BulletPhysics DbvtCullingDemo)
-~ Add more primitives (sphere, cilinder, cone, torus, etc)
+~ Add more primitives for RenderableMesh (sphere, cilinder, cone, etc)
 ~ Use relative positions to the camera for physics and rendering
-~ Debug Bullet physics renderer
+~ Add static plane, heightmap, etc in physics
 ~ Add constraints support
 ~ Add soft body support
 - Make input manager into a vector, only one can be active at a time (XML)
 - Binding keys (or other inputs) with a command
 - Possibility of multiple active cameras in different viewports
+- Debug camera
+- Debug Bullet physics renderer
 - Change Camera viewport data to double (percentage values instead of absolute pixels)
 - Update XML scene reader for viewport default value
 - Animations
@@ -18,16 +19,6 @@
 BUGS:
 Concave hulls in RigidBody crash!
 
-NOTES:
-All components must remove at destructor ONLY the commands and attributes created by it, all other objects can safely remove all
-
 Wiki:
-Complete Design pages https://github.com/davido262/shoggoth-engine/wiki/Design
-Describe all managers and components (in separate pages) https://github.com/davido262/shoggoth-engine/wiki/Entity-Component-Model
 Describe all commands https://github.com/davido262/shoggoth-engine/wiki/List-of-Commands
 Complete installation guides https://github.com/davido262/shoggoth-engine/wiki/Installation
-
-Finish OpenGL Renderer https://github.com/davido262/shoggoth-engine/wiki/OpenGL-Renderer
-Finish Data Structures and Organization https://github.com/davido262/shoggoth-engine/wiki/Data-Structures-and-Organization
-Finish Source Code Organization https://github.com/davido262/shoggoth-engine/wiki/Source-Code-Organization
-Finish Tutorials https://github.com/davido262/shoggoth-engine/wiki/Tutorials
