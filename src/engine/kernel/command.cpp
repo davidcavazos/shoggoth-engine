@@ -38,6 +38,7 @@ Command::Command():
     m_idObject(0),
     m_idCommand(0),
     m_arguments(),
+    m_output(),
     m_empty()
 {}
 
@@ -51,6 +52,7 @@ bool Command::parseCommand(const string& expression) {
     string argument;
 
     m_arguments.resize(0);
+    m_output.clear();
     bool isComment = false;
     unsigned short token = 0;
     for (size_t i = 0; i < expression.length() && !isComment; ++i) {
@@ -95,7 +97,7 @@ bool Command::parseCommand(const string& expression) {
 bool Command::run() {
     CommandObject* object;
     if (Terminal::getObject(m_idObject, object))
-        return object->runObjectCommand(m_idCommand, m_arguments);
+        return object->runObjectCommand(m_idCommand, m_arguments, m_output);
     cerr << "ObjectID " << m_idObject << " not found!" << endl;
     return false;
 }

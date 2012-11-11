@@ -49,6 +49,7 @@ public:
     std::deque<std::string>& arguments();
     const std::string& getArgument(const size_t i) const;
     void setArguments(const std::deque<std::string>& arguments);
+    const std::string& getOutput() const;
 
     void appendToArguments(const std::string& newArg);
     bool parseCommand(const std::string& expression);
@@ -57,6 +58,7 @@ private:
     size_t m_idObject;
     size_t m_idCommand;
     std::deque<std::string> m_arguments;
+    std::string m_output;
     std::string m_empty;
 
     bool run();
@@ -88,6 +90,10 @@ inline const std::string& Command::getArgument(const size_t i) const {
 
 inline void Command::setArguments(const std::deque<std::string>& arguments) {
     m_arguments = arguments;
+}
+
+inline const std::string& Command::getOutput() const {
+    return m_output;
 }
 
 #endif // COMMAND_HPP

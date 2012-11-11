@@ -55,7 +55,7 @@ public:
     bool isCommandFound(const size_t idCommand) const;
     bool isAttributeFound(const size_t idAttribute) const;
 
-    bool runObjectCommand(const size_t idCommand, std::deque<std::string>& arguments);
+    bool runObjectCommand(const size_t idCommand, std::deque<std::string>& arguments, std::string& output);
 
     size_t registerCommand(const std::string& cmd, const slot_t& slot);
     size_t registerAttribute(const std::string& attrName, const slot_t& slot);

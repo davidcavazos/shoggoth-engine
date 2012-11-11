@@ -92,20 +92,22 @@ string Terminal::runScript(const string& fileName) {
 
     // run commands
     for (size_t i = 0; i < commands.size(); ++i) {
-        cout << "> " << commands[i] << endl;
         output << "> " << commands[i] << endl;
-        commands[i].run();
+        if (commands[i].run() && !commands[i].getOutput().empty())
+            output << commands[i].getOutput() << endl;
     }
     return output.str();
 }
 
-void Terminal::processCommandsQueue() {
+string Terminal::processCommandsQueue() {
+    string output;
     Command cmd;
     while (!ms_commandsQueue.empty()) {
-        if (cmd.parseCommand(ms_commandsQueue.front()))
-            cmd.run();
+        if (cmd.parseCommand(ms_commandsQueue.front()) && cmd.run() && !cmd.getOutput().empty())
+            output.append(cmd.getOutput() + "\n");
         ms_commandsQueue.pop_front();
     }
+    return output;
 }
 
 vector<string> Terminal::generateObjectsList(const bool shouldIncludeId) {

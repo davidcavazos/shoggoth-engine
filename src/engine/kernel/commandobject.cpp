@@ -57,10 +57,10 @@ bool CommandObject::operator>(const CommandObject& rhs) const {
     return m_idObject > rhs.m_idObject;
 }
 
-bool CommandObject::runObjectCommand(const size_t idCommand, deque<string>& arguments) {
+bool CommandObject::runObjectCommand(const size_t idCommand, deque<string>& arguments, string& output) {
     cmd_table_t::iterator it = m_commands.find(idCommand);
     if (it != m_commands.end()) {
-        (it->second)(arguments);
+        output = (it->second)(arguments);
         return true;
     }
     cerr << "Object \"" << m_objectName << "\" has no CommandID " << idCommand << endl;

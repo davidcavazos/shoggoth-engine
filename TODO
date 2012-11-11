@@ -1,7 +1,9 @@
++ Unify the runScript with the processCommandsQueue for output
 + Viewport & Occlusion Culling (BulletPhysics DbvtCullingDemo)
 + Save input commands as a replay script
 + Implement OpenGL Core and shaders
 + Advanced lighting (spotlights and directional lights)
++ GUI and 2D stuff
 ~ Add more primitives for RenderableMesh (sphere, cilinder, cone, etc)
 ~ Use relative positions to the camera for physics and rendering
 ~ Add static plane, heightmap, etc in physics

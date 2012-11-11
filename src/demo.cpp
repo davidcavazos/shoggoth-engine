@@ -135,7 +135,7 @@ void Demo::runMainLoop() {
 
         m_physicsWorld.stepSimulation(0.001 * SDL_GetTicks());
         m_device.processEvents(m_isRunning);
-        Terminal::processCommandsQueue();
+        cout << Terminal::processCommandsQueue();
 
         stringstream ss;
         deltaTime = SDL_GetTicks() - startTime;
@@ -161,7 +161,7 @@ string Demo::cmdQuit(std::deque<std::string>&) {
 string Demo::cmdRunCommand(std::deque<std::string>& args) {
     if (args.size() < 1)
         return "Error: too few arguments";
-    Terminal::runScript(args[0]);
+    cout << Terminal::runScript(args[0]);
     return "";
 }
 
@@ -171,7 +171,7 @@ string Demo::cmdPrint(std::deque<std::string>& args) {
     Entity* entity;
     if (m_scene.findEntity(args[0], entity)) {
         TestComponent* test = dynamic_cast<TestComponent*>(entity->component(COMPONENT_TESTCOMPONENT));
-        cout << "Health: " << test->getHealth() << endl;
+        return string("Health: ") + boost::lexical_cast<string>(test->getHealth());
     }
     return "";
 }
