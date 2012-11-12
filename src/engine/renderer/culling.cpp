@@ -88,9 +88,8 @@ struct DbvtBroadphaseFrustumCulling : btDbvt::ICollide {
         btBroadphaseProxy* proxy = static_cast<btBroadphaseProxy*>(leaf->data);
         btCollisionObject* co = static_cast<btCollisionObject*>(proxy->m_clientObject);
 
-        if ((proxy->m_collisionFilterGroup & m_collisionFilterMask) != 0) {
+        if ((proxy->m_collisionFilterGroup & m_collisionFilterMask) != 0)
             m_pCollisionObjectArray->push_back(co);
-        }
     }
 } g_DBFC;
 
@@ -214,8 +213,8 @@ void Culling::performFrustumCulling(const float* projectionMatrix,
     for (it = m_renderableMeshes.begin(); it != m_renderableMeshes.end(); ++it) {
         btCollisionObject* object = it->first;
         RenderableMesh* renderable = it->second;
-        const Entity* entity = renderable->getEntity();
-        object->setWorldTransform(trans(entity->getOrientationAbs(), entity->getPositionAbs()));
+        const Entity* e = renderable->getEntity();
+        object->setWorldTransform(trans(e->getOrientationAbs(), e->getPositionAbs()));
     }
     m_collisionWorld->updateAabbs();
 
@@ -226,19 +225,19 @@ void Culling::performFrustumCulling(const float* projectionMatrix,
     btDbvt::collideKDOP(m_broadphase->m_sets[0].m_root, planeNormals, planeOffsets, 5, g_DBFC);
 
     // fill the models in frustum to be drawn
-    static size_t pastObjects = 0;
-    size_t objects = 0;
+//     static size_t pastObjects = 0;
+//     size_t objects = 0;
     for (int i = 0; i < objectsInFrustum.size(); ++i) {
         it = m_renderableMeshes.find(objectsInFrustum[i]);
         if (it != m_renderableMeshes.end()) {
             modelsInFrustum.insert(it->second);
-            ++objects;
+//             ++objects;
         }
     }
-    if (pastObjects != objects) {
-        cout << objects << " objects in frustum" << endl;
-        pastObjects = objects;
-    }
+//     if (pastObjects != objects) {
+//         cout << objects << " objects in frustum" << endl;
+//         pastObjects = objects;
+//     }
 }
 
 void Culling::openGLMatrixMult(const float* a, const float* b, float* const res) {
