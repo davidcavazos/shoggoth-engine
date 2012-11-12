@@ -1,5 +1,4 @@
 + Add Transform class and change in renderer to use the transform
-+ Unfriend RigidBody from PhysicsWorld
 
 + Save input commands as a replay script
 + Implement OpenGL Core and shaders

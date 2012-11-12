@@ -93,6 +93,7 @@ void PhysicsWorld::shutdown() {
 
 void PhysicsWorld::registerRigidBody(RigidBody* body) {
     m_rigidBodies.insert(std::pair<Entity*, btRigidBody*>(body->entity(), body->bulletRigidBody()));
+    m_dynamicsWorld->addRigidBody(body->bulletRigidBody());
 }
 
 void PhysicsWorld::unregisterRigidBody(RigidBody* body) {

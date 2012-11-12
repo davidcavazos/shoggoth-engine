@@ -46,8 +46,6 @@ class btRigidBody;
 
 class PhysicsWorld: public CommandObject {
 public:
-    friend class RigidBody;
-
     PhysicsWorld(const std::string& objectName);
     ~PhysicsWorld();
 
@@ -55,6 +53,8 @@ public:
     void shutdown();
     void registerRigidBody(RigidBody* body);
     void unregisterRigidBody(RigidBody* body);
+    btCollisionShape* findCollisionShape(const std::string& shapeId);
+    void registerCollisionShape(const std::string& shapeId, btCollisionShape* shape);
     void setMinExpectedFramerate(const double minExpectedFramerate);
     void stepSimulation(const double currentTimeSeconds);
 
@@ -88,6 +88,18 @@ private:
 inline void PhysicsWorld::setMinExpectedFramerate(const double minExpectedFramerate) {
     double minTimestep = 1.0 / minExpectedFramerate;
     m_maxSubsteps = minTimestep / FIXED_TIMESTEP + 2;
+}
+
+inline btCollisionShape* PhysicsWorld::findCollisionShape(const std::string& shapeId) {
+    collision_shapes_map_t::const_iterator it;
+    it = m_collisionShapes.find(shapeId);
+    if (it != m_collisionShapes.end())
+        return it->second;
+    return 0;
+}
+
+inline void PhysicsWorld::registerCollisionShape(const std::string& shapeId, btCollisionShape* shape) {
+    m_collisionShapes.insert(std::pair<std::string, btCollisionShape*>(shapeId, shape));
 }
 
 
