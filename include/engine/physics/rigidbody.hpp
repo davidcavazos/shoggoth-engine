@@ -58,6 +58,7 @@ public:
     RigidBody(Entity* const entity, Resources* resources, PhysicsWorld* physicsWorld);
     ~RigidBody();
 
+    btRigidBody* bulletRigidBody();
     Vector3 getPosition();
     Quaternion getOrientation();
     const std::string& getShapeId() const;
@@ -125,5 +126,11 @@ private:
     std::string cmdAngularVelocity(std::deque<std::string>& args);
     std::string cmdGravity(std::deque<std::string>& args);
 };
+
+
+
+inline btRigidBody* RigidBody::bulletRigidBody() {
+    return m_rigidBody;
+}
 
 #endif // RIGIDBODY_HPP

@@ -53,10 +53,15 @@ public:
 
     void initialize();
     void shutdown();
+    void registerRigidBody(RigidBody* body);
+    void unregisterRigidBody(RigidBody* body);
     void setMinExpectedFramerate(const double minExpectedFramerate);
     void stepSimulation(const double currentTimeSeconds);
 
 private:
+    typedef boost::unordered_map<std::string, btCollisionShape*> collision_shapes_map_t;
+    typedef boost::unordered_map<Entity*, btRigidBody*> rigid_bodies_map_t;
+
     PhysicsWorld(const PhysicsWorld& rhs);
 
     PhysicsWorld& operator=(const PhysicsWorld& rhs);
@@ -65,8 +70,6 @@ private:
 
     int m_maxSubsteps;
     double m_lastTime;
-    typedef boost::unordered_map<std::string, btCollisionShape*> collision_shapes_map_t;
-    typedef boost::unordered_map<Entity*, btRigidBody*> rigid_bodies_map_t;
     btBroadphaseInterface* m_broadphase;
     btDefaultCollisionConfiguration* m_collisionConfiguration;
     btCollisionDispatcher* m_collisionDispatcher;
@@ -79,6 +82,7 @@ private:
     std::string cmdShutdown(std::deque<std::string>&);
     std::string cmdMinExpectedFramerate(std::deque<std::string>& args);
 };
+
 
 
 inline void PhysicsWorld::setMinExpectedFramerate(const double minExpectedFramerate) {

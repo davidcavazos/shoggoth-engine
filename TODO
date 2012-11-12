@@ -1,6 +1,7 @@
 + set default gravity to -9.81
 + Add Transform class and change in renderer to use the transform
 + Change ptree::path_type() to xmlPath()
++ Unfriend RigidBody from PhysicsWorld
 
 + Frustum & Occlusion Culling (BulletPhysics DbvtCullingDemo)
 + Save input commands as a replay script

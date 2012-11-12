@@ -179,12 +179,12 @@ void Culling::unregisterForCulling(RenderableMesh* const renderablemesh) {
 void Culling::performFrustumCulling(const float* projectionMatrix,
                                     const Entity* camera,
                                     set<RenderableMesh*>& modelsInFrustum) {
-    renderable_mesh_map_t::const_iterator itTemp;
-    for (itTemp = m_renderableMeshes.begin(); itTemp != m_renderableMeshes.end(); ++itTemp) {
-        RenderableMesh* renderable = itTemp->second;
-        modelsInFrustum.insert(renderable);
-    }
-    return;
+//     renderable_mesh_map_t::const_iterator itTemp;
+//     for (itTemp = m_renderableMeshes.begin(); itTemp != m_renderableMeshes.end(); ++itTemp) {
+//         RenderableMesh* renderable = itTemp->second;
+//         modelsInFrustum.insert(renderable);
+//     }
+//     return;
 
     // get modelview matrix
     float modelviewMatrix[16];
@@ -217,6 +217,7 @@ void Culling::performFrustumCulling(const float* projectionMatrix,
         const Entity* entity = renderable->getEntity();
         object->setWorldTransform(trans(entity->getOrientationAbs(), entity->getPositionAbs()));
     }
+    m_collisionWorld->updateAabbs();
 
     // check for the dbvt collisions
     btAlignedObjectArray<btCollisionObject*> objectsInFrustum;
@@ -225,11 +226,18 @@ void Culling::performFrustumCulling(const float* projectionMatrix,
     btDbvt::collideKDOP(m_broadphase->m_sets[0].m_root, planeNormals, planeOffsets, 5, g_DBFC);
 
     // fill the models in frustum to be drawn
+    static size_t pastObjects = 0;
+    size_t objects = 0;
     for (int i = 0; i < objectsInFrustum.size(); ++i) {
         it = m_renderableMeshes.find(objectsInFrustum[i]);
         if (it != m_renderableMeshes.end()) {
             modelsInFrustum.insert(it->second);
+            ++objects;
         }
+    }
+    if (pastObjects != objects) {
+        cout << objects << " objects in frustum" << endl;
+        pastObjects = objects;
     }
 }
 

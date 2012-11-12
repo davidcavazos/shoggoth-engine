@@ -53,11 +53,11 @@ const string XML_RIGIDBODY_ANGULARVELOCITY = "angularvelocity";
 const string XML_RIGIDBODY_GRAVITY = "gravity";
 
 
-btDefaultMotionState* getMotionState(const Entity* entity);
-btVector3 v3(const Vector3& v);
-Vector3 v3(const btVector3& v);
+btVector3 vect(const Vector3& v);
+Vector3 vect(const btVector3& v);
 btQuaternion quat(const Quaternion& q);
 Quaternion quat(const btQuaternion& q);
+btTransform trans(const Quaternion& rot, const Vector3& pos);
 
 
 
@@ -83,8 +83,7 @@ RigidBody::RigidBody(Entity* const entity, Resources* resources, PhysicsWorld* p
 }
 
 RigidBody::~RigidBody() {
-    m_physicsWorld->m_dynamicsWorld->removeRigidBody(m_rigidBody);
-    m_physicsWorld->m_rigidBodies.erase(m_entity);
+    m_physicsWorld->unregisterRigidBody(this);
     m_entity->unregisterAttribute("gravity");
     m_entity->unregisterAttribute("angular-velocity");
     m_entity->unregisterAttribute("angular-factor");
@@ -100,7 +99,7 @@ RigidBody::~RigidBody() {
 
 
 Vector3 RigidBody::getPosition() {
-    return v3(m_rigidBody->getCenterOfMassPosition());
+    return vect(m_rigidBody->getCenterOfMassPosition());
 }
 
 Quaternion RigidBody::getOrientation() {
@@ -144,23 +143,23 @@ double RigidBody::getAngularSleepingThreshold() const {
 }
 
 Vector3 RigidBody::getLinearFactor() const {
-    return v3(m_rigidBody->getLinearFactor());
+    return vect(m_rigidBody->getLinearFactor());
 }
 
 Vector3 RigidBody::getLinearVelocity() const {
-    return v3(m_rigidBody->getLinearVelocity());
+    return vect(m_rigidBody->getLinearVelocity());
 }
 
 Vector3 RigidBody::getAngularFactor() const {
-    return v3(m_rigidBody->getAngularFactor());
+    return vect(m_rigidBody->getAngularFactor());
 }
 
 Vector3 RigidBody::getAngularVelocity() const {
-    return v3(m_rigidBody->getAngularVelocity());
+    return vect(m_rigidBody->getAngularVelocity());
 }
 
 Vector3 RigidBody::getGravity() const {
-    return v3(m_rigidBody->getGravity());
+    return vect(m_rigidBody->getGravity());
 }
 
 
@@ -170,7 +169,7 @@ void RigidBody::activate(const bool forceActivate) {
 }
 
 void RigidBody::setTransform(const Vector3& position, const Quaternion& orientation) {
-    m_rigidBody->setWorldTransform(btTransform(quat(orientation), v3(position)));
+    m_rigidBody->setWorldTransform(btTransform(quat(orientation), vect(position)));
 }
 
 void RigidBody::setMass(const double mass) {
@@ -201,23 +200,23 @@ void RigidBody::setSleepingThresholds(const double linear, const double angular)
 }
 
 void RigidBody::setLinearFactor(const Vector3& linearFactor) {
-    m_rigidBody->setLinearFactor(v3(linearFactor));
+    m_rigidBody->setLinearFactor(vect(linearFactor));
 }
 
 void RigidBody::setLinearVelocity(const Vector3& linearVelocity) {
-    m_rigidBody->setLinearVelocity(v3(linearVelocity));
+    m_rigidBody->setLinearVelocity(vect(linearVelocity));
 }
 
 void RigidBody::setAngularFactor(const Vector3& angularFactor) {
-    m_rigidBody->setAngularFactor(v3(angularFactor));
+    m_rigidBody->setAngularFactor(vect(angularFactor));
 }
 
 void RigidBody::setAngularVelocity(const Vector3& angularVelocity) {
-    m_rigidBody->setAngularVelocity(v3(angularVelocity));
+    m_rigidBody->setAngularVelocity(vect(angularVelocity));
 }
 
 void RigidBody::setGravity(const Vector3& gravity) {
-    m_rigidBody->setGravity(v3(gravity));
+    m_rigidBody->setGravity(vect(gravity));
 }
 
 void RigidBody::addSphere(const double mass, const double radius) {
@@ -516,10 +515,10 @@ void RigidBody::addRigidBody(const double mass, btCollisionShape* shape) {
     m_mass = mass;
     btVector3 inertia;
     shape->calculateLocalInertia(m_mass, inertia);
-    btDefaultMotionState* motion = getMotionState(m_entity);
+    btDefaultMotionState* motion = new btDefaultMotionState(
+            trans(m_entity->getOrientationAbs(), m_entity->getPositionAbs()));
     m_rigidBody = new btRigidBody(m_mass, motion, shape, inertia);
-    m_physicsWorld->m_rigidBodies.insert(
-        std::pair<Entity*, btRigidBody*>(m_entity, m_rigidBody));
+    m_physicsWorld->registerRigidBody(this);
     m_physicsWorld->m_dynamicsWorld->addRigidBody(m_rigidBody);
 }
 
@@ -634,18 +633,11 @@ string RigidBody::cmdGravity(deque<string>& args) {
 
 
 
-btDefaultMotionState* getMotionState(const Entity* entity) {
-    const Quaternion& rot = entity->getOrientationAbs();
-    const Vector3& pos = entity->getPositionAbs();
-    btDefaultMotionState* motion = new btDefaultMotionState(btTransform(quat(rot), v3(pos)));
-    return motion;
-}
-
-btVector3 v3(const Vector3& v) {
+btVector3 vect(const Vector3& v) {
     return btVector3(v.getX(), v.getY(), v.getZ());
 }
 
-Vector3 v3(const btVector3& v) {
+Vector3 vect(const btVector3& v) {
     return Vector3(v.getX(), v.getY(), v.getZ());
 }
 
@@ -655,4 +647,8 @@ btQuaternion quat(const Quaternion& q) {
 
 Quaternion quat(const btQuaternion& q) {
     return Quaternion(q.getW(), q.getX(), q.getY(), q.getZ());
+}
+
+btTransform trans(const Quaternion& rot, const Vector3& pos) {
+    return btTransform(quat(rot), vect(pos));
 }

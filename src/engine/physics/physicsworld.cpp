@@ -29,6 +29,7 @@
 #include <iostream>
 #include <bullet/btBulletDynamicsCommon.h>
 #include "engine/kernel/entity.hpp"
+#include "engine/physics/rigidbody.hpp"
 
 using namespace std;
 
@@ -88,6 +89,16 @@ void PhysicsWorld::shutdown() {
     delete m_collisionDispatcher;
     delete m_collisionConfiguration;
     delete m_broadphase;
+}
+
+void PhysicsWorld::registerRigidBody(RigidBody* body) {
+    m_rigidBodies.insert(std::pair<Entity*, btRigidBody*>(body->entity(), body->bulletRigidBody()));
+}
+
+void PhysicsWorld::unregisterRigidBody(RigidBody* body) {
+    m_dynamicsWorld->removeRigidBody(body->bulletRigidBody());
+    delete body->bulletRigidBody()->getMotionState();
+    m_rigidBodies.erase(body->entity());
 }
 
 void PhysicsWorld::stepSimulation(const double currentTimeSeconds) {
