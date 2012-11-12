@@ -38,4 +38,14 @@ const std::string XML_ATTR_TYPE_ROOT = "root-node";
 const std::string XML_ATTR_TYPE_ENTITY = "entity";
 const std::string XML_ATTR_TYPE_COMPONENT = "component";
 
+
+
+boost::property_tree::ptree::path_type xmlPath(const std::string& path);
+
+
+
+inline boost::property_tree::ptree::path_type xmlPath(const std::string& path) {
+    return boost::property_tree::ptree::path_type(path, XML_DELIMITER[0]);
+}
+
 #endif // XMLINFO_HPP

@@ -1,5 +1,8 @@
-+ Unify the runScript with the processCommandsQueue for output
-+ Viewport & Occlusion Culling (BulletPhysics DbvtCullingDemo)
++ set default gravity to -9.81
++ Add Transform class and change in renderer to use the transform
++ Change ptree::path_type() to xmlPath()
+
++ Frustum & Occlusion Culling (BulletPhysics DbvtCullingDemo)
 + Save input commands as a replay script
 + Implement OpenGL Core and shaders
 + Advanced lighting (spotlights and directional lights)

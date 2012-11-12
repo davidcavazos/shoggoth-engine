@@ -48,21 +48,19 @@ Light::Light(Entity* const entity, Renderer* renderer):
 {
     m_description = LIGHT_DESCRIPTION;
 
-    m_renderer->m_lights.insert(this);
+    m_renderer->registerLight(this);
 
     m_entity->registerAttribute("ambient-color", boost::bind(&Light::cmdAmbient, this, _1));
     m_entity->registerAttribute("diffuse-color", boost::bind(&Light::cmdDiffuse, this, _1));
     m_entity->registerAttribute("specular-color", boost::bind(&Light::cmdSpecular, this, _1));
-
-    m_renderer->initLighting();
 }
 
 Light::~Light() {
     m_entity->unregisterAttribute("specular-color");
     m_entity->unregisterAttribute("diffuse-color");
     m_entity->unregisterAttribute("ambient-color");
-    m_renderer->m_lights.erase(this);
-    m_renderer->initLighting();
+
+    m_renderer->unregisterLight(this);
 }
 
 

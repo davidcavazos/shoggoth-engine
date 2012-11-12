@@ -42,25 +42,29 @@ class Texture;
 
 class Renderer: public CommandObject {
 public:
-    friend class Camera;
-    friend class Light;
-    friend class RenderableMesh;
-
     Renderer(const std::string& objectName, const Device* device);
     ~Renderer();
 
     void initialize();
     void shutdown();
+    void registerCamera(Camera* camera);
+    void unregisterCamera(Camera* camera);
+    void registerLight(Light* light);
+    void unregisterLight(Light* light);
+    void registerRenderableMesh(RenderableMesh* model);
+    void unregisterRenderableMesh(RenderableMesh* model);
     void setAmbientLight(const float r, const float g, const float b, const float a = 1.0f);
+    void updateLights() const;
     void uploadModel(unsigned int& meshId, unsigned int& indicesId, const Mesh& mesh);
     void deleteModel(const unsigned int meshId, const unsigned int indicesId);
     void uploadTexture(unsigned int& textureId, const Texture& texture);
     void deleteTexture(const unsigned int textureId);
-    void draw() const;
+    void draw();
     std::string listsToString() const;
 
 private:
     const Device* m_device;
+    float m_projectionMatrix[16];
     Camera* m_activeCamera;
     std::set<Camera*> m_cameras;
     std::set<Light*> m_lights;
@@ -70,10 +74,11 @@ private:
     Renderer& operator=(const Renderer& rhs);
 
     void initLighting() const;
-    void updateLights() const;
-    void initCamera() const;
+    void initCamera();
     void displayLegacyLights() const;
-    void setOpenGLMatrix(float* const m, const Vector3& pos, const Quaternion& rot) const;
+    void openGLModelMatrix(float* const m, const Vector3& pos, const Quaternion& rot) const;
+    void openGLProjectionMatrixOrthographic(float width, float height, float near, float far);
+    void openGLProjectionMatrixPerspective(float perspectiveFOV, float aspectRatio, float near, float far);
 
     std::string cmdInitialize(std::deque<std::string>&);
     std::string cmdShutdown(std::deque<std::string>&);
@@ -81,6 +86,33 @@ private:
 };
 
 
+
+inline void Renderer::registerCamera(Camera* camera) {
+    m_cameras.insert(camera);
+    m_activeCamera = camera;
+}
+
+inline void Renderer::unregisterCamera(Camera* camera) {
+    m_cameras.erase(camera);
+}
+
+inline void Renderer::registerLight(Light* light) {
+    m_lights.insert(light);
+    initLighting();
+}
+
+inline void Renderer::unregisterLight(Light* light) {
+    m_lights.erase(light);
+    initLighting();
+}
+
+inline void Renderer::registerRenderableMesh(RenderableMesh* model) {
+    m_models.insert(model);
+}
+
+inline void Renderer::unregisterRenderableMesh(RenderableMesh* model) {
+    m_models.erase(model);
+}
 
 inline std::string Renderer::cmdInitialize(std::deque<std::string>&) {
     initialize();

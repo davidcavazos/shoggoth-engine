@@ -22,6 +22,7 @@ set(RENDER_SRC_FILES
     renderer/camera.cpp
     renderer/light.cpp
     renderer/renderablemesh.cpp
+    renderer/culling.cpp
     renderer/renderer.cpp
 )
 
@@ -64,6 +65,6 @@ include_directories(
 )
 
 target_link_libraries(${KERNEL_LIBRARY_NAME} ${SDL_LIBRARY})
-target_link_libraries(${RENDER_LIBRARY_NAME} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})
+target_link_libraries(${RENDER_LIBRARY_NAME} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${BULLET_LIBRARIES})
 target_link_libraries(${RESOURCES_LIBRARY_NAME} ${SDLIMAGE_LIBRARY} ${ASSIMP_LIBRARIES})
 target_link_libraries(${PHYSICS_LIBRARY_NAME} ${BULLET_LIBRARIES})

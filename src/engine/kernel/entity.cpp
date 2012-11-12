@@ -121,6 +121,7 @@ void Entity::rotate(const Quaternion& deltaRotation, const transform_space_t& re
 }
 
 void Entity::lookAt(const Vector3& target, const Vector3& up) {
+    // modified Mesa 9.0 glu implementation
     Quaternion result;
     Vector3 vFwd = (target - m_positionAbs).normalized();
     Vector3 vSide = vFwd.cross(up).normalized();

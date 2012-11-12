@@ -221,9 +221,7 @@ void RigidBody::setGravity(const Vector3& gravity) {
 }
 
 void RigidBody::addSphere(const double mass, const double radius) {
-    stringstream ss;
-    ss << COLLISION_SHAPE_BOX << " " << radius;
-    m_shapeId = ss.str();
+    m_shapeId = COLLISION_SHAPE_BOX + " " + boost::lexical_cast<string>(radius);
 
     PhysicsWorld::collision_shapes_map_t& collisionShapes = m_physicsWorld->m_collisionShapes;
     PhysicsWorld::collision_shapes_map_t::const_iterator it;
@@ -240,9 +238,10 @@ void RigidBody::addSphere(const double mass, const double radius) {
 }
 
 void RigidBody::addBox(const double mass, const double lengthX, const double lengthY, const double lengthZ) {
-    stringstream ss;
-    ss << COLLISION_SHAPE_BOX << " " << lengthX << " " << lengthY << " " << lengthZ;
-    m_shapeId = ss.str();
+    m_shapeId = COLLISION_SHAPE_BOX + " " +
+            boost::lexical_cast<string>(lengthX) + " " +
+            boost::lexical_cast<string>(lengthY) + " " +
+            boost::lexical_cast<string>(lengthZ);
 
     PhysicsWorld::collision_shapes_map_t& collisionShapes = m_physicsWorld->m_collisionShapes;
     PhysicsWorld::collision_shapes_map_t::const_iterator it;
@@ -259,9 +258,9 @@ void RigidBody::addBox(const double mass, const double lengthX, const double len
 }
 
 void RigidBody::addCylinder(const double mass, const double radius, const double height) {
-    stringstream ss;
-    ss << COLLISION_SHAPE_CYLINDER << " " << radius << " " << height;
-    m_shapeId = ss.str();
+    m_shapeId = COLLISION_SHAPE_CYLINDER + " " +
+            boost::lexical_cast<string>(radius) + " " +
+            boost::lexical_cast<string>(height);
 
     PhysicsWorld::collision_shapes_map_t& collisionShapes = m_physicsWorld->m_collisionShapes;
     PhysicsWorld::collision_shapes_map_t::const_iterator it;
@@ -278,9 +277,9 @@ void RigidBody::addCylinder(const double mass, const double radius, const double
 }
 
 void RigidBody::addCapsule(const double mass, const double radius, const double height) {
-    stringstream ss;
-    ss << COLLISION_SHAPE_CAPSULE << " " << radius << " " << height;
-    m_shapeId = ss.str();
+    m_shapeId = COLLISION_SHAPE_CAPSULE + " " +
+            boost::lexical_cast<string>(radius) + " " +
+            boost::lexical_cast<string>(height);
 
     PhysicsWorld::collision_shapes_map_t& collisionShapes = m_physicsWorld->m_collisionShapes;
     PhysicsWorld::collision_shapes_map_t::const_iterator it;
@@ -297,9 +296,9 @@ void RigidBody::addCapsule(const double mass, const double radius, const double 
 }
 
 void RigidBody::addCone(const double mass, const double radius, const double height) {
-    stringstream ss;
-    ss << COLLISION_SHAPE_CONE << " " << radius << " " << height;
-    m_shapeId = ss.str();
+    m_shapeId = COLLISION_SHAPE_CONE + " " +
+            boost::lexical_cast<string>(radius) + " " +
+            boost::lexical_cast<string>(height);
 
     PhysicsWorld::collision_shapes_map_t& collisionShapes = m_physicsWorld->m_collisionShapes;
     PhysicsWorld::collision_shapes_map_t::const_iterator it;
@@ -316,9 +315,7 @@ void RigidBody::addCone(const double mass, const double radius, const double hei
 }
 
 void RigidBody::addConvexHull(const double mass, const string& fileName) {
-    stringstream ss;
-    ss << COLLISION_SHAPE_CONVEX << " " << fileName;
-    m_shapeId = ss.str();
+    m_shapeId = COLLISION_SHAPE_CONVEX + " " + fileName;
 
     PhysicsWorld::collision_shapes_map_t& collisionShapes = m_physicsWorld->m_collisionShapes;
     PhysicsWorld::collision_shapes_map_t::const_iterator it;
@@ -356,9 +353,7 @@ void RigidBody::addConvexHull(const double mass, const string& fileName) {
 }
 
 void RigidBody::addConcaveHull(const double mass, const string& fileName) {
-    stringstream ss;
-    ss << COLLISION_SHAPE_CONCAVE << " " << fileName;
-    m_shapeId = ss.str();
+    m_shapeId = COLLISION_SHAPE_CONCAVE + " " + fileName;
 
     PhysicsWorld::collision_shapes_map_t& collisionShapes = m_physicsWorld->m_collisionShapes;
     PhysicsWorld::collision_shapes_map_t::const_iterator it;
@@ -642,11 +637,7 @@ string RigidBody::cmdGravity(deque<string>& args) {
 btDefaultMotionState* getMotionState(const Entity* entity) {
     const Quaternion& rot = entity->getOrientationAbs();
     const Vector3& pos = entity->getPositionAbs();
-    btDefaultMotionState* motion =
-    new btDefaultMotionState(btTransform(
-        btQuaternion(rot.getX(), rot.getY(), rot.getZ(), rot.getW()),
-        btVector3(pos.getX(), pos.getY(), pos.getZ()))
-    );
+    btDefaultMotionState* motion = new btDefaultMotionState(btTransform(quat(rot), v3(pos)));
     return motion;
 }
 
@@ -663,5 +654,5 @@ btQuaternion quat(const Quaternion& q) {
 }
 
 Quaternion quat(const btQuaternion& q) {
-    return Quaternion(q.getX(), q.getY(), q.getZ(), q.getW());
+    return Quaternion(q.getW(), q.getX(), q.getY(), q.getZ());
 }

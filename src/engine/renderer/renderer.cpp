@@ -27,6 +27,7 @@
 #include "engine/renderer/renderer.hpp"
 
 #include <iostream>
+#include <cmath>
 #include <GL/glew.h>
 #include "engine/kernel/device.hpp"
 #include "engine/kernel/entity.hpp"
@@ -53,6 +54,7 @@ typedef enum {
 
 data_upload_t gDataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
 mipmap_generation_t gMipMapGenerationMode = MIPMAP_GENERATION_GLU;
+
 
 
 Renderer::Renderer(const string& objectName, const Device* device):
@@ -200,9 +202,12 @@ void Renderer::initialize() {
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+    Culling::initialize();
 }
 
 void Renderer::shutdown() {
+    Culling::shutdown();
     cout << "Destroying all renderable meshes" << endl;
     set<RenderableMesh*>::const_iterator itMesh;
     for (itMesh = m_models.begin(); itMesh != m_models.end(); ++itMesh)
@@ -222,6 +227,43 @@ void Renderer::shutdown() {
 void Renderer::setAmbientLight(const float r, const float g, const float b, const float a) {
     GLfloat global_ambient[] = {r, g, b, a};
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
+}
+
+void Renderer::updateLights() const {
+    set<Light*>::const_iterator it = m_lights.begin();
+    for (size_t i = 0; i < m_lights.size(); ++i) {
+        GLenum lightEnum;
+        switch (i) {
+            case 0:
+                lightEnum = GL_LIGHT0;
+                break;
+            case 1:
+                lightEnum = GL_LIGHT1;
+                break;
+            case 2:
+                lightEnum = GL_LIGHT2;
+                break;
+            case 3:
+                lightEnum = GL_LIGHT3;
+                break;
+            case 4:
+                lightEnum = GL_LIGHT4;
+                break;
+            case 5:
+                lightEnum = GL_LIGHT5;
+                break;
+            case 6:
+                lightEnum = GL_LIGHT6;
+                break;
+            case 7: default:
+                lightEnum = GL_LIGHT7;
+                break;
+        }
+        glLightfv(lightEnum, GL_AMBIENT, (*it)->getAmbientPtr());
+        glLightfv(lightEnum, GL_DIFFUSE, (*it)->getDiffusePtr());
+        glLightfv(lightEnum, GL_SPECULAR, (*it)->getSpecularPtr());
+        ++it;
+    }
 }
 
 void Renderer::uploadModel(unsigned int& meshId, unsigned int& indicesId, const Mesh& mesh) {
@@ -372,7 +414,7 @@ void Renderer::deleteTexture(const unsigned int textureId) {
     glDeleteTextures(1, &textureId);
 }
 
-void Renderer::draw() const {
+void Renderer::draw() {
     if (m_activeCamera->hasChanged()) {
         initCamera();
         m_activeCamera->setHasChanged(false);
@@ -385,21 +427,31 @@ void Renderer::draw() const {
 
     // set camera
     const Entity* cam = m_activeCamera->getEntity();
-    setOpenGLMatrix(m, VECTOR3_ZERO, cam->getOrientationAbs().inverse());
+//     const Quaternion& q = cam->getOrientationAbs();
+//     const Vector3& v = cam->getPositionAbs();
+//     btQuaternion rot = btQuaternion(q.getX(), q.getY(), q.getZ(), q.getW());
+//     btVector3 pos = btVector3(v.getX(), v.getY(), v.getZ());
+//     btTransform(rot, pos).inverse().getOpenGLMatrix(m);
+
+    openGLModelMatrix(m, VECTOR3_ZERO, cam->getOrientationAbs().inverse());
     glMultMatrixf(m);
     glTranslatef(-cam->getPositionAbs().getX(), -cam->getPositionAbs().getY(), -cam->getPositionAbs().getZ());
 
     // set lights
     displayLegacyLights();
 
+    // frustum culling
+    set<RenderableMesh*> modelsInFrustum;
+    Culling::performFrustumCulling(m_projectionMatrix, m_activeCamera->getEntity(), modelsInFrustum);
+
     // set meshes
     set<RenderableMesh*>::const_iterator it;
-    for (it = m_models.begin(); it != m_models.end(); ++it) {
+    for (it = modelsInFrustum.begin(); it != modelsInFrustum.end(); ++it) {
         const Model* model = (*it)->getModel();
         const Entity* entity = (*it)->getEntity();
 
         glPushMatrix();
-        setOpenGLMatrix(m, entity->getPositionAbs(), entity->getOrientationAbs());
+        openGLModelMatrix(m, entity->getPositionAbs(), entity->getOrientationAbs());
         glMultMatrixf(m);
         for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
             const Mesh* mesh = model->getMesh(n);
@@ -497,10 +549,6 @@ Renderer& Renderer::operator=(const Renderer& rhs) {
     cerr << "Renderer assignment operator should not be called" << endl;
     if (this == &rhs)
         return *this;
-    m_activeCamera = rhs.m_activeCamera;
-    m_cameras = rhs.m_cameras;
-    m_lights = rhs.m_lights;
-    m_models = rhs.m_models;
     return *this;
 }
 
@@ -576,44 +624,7 @@ void Renderer::initLighting() const {
     }
 }
 
-void Renderer::updateLights() const {
-    set<Light*>::const_iterator it = m_lights.begin();
-    for (size_t i = 0; i < m_lights.size(); ++i) {
-        GLenum lightEnum;
-        switch (i) {
-            case 0:
-                lightEnum = GL_LIGHT0;
-                break;
-            case 1:
-                lightEnum = GL_LIGHT1;
-                break;
-            case 2:
-                lightEnum = GL_LIGHT2;
-                break;
-            case 3:
-                lightEnum = GL_LIGHT3;
-                break;
-            case 4:
-                lightEnum = GL_LIGHT4;
-                break;
-            case 5:
-                lightEnum = GL_LIGHT5;
-                break;
-            case 6:
-                lightEnum = GL_LIGHT6;
-                break;
-            case 7: default:
-                lightEnum = GL_LIGHT7;
-                break;
-        }
-        glLightfv(lightEnum, GL_AMBIENT, (*it)->getAmbientPtr());
-        glLightfv(lightEnum, GL_DIFFUSE, (*it)->getDiffusePtr());
-        glLightfv(lightEnum, GL_SPECULAR, (*it)->getSpecularPtr());
-        ++it;
-    }
-}
-
-void Renderer::initCamera() const {
+void Renderer::initCamera() {
     m_activeCamera->setViewport(0, 0, m_device->getWinWidth(), m_device->getWinHeight());
     viewport_t view = m_activeCamera->getViewport();
     glViewport(view.posX, view.posY, view.width, view.height);
@@ -621,25 +632,26 @@ void Renderer::initCamera() const {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     switch (m_activeCamera->getCameraType()) {
-        case CAMERA_ORTHOGRAPHIC:
-            glOrtho(
-                -m_activeCamera->getOrthoWidth(),
-                    m_activeCamera->getOrthoWidth(),
-                    -m_activeCamera->getOrthoHeight(),
-                    m_activeCamera->getOrthoHeight(),
-                    m_activeCamera->getNearDistance(),
-                    m_activeCamera->getFarDistance()
-            );
-            break;
-        case CAMERA_PROJECTION:
-            gluPerspective(
-                m_activeCamera->getPerspectiveFOV(),
-                           m_activeCamera->getAspectRatio(),
-                           m_activeCamera->getNearDistance(),
-                           m_activeCamera->getFarDistance()
-            );
-            break;
+    case CAMERA_ORTHOGRAPHIC:
+        openGLProjectionMatrixOrthographic(
+            m_activeCamera->getOrthoWidth(),
+            m_activeCamera->getOrthoHeight(),
+            m_activeCamera->getNearDistance(),
+            m_activeCamera->getFarDistance()
+        );
+        break;
+    case CAMERA_PROJECTION:
+        openGLProjectionMatrixPerspective(
+            m_activeCamera->getPerspectiveFOV(),
+            m_activeCamera->getAspectRatio(),
+            m_activeCamera->getNearDistance(),
+            m_activeCamera->getFarDistance()
+        );
+        break;
+    default:
+        cerr << "Error: invalid camera_t: " << m_activeCamera->getCameraType() << endl;
     }
+    glMultMatrixf(m_projectionMatrix);
     glMatrixMode(GL_MODELVIEW);
 }
 
@@ -680,24 +692,83 @@ void Renderer::displayLegacyLights() const {
     }
 }
 
-void Renderer::setOpenGLMatrix(float*const m, const Vector3& pos, const Quaternion& rot) const {
+void Renderer::openGLModelMatrix(float* const m, const Vector3& pos, const Quaternion& rot) const {
+    // Bullet Physics implementation
     Matrix3x3 temp(rot);
-    m[0]  = static_cast<float>(temp.getRow(0).getX());
-    m[1]  = static_cast<float>(temp.getRow(1).getX());
-    m[2]  = static_cast<float>(temp.getRow(2).getX());
-    m[3]  = 0.0f;
-    m[4]  = static_cast<float>(temp.getRow(0).getY());
-    m[5]  = static_cast<float>(temp.getRow(1).getY());
-    m[6]  = static_cast<float>(temp.getRow(2).getY());
-    m[7]  = 0.0f;
-    m[8]  = static_cast<float>(temp.getRow(0).getZ());
-    m[9]  = static_cast<float>(temp.getRow(1).getZ());
+    m[ 0] = static_cast<float>(temp.getRow(0).getX());
+    m[ 1] = static_cast<float>(temp.getRow(1).getX());
+    m[ 2] = static_cast<float>(temp.getRow(2).getX());
+    m[ 3] = 0.0f;
+
+    m[ 4] = static_cast<float>(temp.getRow(0).getY());
+    m[ 5] = static_cast<float>(temp.getRow(1).getY());
+    m[ 6] = static_cast<float>(temp.getRow(2).getY());
+    m[ 7] = 0.0f;
+
+    m[ 8] = static_cast<float>(temp.getRow(0).getZ());
+    m[ 9] = static_cast<float>(temp.getRow(1).getZ());
     m[10] = static_cast<float>(temp.getRow(2).getZ());
     m[11] = 0.0f;
+
     m[12] = static_cast<float>(pos.getX());
     m[13] = static_cast<float>(pos.getY());
     m[14] = static_cast<float>(pos.getZ());
     m[15] = 1.0f;
+}
+
+void Renderer::openGLProjectionMatrixOrthographic(float width, float height, float near, float far) {
+    // implementation from http://db-in.com/blog/2011/04/cameras-on-opengl-es-2-x/
+    float deltaZ = far - near;
+
+    m_projectionMatrix[ 0] =  2.0f / width;
+    m_projectionMatrix[ 1] =  0.0f;
+    m_projectionMatrix[ 2] =  0.0f;
+    m_projectionMatrix[ 3] =  0.0f;
+
+    m_projectionMatrix[ 4] =  0.0f;
+    m_projectionMatrix[ 5] = -2.0f / height;
+    m_projectionMatrix[ 6] =  0.0f;
+    m_projectionMatrix[ 7] =  0.0f;
+
+    m_projectionMatrix[ 8] =  0.0f;
+    m_projectionMatrix[ 9] =  0.0f;
+    m_projectionMatrix[10] = -2.0f / deltaZ;
+    m_projectionMatrix[11] =  0.0f;
+
+    m_projectionMatrix[12] = -1.0f;
+    m_projectionMatrix[13] =  1.0f;
+    m_projectionMatrix[14] = -(far + near) / deltaZ;
+    m_projectionMatrix[15] =  1.0f;
+}
+
+void Renderer::openGLProjectionMatrixPerspective(float perspectiveFOV, float aspectRatio, float near, float far) {
+    // Mesa 9.0 glu implementation
+    float deltaZ = far - near;
+    float radians = degToRad(perspectiveFOV) * 0.5f;
+    float sine = sin(radians);
+    if ((deltaZ == 0.0f) || (sine == 0.0f) || (aspectRatio == 0.0f))
+        return;
+    float cotangent = cos(radians) / sine;
+
+    m_projectionMatrix[ 0] =  cotangent / aspectRatio;
+    m_projectionMatrix[ 1] =  0.0f;
+    m_projectionMatrix[ 2] =  0.0f;
+    m_projectionMatrix[ 3] =  0.0f;
+
+    m_projectionMatrix[ 4] =  0.0f;
+    m_projectionMatrix[ 5] =  cotangent;
+    m_projectionMatrix[ 6] =  0.0f;
+    m_projectionMatrix[ 7] =  0.0f;
+
+    m_projectionMatrix[ 8] =  0.0f;
+    m_projectionMatrix[ 9] =  0.0f;
+    m_projectionMatrix[10] = -(far + near) / deltaZ;
+    m_projectionMatrix[11] = -1.0f;
+
+    m_projectionMatrix[12] =  0.0f;
+    m_projectionMatrix[13] =  0.0f;
+    m_projectionMatrix[14] = -2.0f * near * far / deltaZ;
+    m_projectionMatrix[15] =  0.0f;
 }
 
 

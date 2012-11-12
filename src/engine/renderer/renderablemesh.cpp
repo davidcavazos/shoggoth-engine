@@ -29,6 +29,7 @@
 #include <sstream>
 #include "engine/kernel/entity.hpp"
 #include "engine/renderer/renderer.hpp"
+#include "engine/renderer/culling.hpp"
 #include "engine/resources/model.hpp"
 #include "engine/resources/resources.hpp"
 
@@ -44,32 +45,35 @@ RenderableMesh::RenderableMesh(Entity* const entity, Renderer* renderer, Resourc
     m_resources(resources),
     m_model(0)
 {
-    m_renderer->m_models.insert(this);
+    m_renderer->registerRenderableMesh(this);
 
     m_entity->registerCommand("load-model-box", boost::bind(&RenderableMesh::cmdLoadModelBox, this, _1));
     m_entity->registerCommand("load-model-file", boost::bind(&RenderableMesh::cmdLoadModelFile, this, _1));
 }
 
 RenderableMesh::~RenderableMesh() {
-    m_renderer->m_models.erase(this);
     m_entity->unregisterCommand("load-model-file");
     m_entity->unregisterCommand("load-model-box");
+
+    Culling::unregisterForCulling(this);
+    m_renderer->unregisterRenderableMesh(this);
 }
 
 
 
 void RenderableMesh::loadBox(const double lengthX, const double lengthY, const double lengthZ) {
-    stringstream ss;
-    ss << RENDERABLEMESH_BOX_DESCRIPTION << " " << lengthX << " " << lengthY << " " << lengthZ;
-    m_description = ss.str();
+    m_description = RENDERABLEMESH_BOX_DESCRIPTION + " " +
+            boost::lexical_cast<string>(lengthX) + " " +
+            boost::lexical_cast<string>(lengthY) + " " +
+            boost::lexical_cast<string>(lengthZ);
     m_model = m_resources->generateBox(m_description, lengthX, lengthY, lengthZ);
+    Culling::registerForCulling(this);
 }
 
 void RenderableMesh::loadFromFile(const string& fileName) {
-    stringstream ss;
-    ss << RENDERABLEMESH_FILE_DESCRIPTION << " " << fileName;
-    m_description = ss.str();
+    m_description = RENDERABLEMESH_FILE_DESCRIPTION + " " + fileName;
     m_model = m_resources->generateModelFromFile(fileName);
+    Culling::registerForCulling(this);
 }
 
 void RenderableMesh::loadFromPtree(const string& path, const ptree& tree) {

@@ -34,6 +34,7 @@
 #include "vector3.hpp"
 #include "quaternion.hpp"
 #include "component.hpp"
+#include <engine/renderer/culling.hpp>
 
 class Device;
 class Component;
