@@ -111,22 +111,15 @@ void Light::setSpecular(const float r, const float g, const float b, const float
 }
 
 void Light::loadFromPtree(const string& path, const ptree& tree) {
-    m_ambient = tree.get<color4_t>(ptree::path_type(path + XML_LIGHT_AMBIENT, XML_DELIMITER[0]),
-                                   color4_t(0.0f, 0.0f, 0.0f, 1.0f));
-    m_diffuse = tree.get<color4_t>(ptree::path_type(path + XML_LIGHT_DIFFUSE, XML_DELIMITER[0]),
-                                   color4_t(1.0f, 1.0f, 1.0f, 1.0f));
-    m_specular = tree.get<color4_t>(ptree::path_type(path + XML_LIGHT_SPECULAR, XML_DELIMITER[0]),
-                                    color4_t(1.0f, 1.0f, 1.0f, 1.0f));
+    m_ambient = tree.get<color4_t>(xmlPath(path + XML_LIGHT_AMBIENT), color4_t(0.0f, 0.0f, 0.0f, 1.0f));
+    m_diffuse = tree.get<color4_t>(xmlPath(path + XML_LIGHT_DIFFUSE), color4_t(1.0f, 1.0f, 1.0f, 1.0f));
+    m_specular = tree.get<color4_t>(xmlPath(path + XML_LIGHT_SPECULAR), color4_t(1.0f, 1.0f, 1.0f, 1.0f));
 }
 
 void Light::saveToPtree(const string& path, ptree& tree) const {
-    string attr;
-    attr = path + XML_LIGHT_AMBIENT;
-    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getAmbient());
-    attr = path + XML_LIGHT_DIFFUSE;
-    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getDiffuse());
-    attr = path + XML_LIGHT_SPECULAR;
-    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getSpecular());
+    tree.put(xmlPath(path + XML_LIGHT_AMBIENT), getAmbient());
+    tree.put(xmlPath(path + XML_LIGHT_DIFFUSE), getDiffuse());
+    tree.put(xmlPath(path + XML_LIGHT_SPECULAR), getSpecular());
 }
 
 

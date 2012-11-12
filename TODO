@@ -1,9 +1,6 @@
-+ set default gravity to -9.81
 + Add Transform class and change in renderer to use the transform
-+ Change ptree::path_type() to xmlPath()
 + Unfriend RigidBody from PhysicsWorld
 
-+ Frustum & Occlusion Culling (BulletPhysics DbvtCullingDemo)
 + Save input commands as a replay script
 + Implement OpenGL Core and shaders
 + Advanced lighting (spotlights and directional lights)
@@ -21,10 +18,12 @@
 - Change Camera viewport data to double (percentage values instead of absolute pixels)
 - Update XML scene reader for viewport default value
 - Animations
+- Occlusion Culling (BulletPhysics DbvtCullingDemo)
 
 BUGS:
 Concave hulls in RigidBody crash!
 
 Wiki:
+Add frustum culling
 Describe all commands https://github.com/davido262/shoggoth-engine/wiki/List-of-Commands
 Complete installation guides https://github.com/davido262/shoggoth-engine/wiki/Installation

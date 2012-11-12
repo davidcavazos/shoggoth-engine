@@ -81,7 +81,7 @@ Camera::~Camera() {
 }
 
 void Camera::loadFromPtree(const string& path, const ptree& tree) {
-//     viewport_t view = tree.get<viewport_t>(ptree::path_type(path + XML_CAMERA_VIEWPORT));
+//     viewport_t view = tree.get<viewport_t>(xmlPath(path + XML_CAMERA_VIEWPORT));
     m_cameraType = (camera_t)tree.get<int>(xmlPath(path + XML_CAMERA_TYPE), 1);
     m_perspectiveFOV = tree.get<double>(xmlPath(path + XML_CAMERA_PERSPECTIVEFOV), 45.0);
     m_orthoHeight = tree.get<double>(xmlPath(path + XML_CAMERA_ORTHOHEIGHT), 10.0);
@@ -90,19 +90,12 @@ void Camera::loadFromPtree(const string& path, const ptree& tree) {
 }
 
 void Camera::saveToPtree(const string& path, ptree& tree) const {
-    string attr;
-//     attr = attrPath + XML_CAMERA_VIEWPORT;
-//     tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getViewport());
-    attr = path + XML_CAMERA_TYPE;
-    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), (int)getCameraType());
-    attr = path + XML_CAMERA_PERSPECTIVEFOV;
-    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getPerspectiveFOV());
-    attr = path + XML_CAMERA_ORTHOHEIGHT;
-    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getOrthoHeight());
-    attr = path + XML_CAMERA_NEARDISTANCE;
-    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getNearDistance());
-    attr = path + XML_CAMERA_FARDISTANCE;
-    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getFarDistance());
+//     tree.put(xmlPath(path + XML_CAMERA_VIEWPORT), getViewport());
+    tree.put(xmlPath(path + XML_CAMERA_TYPE), (int)getCameraType());
+    tree.put(xmlPath(path + XML_CAMERA_PERSPECTIVEFOV), getPerspectiveFOV());
+    tree.put(xmlPath(path + XML_CAMERA_ORTHOHEIGHT), getOrthoHeight());
+    tree.put(xmlPath(path + XML_CAMERA_NEARDISTANCE), getNearDistance());
+    tree.put(xmlPath(path + XML_CAMERA_FARDISTANCE), getFarDistance());
 }
 
 

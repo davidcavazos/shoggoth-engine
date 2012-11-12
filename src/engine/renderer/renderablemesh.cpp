@@ -77,7 +77,7 @@ void RenderableMesh::loadFromFile(const string& fileName) {
 }
 
 void RenderableMesh::loadFromPtree(const string& path, const ptree& tree) {
-    string model = tree.get<string>(ptree::path_type(path + XML_RENDERABLEMESH_MODEL, XML_DELIMITER[0]), "empty");
+    string model = tree.get<string>(xmlPath(path + XML_RENDERABLEMESH_MODEL), "empty");
     stringstream ss(model);
     ss >> model;
     if (model.compare(RENDERABLEMESH_BOX_DESCRIPTION) == 0) {
@@ -95,9 +95,7 @@ void RenderableMesh::loadFromPtree(const string& path, const ptree& tree) {
 }
 
 void RenderableMesh::saveToPtree(const string& path, ptree& tree) const {
-    string attr;
-    attr = path + XML_RENDERABLEMESH_MODEL;
-    tree.put(ptree::path_type(attr, XML_DELIMITER[0]), getDescription());
+    tree.put(xmlPath(path + XML_RENDERABLEMESH_MODEL), getDescription());
 }
 
 
