@@ -9,5 +9,11 @@ endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
 
+# installation directories
+set(INSTALL_DIR_INCLUDE ${CMAKE_INSTALL_PREFIX}/include)
+set(INSTALL_DIR_LIBRARIES ${CMAKE_INSTALL_PREFIX}/lib)
+
+
 include_directories(include)
 add_subdirectory(src)
+add_subdirectory(include)

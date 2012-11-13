@@ -1,7 +1,7 @@
-set(KERNEL_LIBRARY_NAME kernel)
-set(RENDER_LIBRARY_NAME renderer)
-set(RESOURCES_LIBRARY_NAME resources)
-set(PHYSICS_LIBRARY_NAME physics)
+set(KERNEL_LIBRARY_NAME shoggoth-kernel)
+set(RENDER_LIBRARY_NAME shoggoth-renderer)
+set(RESOURCES_LIBRARY_NAME shoggoth-resources)
+set(PHYSICS_LIBRARY_NAME shoggoth-physics)
 
 set(KERNEL_SRC_FILES
     kernel/tokentable.cpp
@@ -68,3 +68,14 @@ target_link_libraries(${KERNEL_LIBRARY_NAME} ${SDL_LIBRARY})
 target_link_libraries(${RENDER_LIBRARY_NAME} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${BULLET_LIBRARIES})
 target_link_libraries(${RESOURCES_LIBRARY_NAME} ${SDLIMAGE_LIBRARY} ${ASSIMP_LIBRARIES})
 target_link_libraries(${PHYSICS_LIBRARY_NAME} ${BULLET_LIBRARIES})
+
+
+# install libraries
+set(INSTALL_TARGET_LIBRARIES
+    ${KERNEL_LIBRARY_NAME}
+    ${RENDER_LIBRARY_NAME}
+    ${RESOURCES_LIBRARY_NAME}
+    ${PHYSICS_LIBRARY_NAME}
+)
+
+install(TARGETS ${INSTALL_TARGET_LIBRARIES} DESTINATION ${INSTALL_DIR_LIBRARIES})
