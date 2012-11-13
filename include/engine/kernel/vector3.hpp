@@ -332,14 +332,19 @@ inline Vector3 Vector3::rotate(const Vector3& axis, const scalar_t& angle) const
 }
 
 inline Vector3 Vector3::rotate(const Quaternion& q) const {
-    // nVidia SDK implementation
-    Vector3 uv, uuv;
-    const Vector3 qvec(q.getX(), q.getY(), q.getZ());
-    uv = qvec.cross(*this);
-    uuv = qvec.cross(uv);
-    uv *= (2.0f * q.getW());
-    uuv *= 2.0f;
-    return *this + uv + uuv;
+    // Bullet Physics implementation
+    Quaternion q1 = q * *this;
+    q1 *= q.inverse();
+    return Vector3(q1.getX(), q1.getY(), q1.getZ());
+
+//     // nVidia SDK implementation
+//     Vector3 uv, uuv;
+//     const Vector3 qvec(q.getX(), q.getY(), q.getZ());
+//     uv = qvec.cross(*this);
+//     uuv = qvec.cross(uv);
+//     uv *= (2.0f * q.getW());
+//     uuv *= 2.0f;
+//     return *this + uv + uuv;
 }
 
 inline Vector3 Vector3::lerp(const Vector3& v, const scalar_t& t) const {

@@ -129,7 +129,7 @@ void Entity::lookAt(const Vector3& target, const Vector3& up) {
     Matrix3x3 m(vSide.getX(), vUp.getX(), -vFwd.getX(),
                 vSide.getY(), vUp.getY(), -vFwd.getY(),
                 vSide.getZ(), vUp.getZ(), -vFwd.getZ());
-    m.getRotation(result);
+    result = m.getRotationQuat();
     setOrientationAbs(result);
 }
 

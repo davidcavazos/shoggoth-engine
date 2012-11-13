@@ -357,4 +357,20 @@ inline Quaternion Quaternion::slerp(const Quaternion& q, const scalar_t& t) cons
         return *this;
 }
 
+
+
+inline Quaternion operator*(const Quaternion& q, const Vector3& v) {
+    return Quaternion(-q.getX() * v.getX() - q.getY() * v.getY() - q.getZ() * v.getZ(),
+                       q.getW() * v.getX() + q.getY() * v.getZ() - q.getZ() * v.getY(),
+                       q.getW() * v.getY() + q.getZ() * v.getX() - q.getX() * v.getZ(),
+                       q.getW() * v.getZ() + q.getX() * v.getY() - q.getY() * v.getX());
+}
+
+inline Quaternion operator*(const Vector3& v, const Quaternion& q) {
+    return Quaternion(-v.getX() * q.getX() - v.getY() * q.getY() - v.getZ() * q.getZ(),
+                       v.getX() * q.getW() + v.getY() * q.getZ() - v.getZ() * q.getY(),
+                       v.getY() * q.getW() + v.getZ() * q.getX() - v.getX() * q.getZ(),
+                       v.getZ() * q.getW() + v.getX() * q.getY() - v.getY() * q.getX());
+}
+
 #endif // QUATERNION_HPP

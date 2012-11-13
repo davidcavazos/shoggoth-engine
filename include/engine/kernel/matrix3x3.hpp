@@ -37,6 +37,7 @@ public:
     Matrix3x3(const scalar_t& xx, const scalar_t& xy, const scalar_t& xz,
               const scalar_t& yx, const scalar_t& yy, const scalar_t& yz,
               const scalar_t& zx, const scalar_t& zy, const scalar_t& zz);
+    Matrix3x3(const float* openGLSubMatrix);
     Matrix3x3(const Vector3& xrow, const Vector3& yrow, const Vector3& zrow);
     Matrix3x3(const Quaternion& q);
     Matrix3x3(const scalar_t& yaw, const scalar_t& pitch, const scalar_t& roll);
@@ -57,13 +58,15 @@ public:
     const scalar_t& get(const int row, const int col) const;
     Vector3 getColumn(const int i) const;
     const Vector3& getRow(const int i) const;
-    void getRotation(Quaternion& q) const;
+    Quaternion getRotationQuat() const;
     void getEuler(scalar_t& yaw, scalar_t& pitch, scalar_t& roll) const;
+    void getOpenGLSubMatrix(float* openGLSubMatrix) const;
     void setRow(const int i, const Vector3& v);
     void setValue(const Matrix3x3& m);
     void setValue(const scalar_t& xx, const scalar_t& xy, const scalar_t& xz,
                   const scalar_t& yx, const scalar_t& yy, const scalar_t& yz,
                   const scalar_t& zx, const scalar_t& zy, const scalar_t& zz);
+    void setOpenGLSubMatrix(const float* openGLSubMatrix);
     void setValue(const Vector3& xrow, const Vector3& yrow, const Vector3& zrow);
     void setRotation(const Quaternion& q);
     void setEuler(const scalar_t& yaw, const scalar_t& pitch, const scalar_t& roll);
@@ -75,6 +78,7 @@ public:
     Matrix3x3 inverse() const;
     Matrix3x3 scaled(const Vector3& s) const;
     Matrix3x3 transpose() const;
+    Matrix3x3 transposeTimes(const Matrix3x3& m) const;
 
     scalar_t tdotx(const Vector3& v) const;
     scalar_t tdoty(const Vector3& v) const;
@@ -109,6 +113,10 @@ inline Matrix3x3::Matrix3x3(const scalar_t& xx, const scalar_t& xy, const scalar
                             const scalar_t& yx, const scalar_t& yy, const scalar_t& yz,
                             const scalar_t& zx, const scalar_t& zy, const scalar_t& zz) {
     setValue(xx, xy, xz, yx, yy, yz, zx, zy, zz);
+}
+
+inline Matrix3x3::Matrix3x3(const float* openGLSubMatrix) {
+    setValue(openGLSubMatrix);
 }
 
 inline Matrix3x3::Matrix3x3(const Quaternion& q) {
@@ -200,7 +208,7 @@ inline const Vector3& Matrix3x3::getRow(const int i) const {
     return m_rows[i];
 }
 
-inline void Matrix3x3::getRotation(Quaternion& q) const {
+Quaternion Matrix3x3::getRotationQuat() const {
     scalar_t trace = get(0, 0) + get(1, 1) + get(2, 2);
     scalar_t temp[4];
 
@@ -228,7 +236,7 @@ inline void Matrix3x3::getRotation(Quaternion& q) const {
         temp[j] = (get(j, i) + get(i, j)) * s;
         temp[k] = (get(k, i) + get(i, k)) * s;
     }
-    q.setValue(temp[3], temp[0], temp[1], temp[2]);
+    return Quaternion(temp[3], temp[0], temp[1], temp[2]);
 }
 
 inline void Matrix3x3::getEuler(scalar_t& yaw, scalar_t& pitch, scalar_t& roll) const {
@@ -249,6 +257,21 @@ inline void Matrix3x3::getEuler(scalar_t& yaw, scalar_t& pitch, scalar_t& roll) 
         else
             roll += PI;
     }
+}
+
+inline void Matrix3x3::getOpenGLSubMatrix(float* openGLSubMatrix) const {
+    openGLSubMatrix[ 0] = getRow(0).getX();
+    openGLSubMatrix[ 1] = getRow(1).getX();
+    openGLSubMatrix[ 2] = getRow(2).getX();
+    openGLSubMatrix[ 3] = 0.0f;
+    openGLSubMatrix[ 4] = getRow(0).getY();
+    openGLSubMatrix[ 5] = getRow(1).getY();
+    openGLSubMatrix[ 6] = getRow(2).getY();
+    openGLSubMatrix[ 7] = 0.0f;
+    openGLSubMatrix[ 8] = getRow(0).getZ();
+    openGLSubMatrix[ 9] = getRow(1).getZ();
+    openGLSubMatrix[10] = getRow(2).getZ();
+    openGLSubMatrix[11] = 0.0f;
 }
 
 inline void Matrix3x3::setRow(const int i, const Vector3& v) {
@@ -275,6 +298,14 @@ inline void Matrix3x3::setValue(const scalar_t& xx, const scalar_t& xy, const sc
     m_rows[2].setX(zx);
     m_rows[2].setY(zy);
     m_rows[2].setZ(zz);
+}
+
+inline void Matrix3x3::setOpenGLSubMatrix(const float* openGLSubMatrix) {
+    setValue(
+        openGLSubMatrix[ 0], openGLSubMatrix[ 4], openGLSubMatrix[ 8],
+        openGLSubMatrix[ 1], openGLSubMatrix[ 5], openGLSubMatrix[ 9],
+        openGLSubMatrix[ 2], openGLSubMatrix[ 6], openGLSubMatrix[10]
+    );
 }
 
 inline void Matrix3x3::setValue(const Vector3& xrow, const Vector3& yrow, const Vector3& zrow) {
@@ -373,6 +404,20 @@ inline Matrix3x3 Matrix3x3::transpose() const {
     );
 }
 
+inline Matrix3x3 Matrix3x3::transposeTimes(const Matrix3x3& m) const {
+    return Matrix3x3(
+        getRow(0).getX() * m.getRow(0).getX() + getRow(1).getX() * m.getRow(1).getX() + getRow(2).getX() * m.getRow(2).getX(),
+        getRow(0).getX() * m.getRow(0).getY() + getRow(1).getX() * m.getRow(1).getY() + getRow(2).getX() * m.getRow(2).getY(),
+        getRow(0).getX() * m.getRow(0).getZ() + getRow(1).getX() * m.getRow(1).getZ() + getRow(2).getX() * m.getRow(2).getZ(),
+        getRow(0).getY() * m.getRow(0).getX() + getRow(1).getY() * m.getRow(1).getX() + getRow(2).getY() * m.getRow(2).getX(),
+        getRow(0).getY() * m.getRow(0).getY() + getRow(1).getY() * m.getRow(1).getY() + getRow(2).getY() * m.getRow(2).getY(),
+        getRow(0).getY() * m.getRow(0).getZ() + getRow(1).getY() * m.getRow(1).getZ() + getRow(2).getY() * m.getRow(2).getZ(),
+        getRow(0).getZ() * m.getRow(0).getX() + getRow(1).getZ() * m.getRow(1).getX() + getRow(2).getZ() * m.getRow(2).getX(),
+        getRow(0).getZ() * m.getRow(0).getY() + getRow(1).getZ() * m.getRow(1).getY() + getRow(2).getZ() * m.getRow(2).getY(),
+        getRow(0).getZ() * m.getRow(0).getZ() + getRow(1).getZ() * m.getRow(1).getZ() + getRow(2).getZ() * m.getRow(2).getZ()
+    );
+}
+
 
 
 inline scalar_t Matrix3x3::tdotx(const Vector3& v) const {
@@ -389,6 +434,16 @@ inline scalar_t Matrix3x3::tdotz(const Vector3& v) const {
 
 inline scalar_t Matrix3x3::cofac(const int r1, const int c1, const int r2, const int c2) const {
     return get(r1, c1) * get(r2, c2) - get(r1, c2) * get(r2, c1);
+}
+
+
+
+inline Vector3 operator*(const Matrix3x3& m, const Vector3& v) {
+    return Vector3(m.getRow(0).dot(v), m.getRow(1).dot(v), m.getRow(2).dot(v));
+}
+
+inline Vector3 operator*(const Vector3& v, const Matrix3x3& m) {
+    return Vector3(m.tdotx(v), m.tdoty(v), m.tdotz(v));
 }
 
 #endif // MATRIX3X3_HPP
