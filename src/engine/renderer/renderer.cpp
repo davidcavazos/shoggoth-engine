@@ -427,15 +427,8 @@ void Renderer::draw() {
 
     // set camera
     const Entity* cam = m_activeCamera->getEntity();
-//     const Quaternion& q = cam->getOrientationAbs();
-//     const Vector3& v = cam->getPositionAbs();
-//     btQuaternion rot = btQuaternion(q.getX(), q.getY(), q.getZ(), q.getW());
-//     btVector3 pos = btVector3(v.getX(), v.getY(), v.getZ());
-//     btTransform(rot, pos).inverse().getOpenGLMatrix(m);
-
-    openGLModelMatrix(m, VECTOR3_ZERO, cam->getOrientationAbs().inverse());
+    Transform(cam->getOrientationAbs(), cam->getPositionAbs()).inverse().getOpenGLMatrix(m);
     glMultMatrixf(m);
-    glTranslatef(-cam->getPositionAbs().getX(), -cam->getPositionAbs().getY(), -cam->getPositionAbs().getZ());
 
     // set lights
     displayLegacyLights();
@@ -451,7 +444,7 @@ void Renderer::draw() {
         const Entity* entity = (*it)->getEntity();
 
         glPushMatrix();
-        openGLModelMatrix(m, entity->getPositionAbs(), entity->getOrientationAbs());
+        Transform(entity->getOrientationAbs(), entity->getPositionAbs()).getOpenGLMatrix(m);
         glMultMatrixf(m);
         for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
             const Mesh* mesh = model->getMesh(n);
@@ -690,30 +683,6 @@ void Renderer::displayLegacyLights() const {
         glLightfv(lightEnum, GL_POSITION, lightPosition);
         ++itLight;
     }
-}
-
-void Renderer::openGLModelMatrix(float* const m, const Vector3& pos, const Quaternion& rot) const {
-    // Bullet Physics implementation
-    Matrix3x3 temp(rot);
-    m[ 0] = static_cast<float>(temp.getRow(0).getX());
-    m[ 1] = static_cast<float>(temp.getRow(1).getX());
-    m[ 2] = static_cast<float>(temp.getRow(2).getX());
-    m[ 3] = 0.0f;
-
-    m[ 4] = static_cast<float>(temp.getRow(0).getY());
-    m[ 5] = static_cast<float>(temp.getRow(1).getY());
-    m[ 6] = static_cast<float>(temp.getRow(2).getY());
-    m[ 7] = 0.0f;
-
-    m[ 8] = static_cast<float>(temp.getRow(0).getZ());
-    m[ 9] = static_cast<float>(temp.getRow(1).getZ());
-    m[10] = static_cast<float>(temp.getRow(2).getZ());
-    m[11] = 0.0f;
-
-    m[12] = static_cast<float>(pos.getX());
-    m[13] = static_cast<float>(pos.getY());
-    m[14] = static_cast<float>(pos.getZ());
-    m[15] = 1.0f;
 }
 
 void Renderer::openGLProjectionMatrixOrthographic(float width, float height, float near, float far) {

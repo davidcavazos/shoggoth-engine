@@ -76,7 +76,6 @@ private:
     void initLighting() const;
     void initCamera();
     void displayLegacyLights() const;
-    void openGLModelMatrix(float* const m, const Vector3& pos, const Quaternion& rot) const;
     void openGLProjectionMatrixOrthographic(float width, float height, float near, float far);
     void openGLProjectionMatrixPerspective(float perspectiveFOV, float aspectRatio, float near, float far);
 
