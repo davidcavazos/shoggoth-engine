@@ -26,7 +26,7 @@
 
 #include "testcomponent.hpp"
 
-#include "engine/kernel/entity.hpp"
+#include "shoggoth-engine/kernel/entity.hpp"
 
 using namespace std;
 using namespace boost::property_tree;

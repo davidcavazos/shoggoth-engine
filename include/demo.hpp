@@ -27,11 +27,11 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
-#include "engine/kernel/device.hpp"
-#include "engine/kernel/scene.hpp"
-#include "engine/renderer/renderer.hpp"
-#include "engine/physics/physicsworld.hpp"
-#include "engine/resources/resources.hpp"
+#include "shoggoth-engine/kernel/device.hpp"
+#include "shoggoth-engine/kernel/scene.hpp"
+#include "shoggoth-engine/renderer/renderer.hpp"
+#include "shoggoth-engine/physics/physicsworld.hpp"
+#include "shoggoth-engine/resources/resources.hpp"
 #include "testcomponentfactory.hpp"
 
 class Demo: public CommandObject {

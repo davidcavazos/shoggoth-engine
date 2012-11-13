@@ -24,33 +24,32 @@
  */
 
 
-#ifndef TESTCOMPONENT_HPP
-#define TESTCOMPONENT_HPP
+#include "shoggoth-engine/resources/model.hpp"
 
-#include "shoggoth-engine/kernel/component.hpp"
+#include <iostream>
 
-const std::string COMPONENT_TESTCOMPONENT = "testcomponent";
+using namespace std;
 
-class TestComponent: public Component {
-public:
-    TestComponent(Entity* const entity);
-    ~TestComponent();
+Model::Model(const std::string& identifier, Renderer* renderer):
+    m_identifier(identifier),
+    m_renderer(renderer),
+    m_meshes()
+{}
 
-    double getHealth() const;
-
-    void loadFromPtree(const std::string& path, const boost::property_tree::ptree& tree);
-    void saveToPtree(const std::string& path, boost::property_tree::ptree& tree) const;
-
-private:
-    double m_health;
-
-    std::string cmdHealth(std::deque<std::string>& arg);
-};
-
-
-
-inline double TestComponent::getHealth() const {
-    return m_health;
+void Model::uploadToGPU() {
+    for (size_t i = 0; i < m_meshes.size(); ++i)
+        m_meshes[i].uploadToGPU();
 }
 
-#endif // TESTCOMPONENT_HPP
+Model::Model(const Model& rhs):
+    m_identifier(rhs.m_identifier),
+    m_renderer(rhs.m_renderer),
+    m_meshes(rhs.m_meshes)
+{
+    cerr << "Error: Model copy constructor should not be called!" << endl;
+}
+
+Model& Model::operator=(const Model&) {
+    cerr << "Error: Model assignment operator should not be called!" << endl;
+    return *this;
+}

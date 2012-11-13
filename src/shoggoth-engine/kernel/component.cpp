@@ -24,33 +24,35 @@
  */
 
 
-#ifndef TESTCOMPONENT_HPP
-#define TESTCOMPONENT_HPP
-
 #include "shoggoth-engine/kernel/component.hpp"
 
-const std::string COMPONENT_TESTCOMPONENT = "testcomponent";
+#include <iostream>
+#include <ostream>
+#include "shoggoth-engine/kernel/entity.hpp"
 
-class TestComponent: public Component {
-public:
-    TestComponent(Entity* const entity);
-    ~TestComponent();
+using namespace std;
 
-    double getHealth() const;
-
-    void loadFromPtree(const std::string& path, const boost::property_tree::ptree& tree);
-    void saveToPtree(const std::string& path, boost::property_tree::ptree& tree) const;
-
-private:
-    double m_health;
-
-    std::string cmdHealth(std::deque<std::string>& arg);
-};
-
-
-
-inline double TestComponent::getHealth() const {
-    return m_health;
+Component::Component(const string& type, Entity* const entity):
+    m_entity(entity),
+    m_type(type),
+    m_description()
+{
+    m_entity->m_components.insert(pair<string, Component*>(m_type, this));
 }
 
-#endif // TESTCOMPONENT_HPP
+Component::~Component() {
+    m_entity->m_components.erase(m_type);
+}
+
+Component::Component(const Component& rhs):
+    m_entity(rhs.m_entity),
+    m_type(rhs.m_type),
+    m_description(rhs.m_description)
+{
+    cerr << "Error: Component copy constructor should not be called!" << endl;
+}
+
+Component& Component::operator=(const Component&) {
+    cerr << "Error: Component assignment operator should not be called!" << endl;
+    return *this;
+}

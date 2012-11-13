@@ -24,33 +24,66 @@
  */
 
 
-#ifndef TESTCOMPONENT_HPP
-#define TESTCOMPONENT_HPP
+#ifndef RENDERABLEMESH_HPP
+#define RENDERABLEMESH_HPP
 
 #include "shoggoth-engine/kernel/component.hpp"
 
-const std::string COMPONENT_TESTCOMPONENT = "testcomponent";
+const std::string COMPONENT_RENDERABLEMESH = "renderablemesh";
 
-class TestComponent: public Component {
+const std::string RENDERABLEMESH_BOX_DESCRIPTION = "$box";
+const std::string RENDERABLEMESH_FILE_DESCRIPTION = "$file";
+
+class Renderer;
+class Resources;
+class Model;
+
+class RenderableMesh: public Component {
 public:
-    TestComponent(Entity* const entity);
-    ~TestComponent();
+    RenderableMesh(Entity* const entity, Renderer* renderer, Resources* resources);
+    ~RenderableMesh();
 
-    double getHealth() const;
+    const Model* getModel() const;
+
+    Model* model();
+
+    void loadBox(const double lengthX, const double lengthY, const double lengthZ);
+    void loadFromFile(const std::string& fileName);
 
     void loadFromPtree(const std::string& path, const boost::property_tree::ptree& tree);
     void saveToPtree(const std::string& path, boost::property_tree::ptree& tree) const;
 
 private:
-    double m_health;
+    Renderer* m_renderer;
+    Resources* m_resources;
+    Model* m_model;
 
-    std::string cmdHealth(std::deque<std::string>& arg);
+    RenderableMesh(const RenderableMesh& rhs);
+    RenderableMesh& operator=(const RenderableMesh&);
+
+    std::string cmdLoadModelBox(std::deque<std::string>& args);
+    std::string cmdLoadModelFile(std::deque<std::string>& args);
 };
 
 
 
-inline double TestComponent::getHealth() const {
-    return m_health;
+inline const Model* RenderableMesh::getModel() const {
+    return m_model;
 }
 
-#endif // TESTCOMPONENT_HPP
+
+
+inline Model* RenderableMesh::model() {
+    return m_model;
+}
+
+
+
+inline std::string RenderableMesh::cmdLoadModelFile(std::deque<std::string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    loadFromFile(args[0]);
+    return "";
+}
+
+#endif // RENDERABLEMESH_HPP

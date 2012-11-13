@@ -27,7 +27,7 @@
 #ifndef TESTCOMPONENTFACTORY_HPP
 #define TESTCOMPONENTFACTORY_HPP
 
-#include "engine/kernel/componentfactory.hpp"
+#include "shoggoth-engine/kernel/componentfactory.hpp"
 
 class TestComponentFactory: public DefaultComponentFactory {
 public:

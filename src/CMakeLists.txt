@@ -22,4 +22,4 @@ find_package(SDL REQUIRED)
 include_directories(${SDL_INCLUDE_DIR})
 target_link_libraries(${EXE_NAME} ${LIBRARIES})
 
-add_subdirectory(engine)
+add_subdirectory(shoggoth-engine)

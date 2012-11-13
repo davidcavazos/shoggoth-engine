@@ -17,6 +17,7 @@
 - Update XML scene reader for viewport default value
 - Animations
 - Occlusion Culling (BulletPhysics DbvtCullingDemo)
+- Make scripting support all regular expresions of any scripting language
 
 BUGS:
 Concave hulls in RigidBody crash!

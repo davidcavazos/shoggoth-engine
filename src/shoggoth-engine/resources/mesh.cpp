@@ -24,33 +24,53 @@
  */
 
 
-#ifndef TESTCOMPONENT_HPP
-#define TESTCOMPONENT_HPP
+#include "shoggoth-engine/resources/mesh.hpp"
 
-#include "shoggoth-engine/kernel/component.hpp"
+#include <iostream>
+#include "shoggoth-engine/renderer/renderer.hpp"
 
-const std::string COMPONENT_TESTCOMPONENT = "testcomponent";
+using namespace std;
 
-class TestComponent: public Component {
-public:
-    TestComponent(Entity* const entity);
-    ~TestComponent();
+Mesh::Mesh(Renderer* renderer):
+    m_renderer(renderer),
+    m_meshId(0),
+    m_indicesId(0),
+    m_vertices(),
+    m_normals(),
+    m_uvCoords(),
+    m_indices(),
+    m_material()
+{}
 
-    double getHealth() const;
+Mesh::Mesh(const Mesh& rhs):
+    m_renderer(rhs.m_renderer),
+    m_meshId(rhs.m_meshId),
+    m_indicesId(rhs.m_indicesId),
+    m_vertices(rhs.m_vertices),
+    m_normals(rhs.m_normals),
+    m_uvCoords(rhs.m_uvCoords),
+    m_indices(rhs.m_indices),
+    m_material(rhs.m_material)
+{}
 
-    void loadFromPtree(const std::string& path, const boost::property_tree::ptree& tree);
-    void saveToPtree(const std::string& path, boost::property_tree::ptree& tree) const;
-
-private:
-    double m_health;
-
-    std::string cmdHealth(std::deque<std::string>& arg);
-};
-
-
-
-inline double TestComponent::getHealth() const {
-    return m_health;
+Mesh& Mesh::operator=(const Mesh& rhs) {
+    if (this == &rhs)
+        return *this;
+    m_renderer = rhs.m_renderer;
+    m_meshId = rhs.m_meshId;
+    m_indicesId = rhs.m_indicesId;
+    m_vertices = rhs.m_vertices;
+    m_normals = rhs.m_normals;
+    m_uvCoords = rhs.m_uvCoords;
+    m_indices = rhs.m_indices;
+    m_material = rhs.m_material;
+    return *this;
 }
 
-#endif // TESTCOMPONENT_HPP
+Mesh::~Mesh() {
+    m_renderer->deleteModel(m_meshId, m_indicesId);
+}
+
+void Mesh::uploadToGPU() {
+    m_renderer->uploadModel(m_meshId, m_indicesId, *this);
+}

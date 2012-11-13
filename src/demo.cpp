@@ -31,12 +31,12 @@
 #include <fstream>
 #include <iomanip>
 #include <SDL/SDL.h>
-#include "engine/kernel/entity.hpp"
-#include "engine/kernel/terminal.hpp"
-#include "engine/renderer/renderablemesh.hpp"
-#include "engine/renderer/camera.hpp"
-#include "engine/renderer/light.hpp"
-#include "engine/physics/rigidbody.hpp"
+#include "shoggoth-engine/kernel/entity.hpp"
+#include "shoggoth-engine/kernel/terminal.hpp"
+#include "shoggoth-engine/renderer/renderablemesh.hpp"
+#include "shoggoth-engine/renderer/camera.hpp"
+#include "shoggoth-engine/renderer/light.hpp"
+#include "shoggoth-engine/physics/rigidbody.hpp"
 #include "testcomponent.hpp"
 
 using namespace std;

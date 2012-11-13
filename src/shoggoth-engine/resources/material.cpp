@@ -24,33 +24,19 @@
  */
 
 
-#ifndef TESTCOMPONENT_HPP
-#define TESTCOMPONENT_HPP
+#include "shoggoth-engine/resources/material.hpp"
 
-#include "shoggoth-engine/kernel/component.hpp"
+#include "shoggoth-engine/resources/texture.hpp"
 
-const std::string COMPONENT_TESTCOMPONENT = "testcomponent";
-
-class TestComponent: public Component {
-public:
-    TestComponent(Entity* const entity);
-    ~TestComponent();
-
-    double getHealth() const;
-
-    void loadFromPtree(const std::string& path, const boost::property_tree::ptree& tree);
-    void saveToPtree(const std::string& path, boost::property_tree::ptree& tree) const;
-
-private:
-    double m_health;
-
-    std::string cmdHealth(std::deque<std::string>& arg);
-};
-
-
-
-inline double TestComponent::getHealth() const {
-    return m_health;
+Material::Material():
+    m_colors(),
+    m_shininess(0.0f),
+    m_textureMaps()
+{
+    m_colors.resize(TOTAL_MATERIAL_COLORS);
+    setColor(MATERIAL_COLOR_DIFFUSE, 0.8f, 0.8f, 0.8f);
+    setColor(MATERIAL_COLOR_SPECULAR, 0.0f, 0.0f, 0.0f);
+    setColor(MATERIAL_COLOR_AMBIENT, 0.2f, 0.2f, 0.2f);
+    setColor(MATERIAL_COLOR_EMISSIVE, 0.0f, 0.0f, 0.0f);
+    m_textureMaps.resize(TOTAL_MATERIAL_MAPS);
 }
-
-#endif // TESTCOMPONENT_HPP
