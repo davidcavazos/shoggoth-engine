@@ -1,5 +1,3 @@
-+ Add Transform class and change in renderer to use the transform
-
 + Save input commands as a replay script
 + Implement OpenGL Core and shaders
 + Advanced lighting (spotlights and directional lights)
