@@ -106,12 +106,12 @@ void Demo::bindInputs() {
     inputs->bindInput(INPUT_KEY_PRESSED, "cube move-z  5", SDLK_DOWN);
     inputs->bindInput(INPUT_KEY_PRESSED, "cube move-x  5", SDLK_RIGHT);
 
-    inputs->bindInput(INPUT_KEY_PRESSED, "camera1 move-z -5", SDLK_w);
-    inputs->bindInput(INPUT_KEY_PRESSED, "camera1 move-x -5", SDLK_a);
-    inputs->bindInput(INPUT_KEY_PRESSED, "camera1 move-z  5", SDLK_s);
-    inputs->bindInput(INPUT_KEY_PRESSED, "camera1 move-x  5", SDLK_d);
-    inputs->bindInput(INPUT_KEY_PRESSED, "camera1 move-y-global  5", SDLK_SPACE);
-    inputs->bindInput(INPUT_KEY_PRESSED, "camera1 move-y-global -5", SDLK_LSHIFT);
+    inputs->bindInput(INPUT_KEY_PRESSED, "body move-z -5", SDLK_w);
+    inputs->bindInput(INPUT_KEY_PRESSED, "body move-x -5", SDLK_a);
+    inputs->bindInput(INPUT_KEY_PRESSED, "body move-z  5", SDLK_s);
+    inputs->bindInput(INPUT_KEY_PRESSED, "body move-x  5", SDLK_d);
+    inputs->bindInput(INPUT_KEY_PRESSED, "body move-y-global  5", SDLK_SPACE);
+    inputs->bindInput(INPUT_KEY_PRESSED, "body move-y-global -5", SDLK_LSHIFT);
     inputs->bindInput(INPUT_MOUSE_BUTTON_RELEASE, "demo fire-cube", 1);
     inputs->bindInput(INPUT_MOUSE_BUTTON_RELEASE, "demo fire-sphere", 3);
 }
@@ -180,7 +180,7 @@ string Demo::cmdOnMouseMotion(std::deque<std::string>&) {
     float sensitivity = 0.05;
     mouse_motion_t motion = m_device.getInputs()->getLastMouseMotion();
 
-    string x = string("camera1 yaw-global ") + boost::lexical_cast<string>(motion.xrel * sensitivity);
+    string x = string("body yaw-global ") + boost::lexical_cast<string>(motion.xrel * sensitivity);
     Terminal::pushCommand(x);
 
     string y = string("camera1 pitch ") + boost::lexical_cast<string>(motion.yrel * sensitivity);

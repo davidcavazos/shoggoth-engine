@@ -209,9 +209,9 @@ bool Scene::loadFromPTree(const string& path,
         Vector3 vect;
         Quaternion quat;
         vect = tree.get<Vector3>(ptree::path_type(attrPath + XML_ATTR_POSITION, XML_DELIMITER[0]));
-        node->setPositionAbs(vect);
+        node->setPositionRel(vect);
         quat = tree.get<Quaternion>(ptree::path_type(attrPath + XML_ATTR_ORIENTATION, XML_DELIMITER[0]));
-        node->setOrientationAbs(quat);
+        node->setOrientationRel(quat);
     }
 
     // traverse all children
