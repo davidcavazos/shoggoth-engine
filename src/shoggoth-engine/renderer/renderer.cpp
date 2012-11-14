@@ -427,7 +427,7 @@ void Renderer::draw() {
 
     // set camera
     const Entity* cam = m_activeCamera->getEntity();
-    trans(cam->getOrientationAbs(), cam->getPositionAbs()).inverse().getOpenGLMatrix(m);
+    Transform(cam->getOrientationAbs(), cam->getPositionAbs()).inverse().getOpenGLMatrix(m);
     glMultMatrixf(m);
 
     // set lights
@@ -444,7 +444,7 @@ void Renderer::draw() {
         const Entity* entity = (*it)->getEntity();
 
         glPushMatrix();
-        trans(entity->getOrientationAbs(), entity->getPositionAbs()).getOpenGLMatrix(m);
+        Transform(entity->getOrientationAbs(), entity->getPositionAbs()).getOpenGLMatrix(m);
         glMultMatrixf(m);
         for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
             const Mesh* mesh = model->getMesh(n);
