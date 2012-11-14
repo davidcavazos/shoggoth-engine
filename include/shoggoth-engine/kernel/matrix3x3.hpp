@@ -208,7 +208,7 @@ inline const Vector3& Matrix3x3::getRow(const int i) const {
     return m_rows[i];
 }
 
-Quaternion Matrix3x3::getRotationQuat() const {
+inline Quaternion Matrix3x3::getRotationQuat() const {
     scalar_t trace = get(0, 0) + get(1, 1) + get(2, 2);
     scalar_t temp[4];
 
