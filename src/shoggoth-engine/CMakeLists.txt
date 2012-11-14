@@ -1,5 +1,5 @@
 
-set(KERNEL_SRC_FILES
+set(ENGINE_SRC_FILES
     kernel/tokentable.cpp
     kernel/commandobject.cpp
     kernel/command.cpp
@@ -12,34 +12,25 @@ set(KERNEL_SRC_FILES
 
     kernel/inputs.cpp
     kernel/device.cpp
-)
 
-set(RENDER_SRC_FILES
     renderer/camera.cpp
     renderer/light.cpp
     renderer/renderablemesh.cpp
     renderer/culling.cpp
     renderer/renderer.cpp
-)
 
-set(RESOURCES_SRC_FILES
     resources/texture.cpp
     resources/modelloader.cpp
     resources/material.cpp
     resources/mesh.cpp
     resources/model.cpp
     resources/resources.cpp
-)
 
-set(PHYSICS_SRC_FILES
     physics/rigidbody.cpp
     physics/physicsworld.cpp
 )
 
-add_library(${KERNEL_LIBRARY_NAME} SHARED ${KERNEL_SRC_FILES})
-add_library(${RENDER_LIBRARY_NAME} SHARED ${RENDER_SRC_FILES})
-add_library(${RESOURCES_LIBRARY_NAME} SHARED ${RESOURCES_SRC_FILES})
-add_library(${PHYSICS_LIBRARY_NAME} SHARED ${PHYSICS_SRC_FILES})
+add_library(${LIBRARY_NAME} SHARED ${ENGINE_SRC_FILES})
 
 # Link libraries
 find_package(Boost REQUIRED)
@@ -60,11 +51,14 @@ include_directories(
     ${ASSIMP_INCLUDE_DIRS}
 )
 
-target_link_libraries(${KERNEL_LIBRARY_NAME} ${SDL_LIBRARY})
-target_link_libraries(${RENDER_LIBRARY_NAME} ${KERNEL_LIBRARY_NAME} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${BULLET_LIBRARIES})
-target_link_libraries(${RESOURCES_LIBRARY_NAME} ${RENDER_LIBRARY_NAME} ${SDLIMAGE_LIBRARY} ${ASSIMP_LIBRARIES})
-target_link_libraries(${PHYSICS_LIBRARY_NAME} ${KERNEL_LIBRARY_NAME} ${RESOURCES_LIBRARY_NAME} ${BULLET_LIBRARIES})
-
+target_link_libraries(${LIBRARY_NAME}
+    ${SDL_LIBRARY}
+    ${SDLIMAGE_LIBRARY}
+    ${OPENGL_LIBRARIES}
+    ${GLEW_LIBRARIES}
+    ${BULLET_LIBRARIES}
+    ${ASSIMP_LIBRARIES}
+)
 
 # install libraries
-install(TARGETS ${TARGET_LIBRARIES} DESTINATION ${INSTALL_DIR_LIBRARIES})
+install(TARGETS ${LIBRARY_NAME} DESTINATION ${INSTALL_DIR_LIBRARIES})
