@@ -29,9 +29,9 @@
 #include <iostream>
 #include <cmath>
 #include <GL/glew.h>
+#include "shoggoth-engine/linearmath/transform.hpp"
 #include "shoggoth-engine/kernel/device.hpp"
 #include "shoggoth-engine/kernel/entity.hpp"
-#include "shoggoth-engine/kernel/transform.hpp"
 #include "shoggoth-engine/renderer/camera.hpp"
 #include "shoggoth-engine/renderer/renderablemesh.hpp"
 #include "shoggoth-engine/renderer/light.hpp"

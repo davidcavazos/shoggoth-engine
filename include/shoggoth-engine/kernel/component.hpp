@@ -30,7 +30,7 @@
 #include <string>
 #include <deque>
 #include <boost/lexical_cast.hpp>
-#include "xmlinfo.hpp"
+#include "shoggoth-engine/common/xmlinfo.hpp"
 
 class Entity;
 class Renderer;

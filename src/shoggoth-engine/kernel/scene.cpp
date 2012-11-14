@@ -30,7 +30,7 @@
 #include <fstream>
 #include <boost/foreach.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-#include "shoggoth-engine/kernel/xmlinfo.hpp"
+#include "shoggoth-engine/common/xmlinfo.hpp"
 #include "shoggoth-engine/kernel/entity.hpp"
 #include "shoggoth-engine/kernel/componentfactory.hpp"
 #include "shoggoth-engine/renderer/camera.hpp"

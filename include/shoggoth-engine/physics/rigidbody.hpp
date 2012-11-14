@@ -27,8 +27,8 @@
 #ifndef RIGIDBODY_HPP
 #define RIGIDBODY_HPP
 
+#include "shoggoth-engine/linearmath/vector3.hpp"
 #include "shoggoth-engine/kernel/component.hpp"
-#include "shoggoth-engine/kernel/vector3.hpp"
 
 const std::string COMPONENT_RIGIDBODY = "rigidbody";
 

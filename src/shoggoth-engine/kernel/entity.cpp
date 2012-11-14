@@ -28,7 +28,7 @@
 
 #include <iostream>
 #include <cmath>
-#include "shoggoth-engine/kernel/matrix3x3.hpp"
+#include "shoggoth-engine/linearmath/matrix3x3.hpp"
 #include "shoggoth-engine/kernel/device.hpp"
 #include "shoggoth-engine/kernel/scene.hpp"
 #include "shoggoth-engine/physics/rigidbody.hpp"

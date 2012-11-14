@@ -31,11 +31,11 @@
 #include <sstream>
 #include <bullet/btBulletDynamicsCommon.h>
 #include <bullet/BulletCollision/CollisionShapes/btShapeHull.h>
-#include "shoggoth-engine/physics/physicsworld.hpp"
-#include "shoggoth-engine/kernel/transform.hpp"
+#include "shoggoth-engine/linearmath/transform.hpp"
 #include "shoggoth-engine/kernel/entity.hpp"
 #include "shoggoth-engine/resources/model.hpp"
 #include "shoggoth-engine/resources/resources.hpp"
+#include "shoggoth-engine/physics/physicsworld.hpp"
 
 using namespace std;
 using namespace boost::property_tree;

@@ -31,7 +31,7 @@
 #include <string>
 #include <vector>
 #include <deque>
-#include "tokentable.hpp"
+#include "shoggoth-engine/common/tokentable.hpp"
 #include "command.hpp"
 
 class CommandObject;

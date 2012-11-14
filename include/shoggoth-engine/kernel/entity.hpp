@@ -30,11 +30,11 @@
 #include <ostream>
 #include <set>
 #include <map>
-#include "commandobject.hpp"
-#include "vector3.hpp"
-#include "quaternion.hpp"
-#include "component.hpp"
+#include "shoggoth-engine/linearmath/vector3.hpp"
+#include "shoggoth-engine/linearmath/quaternion.hpp"
 #include "shoggoth-engine/renderer/culling.hpp"
+#include "commandobject.hpp"
+#include "component.hpp"
 
 class Device;
 class Component;

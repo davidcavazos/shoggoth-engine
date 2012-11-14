@@ -28,7 +28,7 @@
 
 #include <cfloat>
 #include <bullet/btBulletCollisionCommon.h>
-#include "shoggoth-engine/kernel/transform.hpp"
+#include "shoggoth-engine/linearmath/transform.hpp"
 #include "shoggoth-engine/kernel/entity.hpp"
 #include "shoggoth-engine/renderer/renderablemesh.hpp"
 #include "shoggoth-engine/resources/model.hpp"
