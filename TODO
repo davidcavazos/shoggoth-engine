@@ -1,7 +1,7 @@
-+ Networking
-+ Save input commands as a replay script
-+ Implement OpenGL Core and shaders
 + Advanced lighting (spotlights and directional lights)
++ Implement OpenGL Core and shaders
++ Save input commands as a replay script
++ Networking
 + GUI and 2D stuff
 ~ Add more primitives for RenderableMesh (sphere, cilinder, cone, etc)
 ~ Use relative positions to the camera for physics and rendering
