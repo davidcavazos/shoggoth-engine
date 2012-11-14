@@ -24,7 +24,7 @@
  */
 
 
-#include "shoggoth-engine/common/tokentable.hpp"
+#include "shoggoth-engine/kernel/tokentable.hpp"
 
 #include <iostream>
 #include <iomanip>
