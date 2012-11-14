@@ -32,6 +32,7 @@
 #include <bullet/btBulletDynamicsCommon.h>
 #include <bullet/BulletCollision/CollisionShapes/btShapeHull.h>
 #include "shoggoth-engine/physics/physicsworld.hpp"
+#include "shoggoth-engine/kernel/transform.hpp"
 #include "shoggoth-engine/kernel/entity.hpp"
 #include "shoggoth-engine/resources/model.hpp"
 #include "shoggoth-engine/resources/resources.hpp"
@@ -51,13 +52,6 @@ const string XML_RIGIDBODY_LINEARVELOCITY = "linearvelocity";
 const string XML_RIGIDBODY_ANGULARFACTOR = "angularfactor";
 const string XML_RIGIDBODY_ANGULARVELOCITY = "angularvelocity";
 const string XML_RIGIDBODY_GRAVITY = "gravity";
-
-
-btVector3 vect(const Vector3& v);
-Vector3 vect(const btVector3& v);
-btQuaternion quat(const Quaternion& q);
-Quaternion quat(const btQuaternion& q);
-btTransform trans(const Quaternion& rot, const Vector3& pos);
 
 
 
@@ -573,26 +567,4 @@ string RigidBody::cmdGravity(deque<string>& args) {
     double z = boost::lexical_cast<double>(args[2]);
     setGravity(Vector3(x, y, z));
     return "";
-}
-
-
-
-btVector3 vect(const Vector3& v) {
-    return btVector3(v.getX(), v.getY(), v.getZ());
-}
-
-Vector3 vect(const btVector3& v) {
-    return Vector3(v.getX(), v.getY(), v.getZ());
-}
-
-btQuaternion quat(const Quaternion& q) {
-    return btQuaternion(q.getX(), q.getY(), q.getZ(), q.getW());
-}
-
-Quaternion quat(const btQuaternion& q) {
-    return Quaternion(q.getW(), q.getX(), q.getY(), q.getZ());
-}
-
-btTransform trans(const Quaternion& rot, const Vector3& pos) {
-    return btTransform(quat(rot), vect(pos));
 }

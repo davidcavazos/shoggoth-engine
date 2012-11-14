@@ -27,8 +27,8 @@
 #ifndef VECTOR3_HPP
 #define VECTOR3_HPP
 
-#include <iostream>
 #include <cmath>
+#include <bullet/LinearMath/btVector3.h>
 #include "scalar.hpp"
 
 class Quaternion;
@@ -39,6 +39,7 @@ public:
     Vector3(const Vector3& v);
     Vector3(const scalar_t& x, const scalar_t& y, const scalar_t& z);
     Vector3(const scalar_t& num);
+    Vector3(const btVector3& v);
 
     Vector3& operator=(const Vector3& v);
     Vector3 operator-() const;
@@ -71,6 +72,7 @@ public:
     void setValue(const scalar_t& x, const scalar_t& y, const scalar_t& z);
     void setValue(const Vector3& v);
     void setValue(const scalar_t& num);
+    void setValue(const btVector3& v);
 
     scalar_t length() const;
     scalar_t lengthSquared() const;
@@ -132,10 +134,16 @@ inline Vector3::Vector3(const scalar_t& num) {
     setValue(num);
 }
 
+inline Vector3::Vector3(const btVector3& v) {
+    setValue(v);
+}
+
 
 
 inline Vector3& Vector3::operator=(const Vector3& v) {
-    setValue(v.getX(), v.getY(), v.getZ());
+    m_data[0] = v.m_data[0];
+    m_data[1] = v.m_data[1];
+    m_data[2] = v.m_data[2];
     return *this;
 }
 
@@ -272,11 +280,15 @@ inline void Vector3::setValue(const scalar_t& x, const scalar_t& y, const scalar
 }
 
 inline void Vector3::setValue(const Vector3& v) {
-    setValue(v.getX(), v.getY(), v.getZ());
+    *this = v;
 }
 
 inline void Vector3::setValue(const scalar_t& num) {
     setValue(num, num, num);
+}
+
+inline void Vector3::setValue(const btVector3& v) {
+    setValue(v.getX(), v.getY(), v.getZ());
 }
 
 

@@ -27,6 +27,7 @@
 #ifndef MATRIX3X3_HPP
 #define MATRIX3X3_HPP
 
+#include <bullet/LinearMath/btMatrix3x3.h>
 #include "vector3.hpp"
 #include "quaternion.hpp"
 
@@ -41,6 +42,7 @@ public:
     Matrix3x3(const Vector3& xrow, const Vector3& yrow, const Vector3& zrow);
     Matrix3x3(const Quaternion& q);
     Matrix3x3(const scalar_t& yaw, const scalar_t& pitch, const scalar_t& roll);
+    Matrix3x3(const btMatrix3x3& m);
 
     Matrix3x3& operator=(const Matrix3x3& m);
     Matrix3x3 operator-() const;
@@ -68,6 +70,7 @@ public:
                   const scalar_t& zx, const scalar_t& zy, const scalar_t& zz);
     void setOpenGLSubMatrix(const float* openGLSubMatrix);
     void setValue(const Vector3& xrow, const Vector3& yrow, const Vector3& zrow);
+    void setValue(const btMatrix3x3& m);
     void setRotation(const Quaternion& q);
     void setEuler(const scalar_t& yaw, const scalar_t& pitch, const scalar_t& roll);
     void setIdentity();
@@ -127,10 +130,16 @@ inline Matrix3x3::Matrix3x3(const scalar_t& yaw, const scalar_t& pitch, const sc
     setEuler(yaw, pitch, roll);
 }
 
+inline Matrix3x3::Matrix3x3(const btMatrix3x3& m) {
+    setValue(m);
+}
+
 
 
 inline Matrix3x3& Matrix3x3::operator=(const Matrix3x3& m) {
-    setValue(m);
+    m_rows[0] = m.m_rows[0];
+    m_rows[1] = m.m_rows[1];
+    m_rows[2] = m.m_rows[2];
     return *this;
 }
 
@@ -279,9 +288,7 @@ inline void Matrix3x3::setRow(const int i, const Vector3& v) {
 }
 
 inline void Matrix3x3::setValue(const Matrix3x3& m) {
-    setRow(0, m.getRow(0));
-    setRow(1, m.getRow(1));
-    setRow(2, m.getRow(2));
+    *this = m;
 }
 
 inline void Matrix3x3::setValue(const scalar_t& xx, const scalar_t& xy, const scalar_t& xz,
@@ -312,6 +319,12 @@ inline void Matrix3x3::setValue(const Vector3& xrow, const Vector3& yrow, const 
     setRow(0, xrow);
     setRow(1, yrow);
     setRow(2, zrow);
+}
+
+inline void Matrix3x3::setValue(const btMatrix3x3& m) {
+    m_rows[0] = Vector3(m.getRow(0));
+    m_rows[1] = Vector3(m.getRow(1));
+    m_rows[2] = Vector3(m.getRow(2));
 }
 
 inline void Matrix3x3::setRotation(const Quaternion& q) {

@@ -27,7 +27,7 @@
 #ifndef QUATERNION_HPP
 #define QUATERNION_HPP
 
-#include <iostream>
+#include <bullet/LinearMath/btQuaternion.h>
 #include "scalar.hpp"
 
 class Vector3;
@@ -39,6 +39,7 @@ public:
     Quaternion(const scalar_t& w, const scalar_t& x, const scalar_t& y, const scalar_t& z);
     Quaternion(const Vector3& axis, const scalar_t& angle);
     Quaternion(const scalar_t& yaw, const scalar_t& pitch, const scalar_t& roll);
+    Quaternion(const btQuaternion& q);
 
     Quaternion& operator=(const Quaternion& q);
     Quaternion operator-() const;
@@ -72,6 +73,7 @@ public:
     void setValue(const Quaternion& q);
     void setAxisAngle(const Vector3& axis, const scalar_t& angle);
     void setEuler(const scalar_t& yaw, const scalar_t& pitch, const scalar_t& roll);
+    void setValue(const btQuaternion& q);
 
     scalar_t length() const;
     scalar_t lengthSquared() const;
@@ -125,10 +127,17 @@ inline Quaternion::Quaternion(const scalar_t& yaw, const scalar_t& pitch, const 
     setEuler(yaw, pitch, roll);
 }
 
+inline Quaternion::Quaternion(const btQuaternion& q) {
+    setValue(q);
+}
+
 
 
 inline Quaternion& Quaternion::operator=(const Quaternion& q) {
-    setValue(q.getW(), q.getX(), q.getY(), q.getZ());
+    m_data[0] += q.m_data[0];
+    m_data[1] += q.m_data[1];
+    m_data[2] += q.m_data[2];
+    m_data[3] += q.m_data[3];
     return *this;
 }
 
@@ -260,7 +269,7 @@ inline void Quaternion::setValue(const scalar_t& w, const scalar_t& x, const sca
 }
 
 inline void Quaternion::setValue(const Quaternion& q) {
-    setValue(q.getW(), q.getX(), q.getY(), q.getZ());
+    *this = q;
 }
 
 inline void Quaternion::setAxisAngle(const Vector3& axis, const scalar_t& angle) {
@@ -285,6 +294,10 @@ inline void Quaternion::setEuler(const scalar_t& yaw, const scalar_t& pitch, con
         cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw,
         sinRoll * cosPitch * cosYaw - cosRoll * sinPitch * sinYaw
     );
+}
+
+inline void Quaternion::setValue(const btQuaternion& q) {
+    setValue(q.getW(), q.getX(), q.getY(), q.getZ());
 }
 
 

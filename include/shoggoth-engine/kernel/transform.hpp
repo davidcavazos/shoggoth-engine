@@ -27,6 +27,7 @@
 #ifndef TRANSFORM_HPP
 #define TRANSFORM_HPP
 
+#include <bullet/LinearMath/btTransform.h>
 #include "matrix3x3.hpp"
 
 class Transform {
@@ -36,6 +37,7 @@ public:
     Transform(const float* openGL);
     Transform(const Matrix3x3& m, const Vector3& v);
     Transform(const Quaternion& q, const Vector3& v);
+    Transform(const btTransform& t);
 
     Transform& operator=(const Transform& t);
     Transform& operator*=(const Transform& t);
@@ -56,6 +58,7 @@ public:
     void setPosition(const Vector3& v);
     void setRotation(const Matrix3x3& m);
     void setRotation(const Quaternion& q);
+    void setValue(const btTransform& t);
     void setIdentity();
 
     Transform inverse() const;
@@ -69,6 +72,14 @@ private:
 
 
 const Transform TRANSFORM_IDENTITY = Transform().inverse();
+
+
+
+btTransform trans(const Transform& t);
+btTransform trans(const Quaternion& q, const Vector3& v);
+btMatrix3x3 mat3x3(const Matrix3x3& m);
+btQuaternion quat(const Quaternion& q);
+btVector3 vect(const Vector3& v);
 
 
 
@@ -101,10 +112,16 @@ inline Transform::Transform(const Quaternion& q, const Vector3& v):
     setValue(q, v);
 }
 
+inline Transform::Transform(const btTransform& t):
+    m_rotation(t.getBasis()),
+    m_position(t.getOrigin())
+{}
+
 
 
 inline Transform& Transform::operator=(const Transform& t) {
-    setValue(t);
+    m_rotation = t.m_rotation;
+    m_position = t.m_position;
     return *this;
 }
 
@@ -159,8 +176,7 @@ inline void Transform::getOpenGLMatrix(float* openGL) const {
 }
 
 inline void Transform::setValue(const Transform& t) {
-    m_rotation = t.m_rotation;
-    m_position = t.m_position;
+    *this = t;
 }
 
 inline void Transform::setValue(const Matrix3x3& m, const Vector3& v) {
@@ -190,6 +206,11 @@ inline void Transform::setRotation(const Quaternion& q) {
     m_rotation = Matrix3x3(q);
 }
 
+inline void Transform::setValue(const btTransform& t) {
+    m_rotation = Matrix3x3(t.getBasis());
+    m_position = Vector3(t.getOrigin());
+}
+
 inline void Transform::setIdentity() {
     m_rotation.setIdentity();
     m_position = VECTOR3_ZERO;
@@ -206,6 +227,31 @@ inline Transform Transform::inverseTimes(const Transform& t) const {
     Vector3 v = t.getPosition() - m_position;
     return Transform(m_rotation.transposeTimes(t.m_rotation), v * m_rotation);
 
+}
+
+
+
+inline btTransform trans(const Transform& t) {
+    return btTransform(mat3x3(t.getRotation()), vect(t.getPosition()));
+}
+
+inline btTransform trans(const Quaternion& q, const Vector3& v) {
+    return btTransform(quat(q), vect(v));
+}
+
+inline btMatrix3x3 mat3x3(const Matrix3x3& m) {
+    return btMatrix3x3(m.get(0, 0), m.get(0, 1), m.get(0, 2),
+                       m.get(1, 0), m.get(1, 1), m.get(1, 2),
+                       m.get(2, 0), m.get(2, 1), m.get(2, 2)
+    );
+}
+
+inline btQuaternion quat(const Quaternion& q) {
+    return btQuaternion(q.getX(), q.getY(), q.getZ(), q.getW());
+}
+
+inline btVector3 vect(const Vector3& v) {
+    return btVector3(v.getX(), v.getY(), v.getZ());
 }
 
 #endif // TRANSFORM_HPP

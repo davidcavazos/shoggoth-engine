@@ -28,6 +28,7 @@
 
 #include <cfloat>
 #include <bullet/btBulletCollisionCommon.h>
+#include "shoggoth-engine/kernel/transform.hpp"
 #include "shoggoth-engine/kernel/entity.hpp"
 #include "shoggoth-engine/renderer/renderablemesh.hpp"
 #include "shoggoth-engine/resources/model.hpp"
@@ -46,19 +47,6 @@ btCollisionWorld* Culling::m_collisionWorld = 0;
 Culling::collision_object_map_t Culling::m_collisionObjects = collision_object_map_t();
 Culling::renderable_mesh_map_t Culling::m_renderableMeshes = renderable_mesh_map_t();
 
-
-
-btQuaternion quat(const Quaternion& q) {
-    return btQuaternion(q.getX(), q.getY(), q.getZ(), q.getW());
-}
-
-btVector3 vect(const Vector3& v) {
-    return btVector3(v.getX(), v.getY(), v.getZ());
-}
-
-btTransform trans(const Quaternion& rot, const Vector3& pos) {
-    return btTransform(quat(rot), vect(pos));
-}
 
 
 struct DbvtBroadphaseFrustumCulling : btDbvt::ICollide {
