@@ -3,6 +3,11 @@
 + Networking
 + GUI and 2D stuff
 ~ Add more primitives for RenderableMesh (sphere, cilinder, cone, etc)
+~ Fog
+~ Transparency
+~ Multisampling
+~ Anisotropic texture filtering (221)
+~ Texture compression (223)
 ~ Use relative positions to the camera for physics and rendering
 ~ Add static plane, heightmap, etc in physics
 ~ Add constraints support
@@ -26,3 +31,5 @@ Wiki:
 Add frustum culling
 Describe all commands https://github.com/davido262/shoggoth-engine/wiki/List-of-Commands
 Complete installation guides https://github.com/davido262/shoggoth-engine/wiki/Installation
+Describe general information (vectors format X Y Z and quaternions format W X Y Z)
+Add automatic mipmap generation
