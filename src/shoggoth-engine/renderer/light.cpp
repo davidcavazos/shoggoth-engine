@@ -34,17 +34,29 @@ using namespace boost::property_tree;
 
 const string LIGHT_DESCRIPTION = "$light";
 
+const string XML_LIGHT_TYPE = "lighttype";
 const string XML_LIGHT_AMBIENT = "ambient";
 const string XML_LIGHT_DIFFUSE = "diffuse";
 const string XML_LIGHT_SPECULAR = "specular";
+const string XML_SPOT_EXPONENT = "spotexponent";
+const string XML_SPOT_CUTOFF = "spotcutoff";
+const string XML_CONSTANT_ATTENUATION = "constantattenuation";
+const string XML_LINEAR_ATTENUATION = "linearattenuation";
+const string XML_QUADRATIC_ATTENUATION = "quadraticattenuation";
 
 
 Light::Light(Entity* const entity, Renderer* renderer):
-Component(COMPONENT_LIGHT, entity),
-m_renderer(renderer),
-m_ambient(0.0f, 0.0f, 0.0f, 1.0f),
-m_diffuse(1.0f, 1.0f, 1.0f, 1.0f),
-m_specular(1.0f, 1.0f, 1.0f, 1.0f)
+    Component(COMPONENT_LIGHT, entity),
+    m_renderer(renderer),
+    m_lightType(LIGHT_POINTLIGHT),
+    m_ambient(0.0f, 0.0f, 0.0f, 1.0f),
+    m_diffuse(1.0f, 1.0f, 1.0f, 1.0f),
+    m_specular(1.0f, 1.0f, 1.0f, 1.0f),
+    m_spotExponent(0.0f),
+    m_spotCutoff(180.0f),
+    m_constantAttenuation(1.0f),
+    m_linearAttenuation(0.0f),
+    m_quadraticAttenuation(0.0f)
 {
     m_description = LIGHT_DESCRIPTION;
 
@@ -64,7 +76,7 @@ Light::~Light() {
 }
 
 
-void Light::set(const Color4& ambient, const Color4& diffuse, const Color4& specular) {
+void Light::setColors(const Color4& ambient, const Color4& diffuse, const Color4& specular) {
     m_ambient = ambient;
     m_diffuse = diffuse;
     m_specular = specular;
@@ -102,25 +114,43 @@ void Light::setSpecular(const float r, const float g, const float b, const float
 }
 
 void Light::loadFromPtree(const string& path, const ptree& tree) {
+    m_lightType = (light_t)tree.get<int>(xmlPath(path + XML_LIGHT_TYPE), (int)LIGHT_POINTLIGHT);
     m_ambient = tree.get<Color4>(xmlPath(path + XML_LIGHT_AMBIENT), COLOR_BLACK);
     m_diffuse = tree.get<Color4>(xmlPath(path + XML_LIGHT_DIFFUSE), COLOR_WHITE);
     m_specular = tree.get<Color4>(xmlPath(path + XML_LIGHT_SPECULAR), COLOR_WHITE);
+    m_spotExponent = tree.get<float>(xmlPath(path + XML_SPOT_EXPONENT), 0.0f);
+    m_spotCutoff = tree.get<float>(xmlPath(path + XML_SPOT_CUTOFF), 180.0f);
+    m_constantAttenuation = tree.get<float>(xmlPath(path + XML_CONSTANT_ATTENUATION), 1.0f);
+    m_linearAttenuation = tree.get<float>(xmlPath(path + XML_LINEAR_ATTENUATION), 0.0f);
+    m_quadraticAttenuation = tree.get<float>(xmlPath(path + XML_QUADRATIC_ATTENUATION), 0.0f);
 }
 
 void Light::saveToPtree(const string& path, ptree& tree) const {
+    tree.put(xmlPath(path + XML_LIGHT_TYPE), (int)getLightType());
     tree.put(xmlPath(path + XML_LIGHT_AMBIENT), getAmbient());
     tree.put(xmlPath(path + XML_LIGHT_DIFFUSE), getDiffuse());
     tree.put(xmlPath(path + XML_LIGHT_SPECULAR), getSpecular());
+    tree.put(xmlPath(path + XML_SPOT_EXPONENT), getSpotExponent());
+    tree.put(xmlPath(path + XML_SPOT_CUTOFF), getSpotCutoff());
+    tree.put(xmlPath(path + XML_CONSTANT_ATTENUATION), getConstantAttenuation());
+    tree.put(xmlPath(path + XML_LINEAR_ATTENUATION), getLinearAttenuation());
+    tree.put(xmlPath(path + XML_QUADRATIC_ATTENUATION), getQuadraticAttenuation());
 }
 
 
 
 Light::Light(const Light& rhs):
-Component(rhs.m_type, rhs.m_entity),
-m_renderer(rhs.m_renderer),
-m_ambient(rhs.m_ambient),
-m_diffuse(rhs.m_diffuse),
-m_specular(rhs.m_specular)
+    Component(rhs.m_type, rhs.m_entity),
+    m_renderer(rhs.m_renderer),
+    m_lightType(rhs.m_lightType),
+    m_ambient(rhs.m_ambient),
+    m_diffuse(rhs.m_diffuse),
+    m_specular(rhs.m_specular),
+    m_spotExponent(rhs.m_spotExponent),
+    m_spotCutoff(rhs.m_spotCutoff),
+    m_constantAttenuation(rhs.m_constantAttenuation),
+    m_linearAttenuation(rhs.m_linearAttenuation),
+    m_quadraticAttenuation(rhs.m_quadraticAttenuation)
 {
     cerr << "Error: Light copy constructor should not be called!" << endl;
 }

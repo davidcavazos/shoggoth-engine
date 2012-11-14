@@ -17,8 +17,8 @@
       <renderablemesh type="component" model="$box 100 1 100"/>
       <rigidbody type="component" collisionshape="#box 100 1 100" mass="0" damping="0 0" friction="0.5" rollingfriction="0" restitution="0" sleepingthresholds="0.8 1" linearfactor="1 1 1" linearvelocity="0 0 0" angularfactor="1 1 1" angularvelocity="0 0 0" gravity="0 -9.8 0"/>
     </floor>
-    <light1 type="entity" position="5 5 5" orientation="1 0 0 0">
-      <light type="component" ambient="0 0 0 1" diffuse="1 1 1 1" specular="1 1 1 1"/>
+    <light1 type="entity" position="3 2 2" orientation="1 0 0 0">
+      <light type="component" lighttype="0" ambient="0 0 0 1" diffuse="1 1 1 1" specular="1 1 1 1" spotexponent="0" spotcutoff="15" constantattenuation="1" linearattenuation="0" quadraticattenuation="0.005"/>
     </light1>
     <body type="entity" position="0 2 10" orientation="1 0 0 0">
       <renderablemesh type="component" model="$box 1 2 1"/>

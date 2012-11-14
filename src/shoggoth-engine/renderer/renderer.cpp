@@ -679,9 +679,20 @@ void Renderer::displayLegacyLights() const {
                 lightEnum = GL_LIGHT7;
                 break;
         }
+        float w = ((*itLight)->getLightType() == LIGHT_DIRECTIONAL)? 0.0f : 1.0f;
         const Vector3& pos = (*itLight)->getEntity()->getPositionAbs();
-        float lightPosition[] = {float(pos.getX()), float(pos.getY()), float(pos.getZ()), 1.0f};
+        float lightPosition[] = {float(pos.getX()), float(pos.getY()), float(pos.getZ()), w};
         glLightfv(lightEnum, GL_POSITION, lightPosition);
+        glLightf(lightEnum, GL_CONSTANT_ATTENUATION, (*itLight)->getConstantAttenuation());
+        glLightf(lightEnum, GL_LINEAR_ATTENUATION, (*itLight)->getLinearAttenuation());
+        glLightf(lightEnum, GL_QUADRATIC_ATTENUATION, (*itLight)->getQuadraticAttenuation());
+        if ((*itLight)->getLightType() != LIGHT_POINTLIGHT) {
+            const Vector3& rot = VECTOR3_UNIT_Z_NEG.rotate((*itLight)->getEntity()->getOrientationAbs());
+            float lightOrientation[] = {float(rot.getX()), float(pos.getY()), float(pos.getZ()), 1.0f};
+            glLightfv(lightEnum, GL_SPOT_DIRECTION, lightOrientation);
+            glLightf(lightEnum, GL_SPOT_EXPONENT, (*itLight)->getSpotExponent());
+            glLightf(lightEnum, GL_SPOT_CUTOFF, (*itLight)->getSpotCutoff());
+        }
         ++itLight;
     }
 }
