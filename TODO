@@ -6,8 +6,6 @@
 ~ Fog
 ~ Transparency
 ~ Multisampling
-~ Anisotropic texture filtering (221)
-~ Texture compression (223)
 ~ Use relative positions to the camera for physics and rendering
 ~ Add static plane, heightmap, etc in physics
 ~ Add constraints support
@@ -26,10 +24,13 @@
 BUGS:
 Concave hulls in RigidBody crash!
 Fix orientation of spotlights and maybe directional lights
+Fix texture compression
 
 Wiki:
 Add frustum culling
 Describe all commands https://github.com/davido262/shoggoth-engine/wiki/List-of-Commands
 Complete installation guides https://github.com/davido262/shoggoth-engine/wiki/Installation
 Describe general information (vectors format X Y Z and quaternions format W X Y Z)
-Add automatic mipmap generation
+Mipmap generation
+Texture filtering (nearest, linear and anisotropic)
+Texture compression (when fixed)

@@ -40,34 +40,26 @@
 
 using namespace std;
 
-typedef enum {
-    DATA_UPLOAD_VERTEX_ARRAY, // 1.1
-    DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT, // extension
-    DATA_UPLOAD_VERTEX_BUFFER_OBJECT // 1.5
-} data_upload_t;
-
-typedef enum {
-    MIPMAP_GENERATION_GLU, // 1.0
-    MIPMAP_GENERATION_TEX_PARAMETER_EXT, // extension
-    MIPMAP_GENERATION_TEX_PARAMETER // 1.4
-} mipmap_generation_t;
-
-data_upload_t gDataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
-mipmap_generation_t gMipMapGenerationMode = MIPMAP_GENERATION_GLU;
-
-
-
 Renderer::Renderer(const string& objectName, const Device* device):
     CommandObject(objectName),
     m_device(device),
     m_activeCamera(0),
     m_cameras(),
     m_lights(),
-    m_models()
+    m_models(),
+    m_dataUploadMode(DATA_UPLOAD_VERTEX_ARRAY),
+    m_mipMapGenerationMode(MIPMAP_GENERATION_GLU),
+    m_isAnisotropicFilteringSupported(false),
+    m_maxAnisotropy(1.0f),
+    m_anisotropy(1.0f),
+    m_textureFilteringMode(TEXTURE_FILTERING_NEAREST),
+    m_textureCompressionMode(TEXTURE_COMPRESSION_NONE)
 {
     registerCommand("initialize", boost::bind(&Renderer::cmdInitialize, this, _1));
     registerCommand("shutdown", boost::bind(&Renderer::cmdShutdown, this, _1));
     registerAttribute("ambient-light", boost::bind(&Renderer::cmdAmbientLight, this, _1));
+    registerAttribute("texture-filtering", boost::bind(&Renderer::cmdTextureFiltering, this, _1));
+    registerAttribute("anisotropy", boost::bind(&Renderer::cmdAnisotropy, this, _1));
 }
 
 Renderer::~Renderer() {
@@ -119,8 +111,9 @@ void Renderer::initialize() {
         cout << "Using OpenGL Legacy " << openGLVersion << endl;
 
     // default techniques
-    gDataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
-    gMipMapGenerationMode = MIPMAP_GENERATION_GLU;
+    m_dataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
+    m_mipMapGenerationMode = MIPMAP_GENERATION_GLU;
+    m_textureFilteringMode = TEXTURE_FILTERING_LINEAR;
 
     // version techniques
     int openGLVersionInt = floor(openGLVersion * 10.0 + 0.5);
@@ -136,15 +129,25 @@ void Renderer::initialize() {
         case 21: // 2.1
         case 20: // 2.0
         case 15: // 1.5
-            gDataUploadMode = DATA_UPLOAD_VERTEX_BUFFER_OBJECT;
+            m_textureCompressionMode = TEXTURE_COMPRESSION;
+            m_dataUploadMode = DATA_UPLOAD_VERTEX_BUFFER_OBJECT;
+            m_mipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER;
+            break;
         case 14: // 1.4
-            gMipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER;
+            m_textureCompressionMode = TEXTURE_COMPRESSION;
+            m_dataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
+            m_mipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER;
             break;
         case 13: // 1.3
+            m_textureCompressionMode = TEXTURE_COMPRESSION;
+            m_dataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
+            m_mipMapGenerationMode = MIPMAP_GENERATION_GLU;
+            break;
         case 12: // 1.2
         case 11: // 1.1
-            gDataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
-            gMipMapGenerationMode = MIPMAP_GENERATION_GLU;
+            m_textureCompressionMode = TEXTURE_COMPRESSION_NONE;
+            m_dataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
+            m_mipMapGenerationMode = MIPMAP_GENERATION_GLU;
             break;
         default:
             cerr << "Error: unsupported OpenGL version: " << openGLVersion << endl;
@@ -155,39 +158,66 @@ void Renderer::initialize() {
     cout << "Extensions: " << integer << endl;
     if (glewInit() != GLEW_OK)
         cerr << "Error: failed to initialize GLEW" << endl;
-    if (gDataUploadMode == DATA_UPLOAD_VERTEX_ARRAY &&
+    if (m_dataUploadMode == DATA_UPLOAD_VERTEX_ARRAY &&
         glewIsSupported("GL_ARB_vertex_buffer_object"))
-        gDataUploadMode = DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT;
-    if (gMipMapGenerationMode == MIPMAP_GENERATION_GLU &&
+        m_dataUploadMode = DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT;
+    if (m_mipMapGenerationMode == MIPMAP_GENERATION_GLU &&
         glewIsSupported("GL_SGIS_generate_mipmap"))
-        gMipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER_EXT;
+        m_mipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER_EXT;
+    if (glewIsSupported("GL_EXT_texture_filter_anisotropic")) {
+        m_isAnisotropicFilteringSupported = true;
+        glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &m_maxAnisotropy);
+        cout << "Anisotropic texture filtering supported, max: " << m_maxAnisotropy << endl;
+    }
+    else
+        cout << "Anisotropic texture filtering not supported" << endl;
+    if (m_textureCompressionMode == TEXTURE_COMPRESSION_NONE &&
+        m_mipMapGenerationMode != MIPMAP_GENERATION_GLU &&
+        glewIsSupported("GL_ARB_texture_compression"))
+        m_textureCompressionMode = TEXTURE_COMPRESSION_EXT;
 
-    switch (gDataUploadMode) {
-        case DATA_UPLOAD_VERTEX_ARRAY:
-            cout << "Using Vertex Arrays" << endl;
-            break;
-        case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
-            cout << "Using Vertex Buffer Objects EXT" << endl;
-            break;
-        case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
-            cout << "Using Vertex Buffer Objects" << endl;
-            break;
-        default:
-            cerr << "Error: invalid data_upload_t: " << gDataUploadMode << endl;
+    switch (m_dataUploadMode) {
+    case DATA_UPLOAD_VERTEX_ARRAY:
+        cout << "Using Vertex Array Objects" << endl;
+        break;
+    case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
+        cout << "Using Vertex Buffer Objects EXT extension" << endl;
+        break;
+    case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
+        cout << "Using Vertex Buffer Objects" << endl;
+        break;
+    default:
+        cerr << "Error: invalid data_upload_t: " << m_dataUploadMode << endl;
     }
-    switch (gMipMapGenerationMode) {
-        case MIPMAP_GENERATION_GLU:
-            cout << "Using gluBuild2DMipmaps" << endl;
-            break;
-        case MIPMAP_GENERATION_TEX_PARAMETER_EXT:
-            cout << "Using GL_GENERATE_MIPMAP_SGIS" << endl;
-            break;
-        case MIPMAP_GENERATION_TEX_PARAMETER:
-            cout << "Using GL_GENERATE_MIPMAP" << endl;
-            break;
-        default:
-            cerr << "Error: invalid mipmap_generation_t: " << gMipMapGenerationMode << endl;
+    switch (m_mipMapGenerationMode) {
+    case MIPMAP_GENERATION_GLU:
+        cout << "Using mipmaps glu" << endl;
+        break;
+    case MIPMAP_GENERATION_TEX_PARAMETER_EXT:
+        cout << "Using mipmaps SGIS extension" << endl;
+        break;
+    case MIPMAP_GENERATION_TEX_PARAMETER:
+        cout << "Using mipmaps" << endl;
+        break;
+    default:
+        cerr << "Error: invalid mipmap_generation_t: " << m_mipMapGenerationMode << endl;
     }
+    switch (m_textureCompressionMode) {
+    case TEXTURE_COMPRESSION_NONE:
+        cout << "Texture compression not supported" << endl;
+        break;
+    case TEXTURE_COMPRESSION_EXT:
+        cout << "Using texture compression ARB extension" << endl;
+        break;
+    case TEXTURE_COMPRESSION:
+        cout << "Using texture compression" << endl;
+        break;
+    default:
+        cerr << "Error: invalid texture_compression_t: " << m_textureCompressionMode << endl;
+    }
+    cout << "Forcing no texture compression!!" << endl;
+    m_textureCompressionMode = TEXTURE_COMPRESSION_NONE;
+
     cout << endl;
 
     // always
@@ -222,6 +252,13 @@ void Renderer::shutdown() {
     set<Camera*>::const_iterator itCam;
     for (itCam = m_cameras.begin(); itCam != m_cameras.end(); ++itCam)
         delete *itCam;
+}
+
+void Renderer::setTextureFilteringMode(const texture_filtering_t& textureFiltering) {
+    if (textureFiltering == TEXTURE_FILTERING_ANISOTROPIC && !m_isAnisotropicFilteringSupported)
+        cerr << "Warning: anisotropic texture filtering not supported, ignoring change" << endl;
+    else
+        m_textureFilteringMode = textureFiltering;
 }
 
 void Renderer::setAmbientLight(const float r, const float g, const float b, const float a) {
@@ -272,7 +309,7 @@ void Renderer::uploadModel(unsigned int& meshId, unsigned int& indicesId, const 
     size_t normalsBytes = mesh.getNormalsBytes();
     size_t uvCoordsBytes = mesh.getUvCoordsBytes();
     size_t indicesBytes = mesh.getIndicesBytes();
-    switch (gDataUploadMode) {
+    switch (m_dataUploadMode) {
         case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
             glGenBuffers(1, &meshId);
             glBindBuffer(GL_ARRAY_BUFFER, meshId);
@@ -342,12 +379,12 @@ void Renderer::uploadModel(unsigned int& meshId, unsigned int& indicesId, const 
         case DATA_UPLOAD_VERTEX_ARRAY:
             break;
         default:
-            cerr << "Error: invalid data_upload_t: " << gDataUploadMode << endl;
+            cerr << "Error: invalid data_upload_t: " << m_dataUploadMode << endl;
     }
 }
 
 void Renderer::deleteModel(const unsigned int meshId, const unsigned int indicesId) {
-    switch (gDataUploadMode) {
+    switch (m_dataUploadMode) {
         case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
             glDeleteBuffers(1, &meshId);
             glDeleteBuffers(1, &indicesId);
@@ -359,7 +396,7 @@ void Renderer::deleteModel(const unsigned int meshId, const unsigned int indices
         case DATA_UPLOAD_VERTEX_ARRAY:
             break;
         default:
-            cerr << "Error: invalid data_upload_t: " << gDataUploadMode << endl;
+            cerr << "Error: invalid data_upload_t: " << m_dataUploadMode << endl;
     }
 }
 
@@ -369,8 +406,6 @@ void Renderer::uploadTexture(unsigned int& textureId, const Texture& texture) {
     glGenTextures(1, &textureId);
     glBindTexture(GL_TEXTURE_2D, textureId);
 
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     switch (texture.getTextureFormat()) {
@@ -390,23 +425,55 @@ void Renderer::uploadTexture(unsigned int& textureId, const Texture& texture) {
         cerr << "Error: invalid texture_format_t: " << texture.getTextureFormat() << endl;
         textureFormat = GL_RGBA;
     }
-    switch (gMipMapGenerationMode) {
+    switch (m_textureFilteringMode) {
+    case TEXTURE_FILTERING_NEAREST:
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        break;
+    case TEXTURE_FILTERING_ANISOTROPIC:
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, m_anisotropy);
+        // fallthrough
+    case TEXTURE_FILTERING_LINEAR:
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        break;
+    default:
+        cerr << "Error: invalid texture_filtering_t: " << m_textureFilteringMode << endl;
+    }
+    switch (m_mipMapGenerationMode) {
     case MIPMAP_GENERATION_TEX_PARAMETER:
         glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE); // 1.4
-        glTexImage2D(GL_TEXTURE_2D, 0, texture.getBytesPerPixel(), texture.getWidth(),
-                     texture.getHeight(), 0, textureFormat, GL_UNSIGNED_BYTE, texture.getPixels());
         break;
     case MIPMAP_GENERATION_TEX_PARAMETER_EXT:
         glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, GL_TRUE);
-        glTexImage2D(GL_TEXTURE_2D, 0, texture.getBytesPerPixel(), texture.getWidth(),
-                     texture.getHeight(), 0, textureFormat, GL_UNSIGNED_BYTE, texture.getPixels());
         break;
     case MIPMAP_GENERATION_GLU:
         gluBuild2DMipmaps(GL_TEXTURE_2D, texture.getBytesPerPixel(), texture.getWidth(),
                           texture.getHeight(), textureFormat, GL_UNSIGNED_BYTE, texture.getPixels());
         break;
     default:
-        cerr << "Error: invalid mipmap_generation_t: " << gMipMapGenerationMode << endl;
+        cerr << "Error: invalid mipmap_generation_t: " << m_mipMapGenerationMode << endl;
+    }
+    if (m_mipMapGenerationMode != MIPMAP_GENERATION_GLU) {
+        switch (m_textureCompressionMode) {
+        case TEXTURE_COMPRESSION_NONE:
+        case TEXTURE_COMPRESSION_EXT:
+        case TEXTURE_COMPRESSION:
+            glTexImage2D(GL_TEXTURE_2D, 0, texture.getBytesPerPixel(), texture.getWidth(),
+                    texture.getHeight(), 0, textureFormat, GL_UNSIGNED_BYTE, texture.getPixels());
+            break;
+//             glCompressedTexImage2DARB(GL_TEXTURE_2D, 0, texture.getBytesPerPixel(), texture.getWidth(),
+//                     texture.getHeight(), 0, texture.getWidth() * texture.getHeight(), texture.getPixels());
+//             break;
+
+//             glCompressedTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA, texture.getWidth(),
+//                     texture.getHeight(), 0, (texture.getWidth() * texture.getHeight()) / 2, texture.getPixels());
+//             glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA, texture.getWidth(),
+//                     texture.getHeight(), 0, textureFormat, GL_UNSIGNED_BYTE, texture.getPixels());
+//             break;
+        default:
+            cerr << "Error: invalid texture_compression_t: " << m_textureCompressionMode << endl;
+        }
     }
 }
 
@@ -464,7 +531,7 @@ void Renderer::draw() {
                 glBindTexture(GL_TEXTURE_2D, 0);
 
             // draw mesh
-            switch (gDataUploadMode) {
+            switch (m_dataUploadMode) {
             case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
                 glBindBuffer(GL_ARRAY_BUFFER, mesh->getMeshId());
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->getIndicesId());
@@ -496,7 +563,7 @@ void Renderer::draw() {
                 glDrawElements(GL_TRIANGLES, mesh->getIndicesSize(), GL_UNSIGNED_INT, mesh->getIndicesPtr());
                 break;
             default:
-                cerr << "Error: invalid data_upload_t: " << gDataUploadMode << endl;
+                cerr << "Error: invalid data_upload_t: " << m_dataUploadMode << endl;
             }
         }
         glPopMatrix();
@@ -534,7 +601,14 @@ Renderer::Renderer(const Renderer& rhs):
     m_activeCamera(rhs.m_activeCamera),
     m_cameras(rhs.m_cameras),
     m_lights(rhs.m_lights),
-    m_models(rhs.m_models)
+    m_models(rhs.m_models),
+    m_dataUploadMode(rhs.m_dataUploadMode),
+    m_mipMapGenerationMode(rhs.m_mipMapGenerationMode),
+    m_isAnisotropicFilteringSupported(rhs.m_isAnisotropicFilteringSupported),
+    m_maxAnisotropy(rhs.m_maxAnisotropy),
+    m_anisotropy(rhs.m_anisotropy),
+    m_textureFilteringMode(rhs.m_textureFilteringMode),
+    m_textureCompressionMode(rhs.m_textureCompressionMode)
 {
     cerr << "Renderer copy constructor should not be called" << endl;
 }
@@ -763,4 +837,22 @@ string Renderer::cmdAmbientLight(deque<string>& args) {
     double a = boost::lexical_cast<double>(args[3]);
     setAmbientLight(r, g, b, a);
     return "";
+}
+
+string Renderer::cmdTextureFiltering(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    texture_filtering_t filtering = (texture_filtering_t)boost::lexical_cast<int>(args[0]);
+    if (filtering == TEXTURE_FILTERING_ANISOTROPIC && !m_isAnisotropicFilteringSupported)
+        return "Anisotropic texture filtering not supported, ignoring change";
+    m_textureFilteringMode = filtering;
+    return "";
+}
+
+string Renderer::cmdAnisotropy(deque<string>& args) {
+    if (args.size() < 1)
+        return "Error: too few arguments";
+    float anisotropy = boost::lexical_cast<float>(args[0]);
+    setAnisotropy(anisotropy);
+    return string("Anisotropy set to: ") + boost::lexical_cast<string>(m_anisotropy);
 }
