@@ -58,7 +58,7 @@ target_link_libraries(${LIBRARY_NAME}
     ${OPENGL_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${BULLET_LIBRARIES}
-    ${ASSIMP_LIBRARIES}
+    ${ASSIMP_LIBRARY}
 )
 
 # install library
