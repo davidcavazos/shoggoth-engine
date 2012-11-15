@@ -53,7 +53,8 @@ Renderer::Renderer(const string& objectName, const Device* device):
     m_maxAnisotropy(1.0f),
     m_anisotropy(1.0f),
     m_textureFilteringMode(TEXTURE_FILTERING_NEAREST),
-    m_textureCompressionMode(TEXTURE_COMPRESSION_NONE)
+    m_textureCompressionMode(TEXTURE_COMPRESSION_NONE),
+    m_renderingMethod(RENDERING_METHOD_FIXED_PIPELINE)
 {
     registerCommand("initialize", boost::bind(&Renderer::cmdInitialize, this, _1));
     registerCommand("shutdown", boost::bind(&Renderer::cmdShutdown, this, _1));
@@ -114,6 +115,7 @@ void Renderer::initialize() {
     m_dataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
     m_mipMapGenerationMode = MIPMAP_GENERATION_GLU;
     m_textureFilteringMode = TEXTURE_FILTERING_LINEAR;
+    m_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
 
     // version techniques
     int openGLVersionInt = floor(openGLVersion * 10.0 + 0.5);
@@ -128,26 +130,35 @@ void Renderer::initialize() {
         case 30: // 3.0
         case 21: // 2.1
         case 20: // 2.0
+            m_textureCompressionMode = TEXTURE_COMPRESSION;
+            m_dataUploadMode = DATA_UPLOAD_VERTEX_BUFFER_OBJECT;
+            m_mipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER;
+            m_renderingMethod = RENDERING_METHOD_SHADERS;
+            break;
         case 15: // 1.5
             m_textureCompressionMode = TEXTURE_COMPRESSION;
             m_dataUploadMode = DATA_UPLOAD_VERTEX_BUFFER_OBJECT;
             m_mipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER;
+            m_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
             break;
         case 14: // 1.4
             m_textureCompressionMode = TEXTURE_COMPRESSION;
             m_dataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
             m_mipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER;
+            m_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
             break;
         case 13: // 1.3
             m_textureCompressionMode = TEXTURE_COMPRESSION;
             m_dataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
             m_mipMapGenerationMode = MIPMAP_GENERATION_GLU;
+            m_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
             break;
         case 12: // 1.2
         case 11: // 1.1
             m_textureCompressionMode = TEXTURE_COMPRESSION_NONE;
             m_dataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
             m_mipMapGenerationMode = MIPMAP_GENERATION_GLU;
+            m_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
             break;
         default:
             cerr << "Error: unsupported OpenGL version: " << openGLVersion << endl;
@@ -218,6 +229,16 @@ void Renderer::initialize() {
     cout << "Forcing no texture compression!!" << endl;
     m_textureCompressionMode = TEXTURE_COMPRESSION_NONE;
 
+    switch (m_renderingMethod) {
+    case RENDERING_METHOD_FIXED_PIPELINE:
+        cout << "Using fixed pipeline" << endl;
+        break;
+    case RENDERING_METHOD_SHADERS:
+        cout << "Using shaders" << endl;
+        break;
+    default:
+        cerr << "Error: invalid rendering_method_t: " << m_renderingMethod << endl;
+    }
     cout << endl;
 
     // always
@@ -254,6 +275,96 @@ void Renderer::shutdown() {
         delete *itCam;
 }
 
+void Renderer::draw() {
+    if (m_activeCamera->hasChanged()) {
+        initCamera();
+        m_activeCamera->setHasChanged(false);
+    }
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLoadIdentity();
+
+    float m[16];
+
+    // set camera
+    const Entity* cam = m_activeCamera->getEntity();
+    Transform(cam->getOrientationAbs(), cam->getPositionAbs()).inverse().getOpenGLMatrix(m);
+    glMultMatrixf(m);
+
+    // set lights
+    displayLegacyLights();
+
+    // frustum culling
+    set<RenderableMesh*> modelsInFrustum;
+    Culling::performFrustumCulling(m_projectionMatrix, m_activeCamera->getEntity(), modelsInFrustum);
+
+    // set meshes
+    set<RenderableMesh*>::const_iterator it;
+    for (it = modelsInFrustum.begin(); it != modelsInFrustum.end(); ++it) {
+        const Model* model = (*it)->getModel();
+        const Entity* entity = (*it)->getEntity();
+
+        glPushMatrix();
+        Transform(entity->getOrientationAbs(), entity->getPositionAbs()).getOpenGLMatrix(m);
+        glMultMatrixf(m);
+        for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
+            const Mesh* mesh = model->getMesh(n);
+            const Material* mtl = mesh->getMaterial();
+
+            // set material
+            glMaterialfv(GL_FRONT, GL_DIFFUSE, mtl->getColor(MATERIAL_COLOR_DIFFUSE).rgb);
+            glMaterialfv(GL_FRONT, GL_SPECULAR, mtl->getColor(MATERIAL_COLOR_SPECULAR).rgb);
+            glMaterialfv(GL_FRONT, GL_AMBIENT, mtl->getColor(MATERIAL_COLOR_AMBIENT).rgb);
+            glMaterialfv(GL_FRONT, GL_EMISSION, mtl->getColor(MATERIAL_COLOR_EMISSIVE).rgb);
+            glMaterialf(GL_FRONT, GL_SHININESS, mtl->getShininess());
+
+            // set textures
+            if (mtl->getTextureMap(MATERIAL_DIFFUSE_MAP) != 0)
+                glBindTexture(GL_TEXTURE_2D, mtl->getTextureMap(MATERIAL_DIFFUSE_MAP)->getId());
+            else
+                glBindTexture(GL_TEXTURE_2D, 0);
+
+            // draw mesh
+                switch (m_dataUploadMode) {
+                    case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
+                        glBindBuffer(GL_ARRAY_BUFFER, mesh->getMeshId());
+                        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->getIndicesId());
+
+                        glVertexPointer(3, GL_FLOAT, 0, 0);
+                        glNormalPointer(GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes()));
+                        glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes() + mesh->getNormalsBytes()));
+                        glDrawElements(GL_TRIANGLES, mesh->getIndicesSize(), GL_UNSIGNED_INT, 0);
+
+                        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+                        glBindBuffer(GL_ARRAY_BUFFER, 0);
+                        break;
+                    case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
+                        glBindBufferARB(GL_ARRAY_BUFFER_ARB, mesh->getMeshId());
+                        glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mesh->getIndicesId());
+
+                        glVertexPointer(3, GL_FLOAT, 0, 0);
+                        glNormalPointer(GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes()));
+                        glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes() + mesh->getNormalsBytes()));
+                        glDrawElements(GL_TRIANGLES, mesh->getIndicesSize(), GL_UNSIGNED_INT, 0);
+
+                        glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+                        glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+                        break;
+                    case DATA_UPLOAD_VERTEX_ARRAY:
+                        glVertexPointer(3, GL_FLOAT, 0, mesh->getVerticesPtr());
+                        glNormalPointer(GL_FLOAT, 0, mesh->getNormalsPtr());
+                        glTexCoordPointer(2, GL_FLOAT, 0, mesh->getUvCoordsPtr());
+                        glDrawElements(GL_TRIANGLES, mesh->getIndicesSize(), GL_UNSIGNED_INT, mesh->getIndicesPtr());
+                        break;
+                    default:
+                        cerr << "Error: invalid data_upload_t: " << m_dataUploadMode << endl;
+                }
+        }
+        glPopMatrix();
+    }
+    m_device->swapBuffers();
+}
+
 void Renderer::setTextureFilteringMode(const texture_filtering_t& textureFiltering) {
     if (textureFiltering == TEXTURE_FILTERING_ANISOTROPIC && !m_isAnisotropicFilteringSupported)
         cerr << "Warning: anisotropic texture filtering not supported, ignoring change" << endl;
@@ -266,7 +377,7 @@ void Renderer::setAmbientLight(const float r, const float g, const float b, cons
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
 }
 
-void Renderer::updateLights() const {
+void Renderer::updateLegacyLights() const {
     set<Light*>::const_iterator it = m_lights.begin();
     for (size_t i = 0; i < m_lights.size(); ++i) {
         GLenum lightEnum;
@@ -299,6 +410,10 @@ void Renderer::updateLights() const {
         glLightfv(lightEnum, GL_AMBIENT, (*it)->getAmbientPtr());
         glLightfv(lightEnum, GL_DIFFUSE, (*it)->getDiffusePtr());
         glLightfv(lightEnum, GL_SPECULAR, (*it)->getSpecularPtr());
+        if ((*it)->getLightType() != LIGHT_POINTLIGHT) {
+            glLightf(lightEnum, GL_SPOT_EXPONENT, (*it)->getSpotExponent());
+            glLightf(lightEnum, GL_SPOT_CUTOFF, (*it)->getSpotCutoff());
+        }
         ++it;
     }
 }
@@ -457,20 +572,19 @@ void Renderer::uploadTexture(unsigned int& textureId, const Texture& texture) {
     if (m_mipMapGenerationMode != MIPMAP_GENERATION_GLU) {
         switch (m_textureCompressionMode) {
         case TEXTURE_COMPRESSION_NONE:
-        case TEXTURE_COMPRESSION_EXT:
-        case TEXTURE_COMPRESSION:
             glTexImage2D(GL_TEXTURE_2D, 0, texture.getBytesPerPixel(), texture.getWidth(),
                     texture.getHeight(), 0, textureFormat, GL_UNSIGNED_BYTE, texture.getPixels());
             break;
-//             glCompressedTexImage2DARB(GL_TEXTURE_2D, 0, texture.getBytesPerPixel(), texture.getWidth(),
-//                     texture.getHeight(), 0, texture.getWidth() * texture.getHeight(), texture.getPixels());
-//             break;
-
+        case TEXTURE_COMPRESSION_EXT:
+            glCompressedTexImage2DARB(GL_TEXTURE_2D, 0, texture.getBytesPerPixel(), texture.getWidth(),
+                    texture.getHeight(), 0, texture.getWidth() * texture.getHeight(), texture.getPixels());
+            break;
+        case TEXTURE_COMPRESSION:
 //             glCompressedTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA, texture.getWidth(),
 //                     texture.getHeight(), 0, (texture.getWidth() * texture.getHeight()) / 2, texture.getPixels());
-//             glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA, texture.getWidth(),
-//                     texture.getHeight(), 0, textureFormat, GL_UNSIGNED_BYTE, texture.getPixels());
-//             break;
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGB, texture.getWidth(),
+                    texture.getHeight(), 0, textureFormat, GL_UNSIGNED_BYTE, texture.getPixels());
+            break;
         default:
             cerr << "Error: invalid texture_compression_t: " << m_textureCompressionMode << endl;
         }
@@ -479,96 +593,6 @@ void Renderer::uploadTexture(unsigned int& textureId, const Texture& texture) {
 
 void Renderer::deleteTexture(const unsigned int textureId) {
     glDeleteTextures(1, &textureId);
-}
-
-void Renderer::draw() {
-    if (m_activeCamera->hasChanged()) {
-        initCamera();
-        m_activeCamera->setHasChanged(false);
-    }
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLoadIdentity();
-
-    float m[16];
-
-    // set camera
-    const Entity* cam = m_activeCamera->getEntity();
-    Transform(cam->getOrientationAbs(), cam->getPositionAbs()).inverse().getOpenGLMatrix(m);
-    glMultMatrixf(m);
-
-    // set lights
-    displayLegacyLights();
-
-    // frustum culling
-    set<RenderableMesh*> modelsInFrustum;
-    Culling::performFrustumCulling(m_projectionMatrix, m_activeCamera->getEntity(), modelsInFrustum);
-
-    // set meshes
-    set<RenderableMesh*>::const_iterator it;
-    for (it = modelsInFrustum.begin(); it != modelsInFrustum.end(); ++it) {
-        const Model* model = (*it)->getModel();
-        const Entity* entity = (*it)->getEntity();
-
-        glPushMatrix();
-        Transform(entity->getOrientationAbs(), entity->getPositionAbs()).getOpenGLMatrix(m);
-        glMultMatrixf(m);
-        for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
-            const Mesh* mesh = model->getMesh(n);
-            const Material* mtl = mesh->getMaterial();
-
-            // set material
-            glMaterialfv(GL_FRONT, GL_DIFFUSE, mtl->getColor(MATERIAL_COLOR_DIFFUSE).rgb);
-            glMaterialfv(GL_FRONT, GL_SPECULAR, mtl->getColor(MATERIAL_COLOR_SPECULAR).rgb);
-            glMaterialfv(GL_FRONT, GL_AMBIENT, mtl->getColor(MATERIAL_COLOR_AMBIENT).rgb);
-            glMaterialfv(GL_FRONT, GL_EMISSION, mtl->getColor(MATERIAL_COLOR_EMISSIVE).rgb);
-            glMaterialf(GL_FRONT, GL_SHININESS, mtl->getShininess());
-
-            // set textures
-            if (mtl->getTextureMap(MATERIAL_DIFFUSE_MAP) != 0)
-                glBindTexture(GL_TEXTURE_2D, mtl->getTextureMap(MATERIAL_DIFFUSE_MAP)->getId());
-            else
-                glBindTexture(GL_TEXTURE_2D, 0);
-
-            // draw mesh
-            switch (m_dataUploadMode) {
-            case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
-                glBindBuffer(GL_ARRAY_BUFFER, mesh->getMeshId());
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->getIndicesId());
-
-                glVertexPointer(3, GL_FLOAT, 0, 0);
-                glNormalPointer(GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes()));
-                glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes() + mesh->getNormalsBytes()));
-                glDrawElements(GL_TRIANGLES, mesh->getIndicesSize(), GL_UNSIGNED_INT, 0);
-
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-                glBindBuffer(GL_ARRAY_BUFFER, 0);
-                break;
-            case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
-                glBindBufferARB(GL_ARRAY_BUFFER_ARB, mesh->getMeshId());
-                glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mesh->getIndicesId());
-
-                glVertexPointer(3, GL_FLOAT, 0, 0);
-                glNormalPointer(GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes()));
-                glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes() + mesh->getNormalsBytes()));
-                glDrawElements(GL_TRIANGLES, mesh->getIndicesSize(), GL_UNSIGNED_INT, 0);
-
-                glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
-                glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-                break;
-            case DATA_UPLOAD_VERTEX_ARRAY:
-                glVertexPointer(3, GL_FLOAT, 0, mesh->getVerticesPtr());
-                glNormalPointer(GL_FLOAT, 0, mesh->getNormalsPtr());
-                glTexCoordPointer(2, GL_FLOAT, 0, mesh->getUvCoordsPtr());
-                glDrawElements(GL_TRIANGLES, mesh->getIndicesSize(), GL_UNSIGNED_INT, mesh->getIndicesPtr());
-                break;
-            default:
-                cerr << "Error: invalid data_upload_t: " << m_dataUploadMode << endl;
-            }
-        }
-        glPopMatrix();
-    }
-    m_device->swapBuffers();
 }
 
 string Renderer::listsToString() const {
@@ -608,7 +632,8 @@ Renderer::Renderer(const Renderer& rhs):
     m_maxAnisotropy(rhs.m_maxAnisotropy),
     m_anisotropy(rhs.m_anisotropy),
     m_textureFilteringMode(rhs.m_textureFilteringMode),
-    m_textureCompressionMode(rhs.m_textureCompressionMode)
+    m_textureCompressionMode(rhs.m_textureCompressionMode),
+    m_renderingMethod(rhs.m_renderingMethod)
 {
     cerr << "Renderer copy constructor should not be called" << endl;
 }
@@ -762,10 +787,8 @@ void Renderer::displayLegacyLights() const {
         glLightf(lightEnum, GL_QUADRATIC_ATTENUATION, (*itLight)->getQuadraticAttenuation());
         if ((*itLight)->getLightType() != LIGHT_POINTLIGHT) {
             const Vector3& rot = VECTOR3_UNIT_Z_NEG.rotate((*itLight)->getEntity()->getOrientationAbs());
-            float lightOrientation[] = {float(rot.getX()), float(pos.getY()), float(pos.getZ()), 1.0f};
+            float lightOrientation[] = {float(rot.getX()), float(rot.getY()), float(rot.getZ())};
             glLightfv(lightEnum, GL_SPOT_DIRECTION, lightOrientation);
-            glLightf(lightEnum, GL_SPOT_EXPONENT, (*itLight)->getSpotExponent());
-            glLightf(lightEnum, GL_SPOT_CUTOFF, (*itLight)->getSpotCutoff());
         }
         ++itLight;
     }

@@ -80,37 +80,37 @@ void Light::setColors(const Color4& ambient, const Color4& diffuse, const Color4
     m_ambient = ambient;
     m_diffuse = diffuse;
     m_specular = specular;
-    m_renderer->updateLights();
+    m_renderer->updateLegacyLights();
 }
 
 void Light::setAmbient(const Color4& color) {
     m_ambient = color;
-    m_renderer->updateLights();
+    m_renderer->updateLegacyLights();
 }
 
 void Light::setAmbient(const float r, const float g, const float b, const float a) {
     m_ambient.setRGBA(r, g, b, a);
-    m_renderer->updateLights();
+    m_renderer->updateLegacyLights();
 }
 
 void Light::setDiffuse(const Color4& color) {
     m_diffuse = color;
-    m_renderer->updateLights();
+    m_renderer->updateLegacyLights();
 }
 
 void Light::setDiffuse(const float r, const float g, const float b, const float a) {
     m_diffuse.setRGBA(r, g, b, a);
-    m_renderer->updateLights();
+    m_renderer->updateLegacyLights();
 }
 
 void Light::setSpecular(const Color4& color) {
     m_specular = color;
-    m_renderer->updateLights();
+    m_renderer->updateLegacyLights();
 }
 
 void Light::setSpecular(const float r, const float g, const float b, const float a) {
     m_specular.setRGBA(r, g, b, a);
-    m_renderer->updateLights();
+    m_renderer->updateLegacyLights();
 }
 
 void Light::loadFromPtree(const string& path, const ptree& tree) {

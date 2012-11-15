@@ -22,10 +22,11 @@
     </light1>
     <body type="entity" position="0 2 10" orientation="1 0 0 0">
       <renderablemesh type="component" model="$box 1 2 1"/>
-      <rigidbody type="component" collisionshape="#box 1 2 1" mass="10" damping="0 0" friction="0.5" rollingfriction="0" restitution="0" sleepingthresholds="0.8 1" linearfactor="1 1 1" linearvelocity="0 0 0" angularfactor="1 1 1" angularvelocity="0 0 0" gravity="0 -9.8 0"/>
+<!--       <rigidbody type="component" collisionshape="#box 1 2 1" mass="10" damping="0 0" friction="0.5" rollingfriction="0" restitution="0" sleepingthresholds="0.8 1" linearfactor="1 1 1" linearvelocity="0 0 0" angularfactor="1 1 1" angularvelocity="0 0 0" gravity="0 -9.8 0"/> -->
       <camera1 type="entity" position="0 1 -0.75" orientation="1 0 0 0">
         <camera type="component" cameratype="1" perspectivefov="45" orthoheight="10" neardistance="0.1" fardistance="1000"/>
-      </camera1>
+<!--         <light type="component" lighttype="1" ambient="0 0 0 1" diffuse="1 1 1 1" specular="1 1 1 1" spotexponent="7" spotcutoff="40" constantattenuation="1" linearattenuation="0" quadraticattenuation="0.005"/> -->
+    </camera1>
     </body>
     <test type="entity" position="0 8 -3" orientation="1 0 0 0">
       <renderablemesh type="component" model="$box 3 3 3"/>

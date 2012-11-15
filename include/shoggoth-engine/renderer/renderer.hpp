@@ -64,6 +64,10 @@ typedef enum {
     TEXTURE_COMPRESSION // 1.3
 } texture_compression_t;
 
+typedef enum {
+    RENDERING_METHOD_FIXED_PIPELINE, // 1.0
+    RENDERING_METHOD_SHADERS // 2.0
+} rendering_method_t;
 
 class Renderer: public CommandObject {
 public:
@@ -80,6 +84,7 @@ public:
     void setTextureFilteringMode(const texture_filtering_t& textureFiltering);
     void setAnisotropy(const float anisotropy);
 
+    void draw();
     void registerCamera(Camera* camera);
     void unregisterCamera(Camera* camera);
     void registerLight(Light* light);
@@ -87,12 +92,12 @@ public:
     void registerRenderableMesh(RenderableMesh* model);
     void unregisterRenderableMesh(RenderableMesh* model);
     void setAmbientLight(const float r, const float g, const float b, const float a = 1.0f);
-    void updateLights() const;
+
+    void updateLegacyLights() const;
     void uploadModel(unsigned int& meshId, unsigned int& indicesId, const Mesh& mesh);
     void deleteModel(const unsigned int meshId, const unsigned int indicesId);
     void uploadTexture(unsigned int& textureId, const Texture& texture);
     void deleteTexture(const unsigned int textureId);
-    void draw();
     std::string listsToString() const;
 
 private:
@@ -109,6 +114,7 @@ private:
     float m_anisotropy;
     texture_filtering_t m_textureFilteringMode;
     texture_compression_t m_textureCompressionMode;
+    rendering_method_t m_renderingMethod;
 
     Renderer(const Renderer& rhs);
     Renderer& operator=(const Renderer& rhs);

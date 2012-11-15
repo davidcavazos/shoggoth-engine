@@ -30,7 +30,7 @@ Wiki:
 Add frustum culling
 Describe all commands https://github.com/davido262/shoggoth-engine/wiki/List-of-Commands
 Complete installation guides https://github.com/davido262/shoggoth-engine/wiki/Installation
-Describe general information (vectors format X Y Z and quaternions format W X Y Z)
+Describe general information (opengl screen coordinates, vectors format X Y Z and quaternions format W X Y Z)
 Mipmap generation
 Texture filtering (nearest, linear and anisotropic)
 Texture compression (when fixed)
