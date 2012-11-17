@@ -137,9 +137,7 @@ inline Matrix3x3::Matrix3x3(const btMatrix3x3& m) {
 
 
 inline Matrix3x3& Matrix3x3::operator=(const Matrix3x3& m) {
-    m_rows[0] = m.m_rows[0];
-    m_rows[1] = m.m_rows[1];
-    m_rows[2] = m.m_rows[2];
+    setValue(m);
     return *this;
 }
 
@@ -288,7 +286,9 @@ inline void Matrix3x3::setRow(const int i, const Vector3& v) {
 }
 
 inline void Matrix3x3::setValue(const Matrix3x3& m) {
-    *this = m;
+    setRow(0, m.getRow(0));
+    setRow(1, m.getRow(1));
+    setRow(2, m.getRow(2));
 }
 
 inline void Matrix3x3::setValue(const scalar_t& xx, const scalar_t& xy, const scalar_t& xz,

@@ -143,7 +143,6 @@ void Demo::runMainLoop() {
 
         startTime = SDL_GetTicks();
         m_renderer.draw();
-        m_device.swapBuffers();
         deltaTime = SDL_GetTicks() - startTime;
         ss << "GPU:" << setw(3) << deltaTime << " ms (16-40 ideal) - ";
 

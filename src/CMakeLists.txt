@@ -1,4 +1,3 @@
-set(LIBRARY_NAME shoggoth-engine)
 set(EXE_NAME shoggoth-demo)
 
 # Target
@@ -15,6 +14,6 @@ add_executable(${EXE_NAME} ${DEMO_SRC_FILES})
 find_package(SDL REQUIRED)
 
 include_directories(${SDL_INCLUDE_DIR})
-target_link_libraries(${EXE_NAME} ${LIBRARY_NAME})
+target_link_libraries(${EXE_NAME} shoggoth-engine)
 
 add_subdirectory(shoggoth-engine)

@@ -47,7 +47,7 @@ public:
     void shutdown();
     void onFrameStart();
     void onFrameEnd();
-    void swapBuffers();
+    void swapBuffers() const;
     size_t videoMemKB();
     void setTitle(const std::string& title);
     void setFullscreen(const bool useFullscreen = true);

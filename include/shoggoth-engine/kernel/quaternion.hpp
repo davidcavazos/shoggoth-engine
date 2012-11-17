@@ -112,7 +112,7 @@ inline Quaternion::Quaternion() {
 }
 
 inline Quaternion::Quaternion(const Quaternion& q) {
-    setValue(q.getW(), q.getX(), q.getY(), q.getZ());
+    setValue(q);
 }
 
 inline Quaternion::Quaternion(const scalar_t& w, const scalar_t& x, const scalar_t& y, const scalar_t& z) {
@@ -134,10 +134,7 @@ inline Quaternion::Quaternion(const btQuaternion& q) {
 
 
 inline Quaternion& Quaternion::operator=(const Quaternion& q) {
-    m_data[0] += q.m_data[0];
-    m_data[1] += q.m_data[1];
-    m_data[2] += q.m_data[2];
-    m_data[3] += q.m_data[3];
+    setValue(q);
     return *this;
 }
 
@@ -269,7 +266,7 @@ inline void Quaternion::setValue(const scalar_t& w, const scalar_t& x, const sca
 }
 
 inline void Quaternion::setValue(const Quaternion& q) {
-    *this = q;
+    setValue(q.getW(), q.getX(), q.getY(), q.getZ());
 }
 
 inline void Quaternion::setAxisAngle(const Vector3& axis, const scalar_t& angle) {

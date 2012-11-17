@@ -121,7 +121,7 @@ void Device::onFrameEnd() {
     m_fps = 1.0 / m_deltaTime;
 }
 
-void Device::swapBuffers() {
+void Device::swapBuffers() const {
     SDL_GL_SwapBuffers();
 }
 

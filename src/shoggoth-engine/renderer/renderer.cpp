@@ -427,7 +427,7 @@ void Renderer::draw() {
 
     // set camera
     const Entity* cam = m_activeCamera->getEntity();
-    Transform(cam->getOrientationAbs(), cam->getPositionAbs()).inverse().getOpenGLMatrix(m);
+    trans(cam->getOrientationAbs(), cam->getPositionAbs()).inverse().getOpenGLMatrix(m);
     glMultMatrixf(m);
 
     // set lights
@@ -444,7 +444,7 @@ void Renderer::draw() {
         const Entity* entity = (*it)->getEntity();
 
         glPushMatrix();
-        Transform(entity->getOrientationAbs(), entity->getPositionAbs()).getOpenGLMatrix(m);
+        trans(entity->getOrientationAbs(), entity->getPositionAbs()).getOpenGLMatrix(m);
         glMultMatrixf(m);
         for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
             const Mesh* mesh = model->getMesh(n);
@@ -501,6 +501,7 @@ void Renderer::draw() {
         }
         glPopMatrix();
     }
+    m_device->swapBuffers();
 }
 
 string Renderer::listsToString() const {

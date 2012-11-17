@@ -123,7 +123,7 @@ inline Vector3::Vector3() {
 }
 
 inline Vector3::Vector3(const Vector3& v) {
-    setValue(v.getX(), v.getY(), v.getZ());
+    setValue(v);
 }
 
 inline Vector3::Vector3(const scalar_t& x, const scalar_t& y, const scalar_t& z) {
@@ -141,9 +141,7 @@ inline Vector3::Vector3(const btVector3& v) {
 
 
 inline Vector3& Vector3::operator=(const Vector3& v) {
-    m_data[0] = v.m_data[0];
-    m_data[1] = v.m_data[1];
-    m_data[2] = v.m_data[2];
+    setValue(v);
     return *this;
 }
 
@@ -280,7 +278,7 @@ inline void Vector3::setValue(const scalar_t& x, const scalar_t& y, const scalar
 }
 
 inline void Vector3::setValue(const Vector3& v) {
-    *this = v;
+    setValue(v.getX(), v.getY(), v.getZ());
 }
 
 inline void Vector3::setValue(const scalar_t& num) {

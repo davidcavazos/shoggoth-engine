@@ -1,3 +1,4 @@
+set(LIBRARY_NAME shoggoth-engine)
 
 set(ENGINE_SRC_FILES
     kernel/tokentable.cpp
@@ -60,5 +61,5 @@ target_link_libraries(${LIBRARY_NAME}
     ${ASSIMP_LIBRARIES}
 )
 
-# install libraries
+# install library
 install(TARGETS ${LIBRARY_NAME} DESTINATION ${INSTALL_DIR_LIBRARIES})

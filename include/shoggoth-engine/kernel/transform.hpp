@@ -120,8 +120,7 @@ inline Transform::Transform(const btTransform& t):
 
 
 inline Transform& Transform::operator=(const Transform& t) {
-    m_rotation = t.m_rotation;
-    m_position = t.m_position;
+    setValue(t);
     return *this;
 }
 
@@ -176,7 +175,8 @@ inline void Transform::getOpenGLMatrix(float* openGL) const {
 }
 
 inline void Transform::setValue(const Transform& t) {
-    *this = t;
+    setRotation(t.getRotation());
+    setPosition(t.getPosition());
 }
 
 inline void Transform::setValue(const Matrix3x3& m, const Vector3& v) {
