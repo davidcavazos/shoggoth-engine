@@ -28,7 +28,6 @@
 #define MATRIX3X3_HPP
 
 #include <bullet/LinearMath/btMatrix3x3.h>
-#include "shoggoth-engine/common/common.hpp"
 #include "vector3.hpp"
 #include "quaternion.hpp"
 

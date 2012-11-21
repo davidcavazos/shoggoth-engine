@@ -39,7 +39,7 @@ const size_t DEFAULT_SCREEN_HEIGHT = 480;
 const size_t DEFAULT_SCREEN_DEPTH = 32;
 
 const Uint32 SDL_INIT_FLAGS = SDL_INIT_VIDEO;// | SDL_INIT_JOYSTICK;
-const Uint32 SDL_VIDEO_FLAGS = SDL_HWSURFACE | SDL_ANYFORMAT | SDL_OPENGL;
+const Uint32 SDL_VIDEO_FLAGS = SDL_HWSURFACE | SDL_ANYFORMAT | SDL_OPENGL | SDL_DOUBLEBUF;
 
 Inputs Device::ms_inputs = Inputs();
 SDL_Surface* Device::ms_screen = 0;

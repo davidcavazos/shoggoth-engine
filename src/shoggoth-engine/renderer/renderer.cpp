@@ -120,48 +120,48 @@ void Renderer::initialize() {
     // version techniques
     int openGLVersionInt = floor(openGLVersion * 10.0 + 0.5);
     switch (openGLVersionInt) {
-        case 43: // 4.3
-        case 42: // 4.2
-        case 41: // 4.1
-        case 40: // 4.0
-        case 33: // 3.3
-        case 32: // 3.2
-        case 31: // 3.1
-        case 30: // 3.0
-        case 21: // 2.1
-        case 20: // 2.0
-            m_textureCompressionMode = TEXTURE_COMPRESSION;
-            m_dataUploadMode = DATA_UPLOAD_VERTEX_BUFFER_OBJECT;
-            m_mipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER;
-            m_renderingMethod = RENDERING_METHOD_SHADERS;
-            break;
-        case 15: // 1.5
-            m_textureCompressionMode = TEXTURE_COMPRESSION;
-            m_dataUploadMode = DATA_UPLOAD_VERTEX_BUFFER_OBJECT;
-            m_mipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER;
-            m_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
-            break;
-        case 14: // 1.4
-            m_textureCompressionMode = TEXTURE_COMPRESSION;
-            m_dataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
-            m_mipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER;
-            m_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
-            break;
-        case 13: // 1.3
-            m_textureCompressionMode = TEXTURE_COMPRESSION;
-            m_dataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
-            m_mipMapGenerationMode = MIPMAP_GENERATION_GLU;
-            m_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
-            break;
-        case 12: // 1.2
-        case 11: // 1.1
-            m_textureCompressionMode = TEXTURE_COMPRESSION_NONE;
-            m_dataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
-            m_mipMapGenerationMode = MIPMAP_GENERATION_GLU;
-            m_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
-            break;
-        default:
-            cerr << "Error: unsupported OpenGL version: " << openGLVersion << endl;
+    case 43: // 4.3
+    case 42: // 4.2
+    case 41: // 4.1
+    case 40: // 4.0
+    case 33: // 3.3
+    case 32: // 3.2
+    case 31: // 3.1
+    case 30: // 3.0
+    case 21: // 2.1
+    case 20: // 2.0
+        m_textureCompressionMode = TEXTURE_COMPRESSION;
+        m_dataUploadMode = DATA_UPLOAD_VERTEX_BUFFER_OBJECT;
+        m_mipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER;
+        m_renderingMethod = RENDERING_METHOD_SHADERS;
+        break;
+    case 15: // 1.5
+        m_textureCompressionMode = TEXTURE_COMPRESSION;
+        m_dataUploadMode = DATA_UPLOAD_VERTEX_BUFFER_OBJECT;
+        m_mipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER;
+        m_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
+        break;
+    case 14: // 1.4
+        m_textureCompressionMode = TEXTURE_COMPRESSION;
+        m_dataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
+        m_mipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER;
+        m_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
+        break;
+    case 13: // 1.3
+        m_textureCompressionMode = TEXTURE_COMPRESSION;
+        m_dataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
+        m_mipMapGenerationMode = MIPMAP_GENERATION_GLU;
+        m_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
+        break;
+    case 12: // 1.2
+    case 11: // 1.1
+        m_textureCompressionMode = TEXTURE_COMPRESSION_NONE;
+        m_dataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
+        m_mipMapGenerationMode = MIPMAP_GENERATION_GLU;
+        m_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
+        break;
+    default:
+        cerr << "Error: unsupported OpenGL version: " << openGLVersion << endl;
     }
 
     // extension techniques
@@ -169,6 +169,7 @@ void Renderer::initialize() {
     cout << "Extensions: " << integer << endl;
     if (glewInit() != GLEW_OK)
         cerr << "Error: failed to initialize GLEW" << endl;
+
     if (m_dataUploadMode == DATA_UPLOAD_VERTEX_ARRAY &&
         glewIsSupported("GL_ARB_vertex_buffer_object"))
         m_dataUploadMode = DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT;
@@ -325,40 +326,40 @@ void Renderer::draw() {
                 glBindTexture(GL_TEXTURE_2D, 0);
 
             // draw mesh
-                switch (m_dataUploadMode) {
-                    case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
-                        glBindBuffer(GL_ARRAY_BUFFER, mesh->getMeshId());
-                        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->getIndicesId());
+            switch (m_dataUploadMode) {
+            case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
+                glBindBuffer(GL_ARRAY_BUFFER, mesh->getMeshId());
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->getIndicesId());
 
-                        glVertexPointer(3, GL_FLOAT, 0, 0);
-                        glNormalPointer(GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes()));
-                        glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes() + mesh->getNormalsBytes()));
-                        glDrawElements(GL_TRIANGLES, mesh->getIndicesSize(), GL_UNSIGNED_INT, 0);
+                glVertexPointer(3, GL_FLOAT, 0, 0);
+                glNormalPointer(GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes()));
+                glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes() + mesh->getNormalsBytes()));
+                glDrawElements(GL_TRIANGLES, mesh->getIndicesSize(), GL_UNSIGNED_INT, 0);
 
-                        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-                        glBindBuffer(GL_ARRAY_BUFFER, 0);
-                        break;
-                    case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
-                        glBindBufferARB(GL_ARRAY_BUFFER_ARB, mesh->getMeshId());
-                        glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mesh->getIndicesId());
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+                glBindBuffer(GL_ARRAY_BUFFER, 0);
+                break;
+            case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
+                glBindBufferARB(GL_ARRAY_BUFFER_ARB, mesh->getMeshId());
+                glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mesh->getIndicesId());
 
-                        glVertexPointer(3, GL_FLOAT, 0, 0);
-                        glNormalPointer(GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes()));
-                        glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes() + mesh->getNormalsBytes()));
-                        glDrawElements(GL_TRIANGLES, mesh->getIndicesSize(), GL_UNSIGNED_INT, 0);
+                glVertexPointer(3, GL_FLOAT, 0, 0);
+                glNormalPointer(GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes()));
+                glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes() + mesh->getNormalsBytes()));
+                glDrawElements(GL_TRIANGLES, mesh->getIndicesSize(), GL_UNSIGNED_INT, 0);
 
-                        glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
-                        glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-                        break;
-                    case DATA_UPLOAD_VERTEX_ARRAY:
-                        glVertexPointer(3, GL_FLOAT, 0, mesh->getVerticesPtr());
-                        glNormalPointer(GL_FLOAT, 0, mesh->getNormalsPtr());
-                        glTexCoordPointer(2, GL_FLOAT, 0, mesh->getUvCoordsPtr());
-                        glDrawElements(GL_TRIANGLES, mesh->getIndicesSize(), GL_UNSIGNED_INT, mesh->getIndicesPtr());
-                        break;
-                    default:
-                        cerr << "Error: invalid data_upload_t: " << m_dataUploadMode << endl;
-                }
+                glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+                glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+                break;
+            case DATA_UPLOAD_VERTEX_ARRAY:
+                glVertexPointer(3, GL_FLOAT, 0, mesh->getVerticesPtr());
+                glNormalPointer(GL_FLOAT, 0, mesh->getNormalsPtr());
+                glTexCoordPointer(2, GL_FLOAT, 0, mesh->getUvCoordsPtr());
+                glDrawElements(GL_TRIANGLES, mesh->getIndicesSize(), GL_UNSIGNED_INT, mesh->getIndicesPtr());
+                break;
+            default:
+                cerr << "Error: invalid data_upload_t: " << m_dataUploadMode << endl;
+            }
         }
         glPopMatrix();
     }
@@ -382,30 +383,30 @@ void Renderer::updateLegacyLights() const {
     for (size_t i = 0; i < m_lights.size(); ++i) {
         GLenum lightEnum;
         switch (i) {
-            case 0:
-                lightEnum = GL_LIGHT0;
-                break;
-            case 1:
-                lightEnum = GL_LIGHT1;
-                break;
-            case 2:
-                lightEnum = GL_LIGHT2;
-                break;
-            case 3:
-                lightEnum = GL_LIGHT3;
-                break;
-            case 4:
-                lightEnum = GL_LIGHT4;
-                break;
-            case 5:
-                lightEnum = GL_LIGHT5;
-                break;
-            case 6:
-                lightEnum = GL_LIGHT6;
-                break;
-            case 7: default:
-                lightEnum = GL_LIGHT7;
-                break;
+        case 0:
+            lightEnum = GL_LIGHT0;
+            break;
+        case 1:
+            lightEnum = GL_LIGHT1;
+            break;
+        case 2:
+            lightEnum = GL_LIGHT2;
+            break;
+        case 3:
+            lightEnum = GL_LIGHT3;
+            break;
+        case 4:
+            lightEnum = GL_LIGHT4;
+            break;
+        case 5:
+            lightEnum = GL_LIGHT5;
+            break;
+        case 6:
+            lightEnum = GL_LIGHT6;
+            break;
+        case 7: default:
+            lightEnum = GL_LIGHT7;
+            break;
         }
         glLightfv(lightEnum, GL_AMBIENT, (*it)->getAmbientPtr());
         glLightfv(lightEnum, GL_DIFFUSE, (*it)->getDiffusePtr());
@@ -425,93 +426,93 @@ void Renderer::uploadModel(unsigned int& meshId, unsigned int& indicesId, const 
     size_t uvCoordsBytes = mesh.getUvCoordsBytes();
     size_t indicesBytes = mesh.getIndicesBytes();
     switch (m_dataUploadMode) {
-        case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
-            glGenBuffers(1, &meshId);
-            glBindBuffer(GL_ARRAY_BUFFER, meshId);
-            glBufferData(GL_ARRAY_BUFFER,
-                         verticesBytes + normalsBytes + uvCoordsBytes,
-                         0,
-                         GL_STATIC_DRAW);
-            glBufferSubData(GL_ARRAY_BUFFER,
+    case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
+        glGenBuffers(1, &meshId);
+        glBindBuffer(GL_ARRAY_BUFFER, meshId);
+        glBufferData(GL_ARRAY_BUFFER,
+                        verticesBytes + normalsBytes + uvCoordsBytes,
+                        0,
+                        GL_STATIC_DRAW);
+        glBufferSubData(GL_ARRAY_BUFFER,
+                        0,
+                        verticesBytes,
+                        mesh.getVerticesPtr());
+        glBufferSubData(GL_ARRAY_BUFFER,
+                        verticesBytes,
+                        normalsBytes,
+                        mesh.getNormalsPtr());
+        glBufferSubData(GL_ARRAY_BUFFER,
+                        verticesBytes + normalsBytes,
+                        uvCoordsBytes,
+                        mesh.getUvCoordsPtr());
+        glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+        if(verticesBytes + normalsBytes + uvCoordsBytes != (size_t)bufferSize)
+            cerr << "Error: data size is mismatch with input array" << endl;
+
+        glGenBuffers(1, &indicesId);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesId);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                        indicesBytes,
+                        mesh.getIndicesPtr(),
+                        GL_STATIC_DRAW);
+        glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+        if(indicesBytes != (size_t)bufferSize)
+            cerr << "Error: data size is mismatch with input array" << endl;
+        break;
+    case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
+        glGenBuffersARB(1, &meshId);
+        glBindBufferARB(GL_ARRAY_BUFFER_ARB, meshId);
+        glBufferDataARB(GL_ARRAY_BUFFER_ARB,
+                        verticesBytes + normalsBytes + uvCoordsBytes,
+                        0,
+                        GL_STATIC_DRAW_ARB);
+        glBufferSubDataARB(GL_ARRAY_BUFFER_ARB,
                             0,
                             verticesBytes,
                             mesh.getVerticesPtr());
-            glBufferSubData(GL_ARRAY_BUFFER,
+        glBufferSubDataARB(GL_ARRAY_BUFFER_ARB,
                             verticesBytes,
                             normalsBytes,
                             mesh.getNormalsPtr());
-            glBufferSubData(GL_ARRAY_BUFFER,
+        glBufferSubDataARB(GL_ARRAY_BUFFER_ARB,
                             verticesBytes + normalsBytes,
                             uvCoordsBytes,
                             mesh.getUvCoordsPtr());
-            glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-            if(verticesBytes + normalsBytes + uvCoordsBytes != (size_t)bufferSize)
-                cerr << "Error: data size is mismatch with input array" << endl;
+        glGetBufferParameterivARB(GL_ARRAY_BUFFER_ARB, GL_BUFFER_SIZE_ARB, &bufferSize);
+        if(verticesBytes + normalsBytes + uvCoordsBytes != (size_t)bufferSize)
+            cerr << "Error: data size is mismatch with input array" << endl;
 
-            glGenBuffers(1, &indicesId);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesId);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                         indicesBytes,
-                         mesh.getIndicesPtr(),
-                         GL_STATIC_DRAW);
-            glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-            if(indicesBytes != (size_t)bufferSize)
-                cerr << "Error: data size is mismatch with input array" << endl;
-            break;
-        case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
-            glGenBuffersARB(1, &meshId);
-            glBindBufferARB(GL_ARRAY_BUFFER_ARB, meshId);
-            glBufferDataARB(GL_ARRAY_BUFFER_ARB,
-                            verticesBytes + normalsBytes + uvCoordsBytes,
-                            0,
-                            GL_STATIC_DRAW_ARB);
-            glBufferSubDataARB(GL_ARRAY_BUFFER_ARB,
-                               0,
-                               verticesBytes,
-                               mesh.getVerticesPtr());
-            glBufferSubDataARB(GL_ARRAY_BUFFER_ARB,
-                               verticesBytes,
-                               normalsBytes,
-                               mesh.getNormalsPtr());
-            glBufferSubDataARB(GL_ARRAY_BUFFER_ARB,
-                               verticesBytes + normalsBytes,
-                               uvCoordsBytes,
-                               mesh.getUvCoordsPtr());
-            glGetBufferParameterivARB(GL_ARRAY_BUFFER_ARB, GL_BUFFER_SIZE_ARB, &bufferSize);
-            if(verticesBytes + normalsBytes + uvCoordsBytes != (size_t)bufferSize)
-                cerr << "Error: data size is mismatch with input array" << endl;
-
-            glGenBuffersARB(1, &indicesId);
-            glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, indicesId);
-            glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB,
-                            indicesBytes,
-                            mesh.getIndicesPtr(),
-                            GL_STATIC_DRAW_ARB);
-            glGetBufferParameterivARB(GL_ELEMENT_ARRAY_BUFFER_ARB, GL_BUFFER_SIZE_ARB, &bufferSize);
-            if(indicesBytes != (size_t)bufferSize)
-                cerr << "Error: data size is mismatch with input array" << endl;
-            break;
-        case DATA_UPLOAD_VERTEX_ARRAY:
-            break;
-        default:
-            cerr << "Error: invalid data_upload_t: " << m_dataUploadMode << endl;
+        glGenBuffersARB(1, &indicesId);
+        glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, indicesId);
+        glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB,
+                        indicesBytes,
+                        mesh.getIndicesPtr(),
+                        GL_STATIC_DRAW_ARB);
+        glGetBufferParameterivARB(GL_ELEMENT_ARRAY_BUFFER_ARB, GL_BUFFER_SIZE_ARB, &bufferSize);
+        if(indicesBytes != (size_t)bufferSize)
+            cerr << "Error: data size is mismatch with input array" << endl;
+        break;
+    case DATA_UPLOAD_VERTEX_ARRAY:
+        break;
+    default:
+        cerr << "Error: invalid data_upload_t: " << m_dataUploadMode << endl;
     }
 }
 
 void Renderer::deleteModel(const unsigned int meshId, const unsigned int indicesId) {
     switch (m_dataUploadMode) {
-        case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
-            glDeleteBuffers(1, &meshId);
-            glDeleteBuffers(1, &indicesId);
-            break;
-        case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
-            glDeleteBuffersARB(1, &meshId);
-            glDeleteBuffersARB(1, &indicesId);
-            break;
-        case DATA_UPLOAD_VERTEX_ARRAY:
-            break;
-        default:
-            cerr << "Error: invalid data_upload_t: " << m_dataUploadMode << endl;
+    case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
+        glDeleteBuffers(1, &meshId);
+        glDeleteBuffers(1, &indicesId);
+        break;
+    case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
+        glDeleteBuffersARB(1, &meshId);
+        glDeleteBuffersARB(1, &indicesId);
+        break;
+    case DATA_UPLOAD_VERTEX_ARRAY:
+        break;
+    default:
+        cerr << "Error: invalid data_upload_t: " << m_dataUploadMode << endl;
     }
 }
 
@@ -653,30 +654,30 @@ void Renderer::initLighting() const {
     for (size_t i = 0; i < m_lights.size(); ++i) {
         GLenum lightEnum;
         switch (i) {
-            case 0:
-                lightEnum = GL_LIGHT0;
-                break;
-            case 1:
-                lightEnum = GL_LIGHT1;
-                break;
-            case 2:
-                lightEnum = GL_LIGHT2;
-                break;
-            case 3:
-                lightEnum = GL_LIGHT3;
-                break;
-            case 4:
-                lightEnum = GL_LIGHT4;
-                break;
-            case 5:
-                lightEnum = GL_LIGHT5;
-                break;
-            case 6:
-                lightEnum = GL_LIGHT6;
-                break;
-            case 7: default:
-                lightEnum = GL_LIGHT7;
-                break;
+        case 0:
+            lightEnum = GL_LIGHT0;
+            break;
+        case 1:
+            lightEnum = GL_LIGHT1;
+            break;
+        case 2:
+            lightEnum = GL_LIGHT2;
+            break;
+        case 3:
+            lightEnum = GL_LIGHT3;
+            break;
+        case 4:
+            lightEnum = GL_LIGHT4;
+            break;
+        case 5:
+            lightEnum = GL_LIGHT5;
+            break;
+        case 6:
+            lightEnum = GL_LIGHT6;
+            break;
+        case 7: default:
+            lightEnum = GL_LIGHT7;
+            break;
         }
         glEnable(lightEnum);
         glLightfv(lightEnum, GL_AMBIENT, (*it)->getAmbientPtr());
@@ -688,30 +689,30 @@ void Renderer::initLighting() const {
     for (size_t i = m_lights.size(); i < 8; ++i) {
         GLenum lightEnum;
         switch (i) {
-            case 0:
-                lightEnum = GL_LIGHT0;
-                break;
-            case 1:
-                lightEnum = GL_LIGHT1;
-                break;
-            case 2:
-                lightEnum = GL_LIGHT2;
-                break;
-            case 3:
-                lightEnum = GL_LIGHT3;
-                break;
-            case 4:
-                lightEnum = GL_LIGHT4;
-                break;
-            case 5:
-                lightEnum = GL_LIGHT5;
-                break;
-            case 6:
-                lightEnum = GL_LIGHT6;
-                break;
-            case 7: default:
-                lightEnum = GL_LIGHT7;
-                break;
+        case 0:
+            lightEnum = GL_LIGHT0;
+            break;
+        case 1:
+            lightEnum = GL_LIGHT1;
+            break;
+        case 2:
+            lightEnum = GL_LIGHT2;
+            break;
+        case 3:
+            lightEnum = GL_LIGHT3;
+            break;
+        case 4:
+            lightEnum = GL_LIGHT4;
+            break;
+        case 5:
+            lightEnum = GL_LIGHT5;
+            break;
+        case 6:
+            lightEnum = GL_LIGHT6;
+            break;
+        case 7: default:
+            lightEnum = GL_LIGHT7;
+            break;
         }
         glDisable(lightEnum);
     }
@@ -753,30 +754,30 @@ void Renderer::displayLegacyLights() const {
     for (size_t i = 0; i < m_lights.size(); ++i) {
         GLenum lightEnum;
         switch (i) {
-            case 0:
-                lightEnum = GL_LIGHT0;
-                break;
-            case 1:
-                lightEnum = GL_LIGHT1;
-                break;
-            case 2:
-                lightEnum = GL_LIGHT2;
-                break;
-            case 3:
-                lightEnum = GL_LIGHT3;
-                break;
-            case 4:
-                lightEnum = GL_LIGHT4;
-                break;
-            case 5:
-                lightEnum = GL_LIGHT5;
-                break;
-            case 6:
-                lightEnum = GL_LIGHT6;
-                break;
-            case 7: default:
-                lightEnum = GL_LIGHT7;
-                break;
+        case 0:
+            lightEnum = GL_LIGHT0;
+            break;
+        case 1:
+            lightEnum = GL_LIGHT1;
+            break;
+        case 2:
+            lightEnum = GL_LIGHT2;
+            break;
+        case 3:
+            lightEnum = GL_LIGHT3;
+            break;
+        case 4:
+            lightEnum = GL_LIGHT4;
+            break;
+        case 5:
+            lightEnum = GL_LIGHT5;
+            break;
+        case 6:
+            lightEnum = GL_LIGHT6;
+            break;
+        case 7: default:
+            lightEnum = GL_LIGHT7;
+            break;
         }
         float w = ((*itLight)->getLightType() == LIGHT_DIRECTIONAL)? 0.0f : 1.0f;
         const Vector3& pos = (*itLight)->getEntity()->getPositionAbs();

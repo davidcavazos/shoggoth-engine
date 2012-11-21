@@ -27,16 +27,31 @@
 #ifndef SCALAR_HPP
 #define SCALAR_HPP
 
-#include <iostream>
+#include <cmath>
 #include <cfloat>
+#include <boost/math/constants/constants.hpp>
 
 typedef double scalar_t;
 
-// const scalar_t EPSILON = FLT_EPSILON;
+const double PI = boost::math::constants::pi<double>();
+const double HALF_PI = PI / 2.0;
+const double DEG_TO_RAD_MULT = PI / 180.0;
+const double RAD_TO_DEG_MULT = 180.0 / PI;
+
 const scalar_t EPSILON = DBL_EPSILON;
 const scalar_t ZERO = static_cast<scalar_t>(0.0);
 const scalar_t ONE = static_cast<scalar_t>(1.0);
 const scalar_t HALF = static_cast<scalar_t>(0.5);
 const scalar_t TWO = static_cast<scalar_t>(2.0);
+
+
+
+double degToRad(const double deg) {
+    return deg * DEG_TO_RAD_MULT;
+}
+
+double radToDeg(const double rad) {
+    return rad * RAD_TO_DEG_MULT;
+}
 
 #endif // SCALAR_HPP
