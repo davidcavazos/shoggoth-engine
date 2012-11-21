@@ -90,4 +90,6 @@ mark_as_advanced(ASSIMP_LIBRARY_DEBUG ASSIMP_LIBRARY_RELEASE ASSIMP_INCLUDE_DIR)
 
 if (ASSIMP_FOUND)
     message(STATUS "Found ASSIMP: ${ASSIMP_LIBRARY}")
+else()
+    message(STATUS "ASSIMP not found!")
 endif(ASSIMP_FOUND)
