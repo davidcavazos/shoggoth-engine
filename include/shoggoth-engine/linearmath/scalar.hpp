@@ -46,11 +46,11 @@ const scalar_t TWO = static_cast<scalar_t>(2.0);
 
 
 
-double degToRad(const double deg) {
+inline double degToRad(const double deg) {
     return deg * DEG_TO_RAD_MULT;
 }
 
-double radToDeg(const double rad) {
+inline double radToDeg(const double rad) {
     return rad * RAD_TO_DEG_MULT;
 }
 
