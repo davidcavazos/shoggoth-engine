@@ -60,12 +60,19 @@ FIND_LIBRARY(ASSIMP_LIBRARY_RELEASE
         NAMES assimp
         PATHS
         $ENV{ASSIMPSDIR}/lib
+        $ENV{ASSIMPSDIR}/lib64
         /usr/local/lib
+        /usr/local/lib64
         /usr/lib
+        /usr/lib64
         /sw/lib
+        /sw/lib64
         /opt/local/lib
+        /opt/local/lib64
         /opt/csw/lib
+        /opt/csw/lib64
         /opt/lib
+        /opt/lib64
         ${_assimp_LIB_SEARCH_DIRS_SYSTEM}
         )
 
