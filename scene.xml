@@ -26,7 +26,7 @@
       <camera1 type="entity" position="0 1 -0.75" orientation="1 0 0 0">
         <camera type="component" cameratype="1" perspectivefov="45" orthoheight="10" neardistance="0.1" fardistance="1000"/>
 <!--         <light type="component" lighttype="1" ambient="0 0 0 1" diffuse="1 1 1 1" specular="1 1 1 1" spotexponent="7" spotcutoff="40" constantattenuation="1" linearattenuation="0" quadraticattenuation="0.005"/> -->
-    </camera1>
+      </camera1>
     </body>
     <test type="entity" position="0 8 -3" orientation="1 0 0 0">
       <renderablemesh type="component" model="$box 3 3 3"/>
