@@ -41,6 +41,9 @@
 
 using namespace std;
 
+const unsigned int FRAMERATE_LIMIT = 60;
+const unsigned int MILLISECONDS_LIMIT = 1000 / FRAMERATE_LIMIT;
+
 const double FIRE_SPEED = 50.0;
 const double MISSILE_SIZE = 0.5;
 
@@ -77,9 +80,6 @@ Demo::~Demo() {
 }
 
 void Demo::loadScene() {
-    cout << "Loading scene..." << endl;
-    m_scene.loadFromXML("scene.xml");
-
 //     // model            faces (triangles)
 //     // icosphere1              20
 //     // icosphere2              80
@@ -91,6 +91,9 @@ void Demo::loadScene() {
 //     // icosphere8         327,680
 //     // icosphere9       1,310,720
 //     // icosphere10      5,242,880
+
+    cout << "Loading scene..." << endl;
+    m_scene.loadFromXML("scene.xml");
 }
 
 void Demo::bindInputs() {
@@ -133,19 +136,28 @@ void Demo::runMainLoop() {
         startTime = SDL_GetTicks();
         m_device.onFrameStart();
 
+        // update
         m_physicsWorld.stepSimulation(0.001 * SDL_GetTicks());
         m_device.processEvents(m_isRunning);
         cout << Terminal::processCommandsQueue();
 
+        // measure CPU load
         stringstream ss;
         deltaTime = SDL_GetTicks() - startTime;
         ss << "Shoggoth Engine Demo - CPU:" << setw(3) << deltaTime << " ms - ";
 
+        // draw and measure GPU load
         startTime = SDL_GetTicks();
         m_renderer.draw();
         deltaTime = SDL_GetTicks() - startTime;
         ss << "GPU:" << setw(3) << deltaTime << " ms (16-40 ideal) - ";
 
+        // framerate cap
+        deltaTime = SDL_GetTicks() - startTime;
+        if (MILLISECONDS_LIMIT > deltaTime)
+            SDL_Delay(MILLISECONDS_LIMIT - deltaTime);
+
+        // show framerate
         m_device.onFrameEnd();
         ss << setw(5) << fixed << setprecision(1) << m_device.getFps() << " fps";
         m_device.setTitle(ss.str());
