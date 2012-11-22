@@ -30,6 +30,7 @@
 
 const std::string XML_SCENE = "scene";
 const std::string XML_DELIMITER = "/";
+const std::string XML_COMMENT = "<xmlcomment>";
 const std::string XML_ATTRIBUTE = "<xmlattr>";
 const std::string XML_ATTR_POSITION = "position";
 const std::string XML_ATTR_ORIENTATION = "orientation";

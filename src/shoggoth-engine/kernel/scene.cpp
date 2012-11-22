@@ -247,8 +247,11 @@ bool Scene::loadFromPTree(const string& path,
         }
         else if (type.compare(XML_ATTR_TYPE_ROOT) == 0)
             cerr << "Error: invalid root node path: " << path << endl;
+        else if (name.compare(XML_COMMENT) == 0) {
+            // ignore comment
+        }
         else
-            cerr << "Error: unknown node type: " << type << endl;
+            cerr << "Error: unknown node type: " << type << " - " << curPath << endl;
     }
     return true;
 }
