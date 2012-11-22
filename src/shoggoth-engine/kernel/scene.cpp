@@ -56,24 +56,17 @@ Scene::Scene(const std::string& objectName,
     m_rootName(rootNodeName),
     m_root(new Entity(0, m_rootName, m_device))
 {
-    registerCommand("initialize", boost::bind(&Scene::cmdInitialize, this, _1));
-    registerCommand("shutdown", boost::bind(&Scene::cmdShutdown, this, _1));
     registerCommand("save-xml", boost::bind(&Scene::cmdSaveXML, this, _1));
     registerCommand("load-xml", boost::bind(&Scene::cmdLoadXML, this, _1));
 }
 
 Scene::~Scene() {
+    cout << "Removing all entities and their components" << endl;
+    m_root->removeAllChildren();
+
     unregisterAllCommands();
     unregisterAllAttributes();
     delete m_root;
-}
-
-void Scene::initialize() {
-}
-
-void Scene::shutdown() {
-    cout << "Removing all entities and their components" << endl;
-    m_root->removeAllChildren();
 }
 
 void Scene::saveToXML(const string& fileName) const {

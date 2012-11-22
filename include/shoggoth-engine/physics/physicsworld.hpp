@@ -49,8 +49,6 @@ public:
     PhysicsWorld(const std::string& objectName);
     ~PhysicsWorld();
 
-    void initialize();
-    void shutdown();
     void registerRigidBody(RigidBody* body);
     void unregisterRigidBody(RigidBody* body);
     btCollisionShape* findCollisionShape(const std::string& shapeId);
@@ -78,8 +76,6 @@ private:
     collision_shapes_map_t m_collisionShapes;
     rigid_bodies_map_t m_rigidBodies;
 
-    std::string cmdInitialize(std::deque<std::string>&);
-    std::string cmdShutdown(std::deque<std::string>&);
     std::string cmdMinExpectedFramerate(std::deque<std::string>& args);
 };
 
@@ -100,18 +96,6 @@ inline btCollisionShape* PhysicsWorld::findCollisionShape(const std::string& sha
 
 inline void PhysicsWorld::registerCollisionShape(const std::string& shapeId, btCollisionShape* shape) {
     m_collisionShapes.insert(std::pair<std::string, btCollisionShape*>(shapeId, shape));
-}
-
-
-
-inline std::string PhysicsWorld::cmdInitialize(std::deque<std::string>&) {
-    initialize();
-    return "";
-}
-
-inline std::string PhysicsWorld::cmdShutdown(std::deque<std::string>&) {
-    shutdown();
-    return "";
 }
 
 #endif // PHYSICSWORLD_HPP

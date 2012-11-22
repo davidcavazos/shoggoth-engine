@@ -68,11 +68,10 @@ Demo::Demo(const string& objectName,
     registerCommand("fire-cube", boost::bind(&Demo::cmdFireCube, this, _1));
     registerCommand("fire-sphere", boost::bind(&Demo::cmdFireSphere, this, _1));
 
-    Terminal::runScript("assets/scripts/1-initialization.txt");
+    m_device.setResolution(800, 600);
 }
 
 Demo::~Demo() {
-    Terminal::runScript("assets/scripts/4-shutdown.txt");
 }
 
 void Demo::loadScene() {

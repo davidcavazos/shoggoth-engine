@@ -40,8 +40,6 @@ public:
     Resources(const std::string& objectName, Renderer* renderer);
     ~Resources();
 
-    void initialize();
-    void shutdown();
     Model* generateBox(const std::string& identifier, const double lengthX, const double lengthY, const double lengthZ);
     Model* generateModelFromFile(const std::string& fileName);
     Texture* generateTextureFromFile(const std::string& fileName);
@@ -61,21 +59,6 @@ private:
     void registerTexture(Texture* texture);
     Model* findModel(const std::string& identifier);
     Texture* findTexture(const std::string& fileName);
-
-    std::string cmdInitialize(std::deque<std::string>&);
-    std::string cmdShutdown(std::deque<std::string>&);
 };
-
-
-
-inline std::string Resources::cmdInitialize(std::deque<std::string>&) {
-    initialize();
-    return std::string();
-}
-
-inline std::string Resources::cmdShutdown(std::deque<std::string>&) {
-    shutdown();
-    return std::string();
-}
 
 #endif // RESOURCES_HPP

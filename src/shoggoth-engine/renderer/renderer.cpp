@@ -56,19 +56,10 @@ Renderer::Renderer(const string& objectName, const Device* device):
     m_textureCompressionMode(TEXTURE_COMPRESSION_NONE),
     m_renderingMethod(RENDERING_METHOD_FIXED_PIPELINE)
 {
-    registerCommand("initialize", boost::bind(&Renderer::cmdInitialize, this, _1));
-    registerCommand("shutdown", boost::bind(&Renderer::cmdShutdown, this, _1));
     registerAttribute("ambient-light", boost::bind(&Renderer::cmdAmbientLight, this, _1));
     registerAttribute("texture-filtering", boost::bind(&Renderer::cmdTextureFiltering, this, _1));
     registerAttribute("anisotropy", boost::bind(&Renderer::cmdAnisotropy, this, _1));
-}
 
-Renderer::~Renderer() {
-    unregisterAllCommands();
-    unregisterAllAttributes();
-}
-
-void Renderer::initialize() {
     double openGLVersion;
     double shaderLanguageVersion;
     GLint integer;
@@ -258,8 +249,9 @@ void Renderer::initialize() {
     Culling::initialize();
 }
 
-void Renderer::shutdown() {
+Renderer::~Renderer() {
     Culling::shutdown();
+
     cout << "Destroying all renderable meshes" << endl;
     set<RenderableMesh*>::const_iterator itMesh;
     for (itMesh = m_models.begin(); itMesh != m_models.end(); ++itMesh)
@@ -274,6 +266,9 @@ void Renderer::shutdown() {
     set<Camera*>::const_iterator itCam;
     for (itCam = m_cameras.begin(); itCam != m_cameras.end(); ++itCam)
         delete *itCam;
+
+    unregisterAllCommands();
+    unregisterAllAttributes();
 }
 
 void Renderer::draw() {

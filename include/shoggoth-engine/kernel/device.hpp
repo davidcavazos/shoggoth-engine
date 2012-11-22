@@ -43,8 +43,6 @@ public:
     double getDeltaTime() const;
     double getFps() const;
 
-    void initialize();
-    void shutdown();
     void onFrameStart();
     void onFrameEnd();
     void swapBuffers() const;
@@ -70,8 +68,6 @@ protected:
     double m_deltaTime;
     double m_fps;
 
-    std::string cmdInitialize(std::deque<std::string>&);
-    std::string cmdShutdown(std::deque<std::string>&);
     std::string cmdSwapBuffers(std::deque<std::string>&);
     std::string cmdTitle(std::deque<std::string>& args);
     std::string cmdFullscreen(std::deque<std::string>& args);
@@ -93,16 +89,6 @@ inline double Device::getFps() const {
 }
 
 
-
-inline std::string Device::cmdInitialize(std::deque<std::string>&) {
-    initialize();
-    return "";
-}
-
-inline std::string Device::cmdShutdown(std::deque<std::string>&) {
-    shutdown();
-    return "";
-}
 
 inline std::string Device::cmdSwapBuffers(std::deque<std::string>&) {
     swapBuffers();

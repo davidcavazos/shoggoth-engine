@@ -37,20 +37,9 @@ Resources::Resources(const string& objectName, Renderer* renderer):
     m_renderer(renderer),
     m_modelsMap(),
     m_texturesMap()
-{
-    registerCommand("initialize", boost::bind(&Resources::cmdInitialize, this, _1));
-    registerCommand("shutdown", boost::bind(&Resources::cmdShutdown, this, _1));
-}
+{}
 
 Resources::~Resources() {
-    unregisterAllCommands();
-    unregisterAllAttributes();
-}
-
-void Resources::initialize() {
-}
-
-void Resources::shutdown() {
     cout << "Destroying all textures" << endl;
     textures_map_t::const_iterator itTexture;
     for (itTexture = m_texturesMap.begin(); itTexture != m_texturesMap.end(); ++itTexture)
@@ -60,6 +49,9 @@ void Resources::shutdown() {
     models_map_t::const_iterator itMesh;
     for (itMesh = m_modelsMap.begin(); itMesh != m_modelsMap.end(); ++itMesh)
         delete itMesh->second;
+
+    unregisterAllCommands();
+    unregisterAllAttributes();
 }
 
 Model* Resources::generateBox(const string& identifier, const double lengthX, const double lengthY, const double lengthZ) {

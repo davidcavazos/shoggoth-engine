@@ -1,5 +1,0 @@
-scene shutdown
-physics-world shutdown
-resources shutdown
-renderer shutdown
-device shutdown

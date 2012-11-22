@@ -47,17 +47,8 @@ PhysicsWorld::PhysicsWorld(const string& objectName):
     m_collisionShapes(),
     m_rigidBodies()
 {
-    registerCommand("initialize", boost::bind(&PhysicsWorld::cmdInitialize, this, _1));
-    registerCommand("shutdown", boost::bind(&PhysicsWorld::cmdShutdown, this, _1));
     registerAttribute("min-expected-framerate", boost::bind(&PhysicsWorld::cmdMinExpectedFramerate, this, _1));
-}
 
-PhysicsWorld::~PhysicsWorld() {
-    unregisterAllCommands();
-    unregisterAllAttributes();
-}
-
-void PhysicsWorld::initialize() {
     cout << "Physics simulations done with Bullet Physics" << endl;
     setMinExpectedFramerate(DEFAULT_MIN_EXPECTED_FRAMERATE);
 
@@ -69,7 +60,7 @@ void PhysicsWorld::initialize() {
     m_dynamicsWorld = new btDiscreteDynamicsWorld(m_collisionDispatcher, m_broadphase, m_solver, m_collisionConfiguration);
 }
 
-void PhysicsWorld::shutdown() {
+PhysicsWorld::~PhysicsWorld() {
     cout << "Destroying rigid bodies" << endl;
     rigid_bodies_map_t::iterator itRig;
     for (itRig = m_rigidBodies.begin(); itRig != m_rigidBodies.end(); ++itRig) {
@@ -89,6 +80,9 @@ void PhysicsWorld::shutdown() {
     delete m_collisionDispatcher;
     delete m_collisionConfiguration;
     delete m_broadphase;
+
+    unregisterAllCommands();
+    unregisterAllAttributes();
 }
 
 void PhysicsWorld::registerRigidBody(RigidBody* body) {

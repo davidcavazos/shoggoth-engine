@@ -57,8 +57,6 @@ public:
 
     Entity* root();
 
-    void initialize();
-    void shutdown();
     void saveToXML(const std::string& fileName) const;
     bool loadFromXML(const std::string& fileName);
     bool findEntity(const std::string& name, Entity*& entity);
@@ -88,8 +86,6 @@ private:
                        std::set<std::string>& names,
                        bool& isCameraFound);
 
-    std::string cmdInitialize(std::deque<std::string>&);
-    std::string cmdShutdown(std::deque<std::string>&);
     std::string cmdSaveXML(std::deque<std::string>& args);
     std::string cmdLoadXML(std::deque<std::string>& args);
 };
@@ -106,16 +102,6 @@ inline Entity* Scene::root() {
 }
 
 
-
-inline std::string Scene::cmdInitialize(std::deque<std::string>&) {
-    initialize();
-    return "";
-}
-
-inline std::string Scene::cmdShutdown(std::deque<std::string>&) {
-    shutdown();
-    return "";
-}
 
 inline std::string Scene::cmdSaveXML(std::deque<std::string>& args) {
     if (args.size() < 1)

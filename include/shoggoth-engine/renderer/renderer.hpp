@@ -74,9 +74,6 @@ public:
     Renderer(const std::string& objectName, const Device* device);
     ~Renderer();
 
-    void initialize();
-    void shutdown();
-
     bool isAnisotropicFilteringSupported() const;
     float getMaxAnisotropy() const;
     float getAnisotropy() const;
@@ -125,8 +122,6 @@ private:
     void openGLProjectionMatrixOrthographic(float width, float height, float near, float far);
     void openGLProjectionMatrixPerspective(float perspectiveFOV, float aspectRatio, float near, float far);
 
-    std::string cmdInitialize(std::deque<std::string>&);
-    std::string cmdShutdown(std::deque<std::string>&);
     std::string cmdAmbientLight(std::deque<std::string>& args);
     std::string cmdTextureFiltering(std::deque<std::string>& args);
     std::string cmdAnisotropy(std::deque<std::string>& args);
@@ -183,16 +178,6 @@ inline void Renderer::registerRenderableMesh(RenderableMesh* model) {
 
 inline void Renderer::unregisterRenderableMesh(RenderableMesh* model) {
     m_models.erase(model);
-}
-
-inline std::string Renderer::cmdInitialize(std::deque<std::string>&) {
-    initialize();
-    return "";
-}
-
-inline std::string Renderer::cmdShutdown(std::deque<std::string>&) {
-    shutdown();
-    return "";
 }
 
 #endif // RENDERER_HPP

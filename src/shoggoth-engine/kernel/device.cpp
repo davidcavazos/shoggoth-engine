@@ -57,20 +57,11 @@ Device::Device(const string& objectName):
     m_deltaTime(0.0),
     m_fps(0.0)
 {
-    registerCommand("initialize", boost::bind(&Device::cmdInitialize, this, _1));
-    registerCommand("shutdown", boost::bind(&Device::cmdShutdown, this, _1));
     registerCommand("swap-buffers", boost::bind(&Device::cmdSwapBuffers, this, _1));
     registerAttribute("title", boost::bind(&Device::cmdTitle, this, _1));
     registerAttribute("fullscreen", boost::bind(&Device::cmdFullscreen, this, _1));
     registerAttribute("resolution", boost::bind(&Device::cmdResolution, this, _1));
-}
 
-Device::~Device() {
-    unregisterAllCommands();
-    unregisterAllAttributes();
-}
-
-void Device::initialize() {
     cout << "Creating SDL-OpenGL device" << endl;
     if (SDL_Init(SDL_INIT_FLAGS) != 0) // 0 success, -1 failure
         exit(EXIT_FAILURE);
@@ -90,8 +81,8 @@ void Device::initialize() {
     SDL_GL_SetAttribute(SDL_GL_ACCUM_BLUE_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_ACCUM_ALPHA_SIZE, 8);
 
-//     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-//     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
+    //     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    //     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
 
     const SDL_VideoInfo* info = SDL_GetVideoInfo();
     m_width = info->current_w;
@@ -107,9 +98,12 @@ void Device::initialize() {
     SDL_ShowCursor(SDL_FALSE);
 }
 
-void Device::shutdown() {
+Device::~Device() {
     cout << "SDL-OpenGL device quit" << endl;
     SDL_Quit();
+
+    unregisterAllCommands();
+    unregisterAllAttributes();
 }
 
 void Device::onFrameStart() {
