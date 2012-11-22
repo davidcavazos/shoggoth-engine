@@ -69,6 +69,8 @@ Demo::Demo(const string& objectName,
     registerCommand("fire-sphere", boost::bind(&Demo::cmdFireSphere, this, _1));
 
     m_device.setResolution(800, 600);
+    m_renderer.setTextureFilteringMode(TEXTURE_FILTERING_ANISOTROPIC);
+    m_renderer.setAnisotropy(4.0f);
 }
 
 Demo::~Demo() {
@@ -76,7 +78,7 @@ Demo::~Demo() {
 
 void Demo::loadScene() {
     cout << "Loading scene..." << endl;
-    Terminal::runScript("assets/scripts/2-initialize-scene.txt");
+    m_scene.loadFromXML("scene.xml");
 
 //     // model            faces (triangles)
 //     // icosphere1              20
@@ -93,7 +95,6 @@ void Demo::loadScene() {
 
 void Demo::bindInputs() {
     cout << "Binding inputs..." << endl;
-    Terminal::runScript("assets/scripts/3-bind-inputs.txt");
 
     Inputs* inputs = m_device.getInputs();
     inputs->bindInput(INPUT_KEY_RELEASE, "demo quit", SDLK_ESCAPE);

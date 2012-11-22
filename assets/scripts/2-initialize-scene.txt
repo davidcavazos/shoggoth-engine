@@ -1,3 +1,0 @@
-renderer set texture-filtering 2
-renderer set anisotropy 4
-scene load-xml scene.xml
