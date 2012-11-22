@@ -1,7 +1,10 @@
 + Implement OpenGL Core and shaders
++ Save/load a scene to/from script
 + Save input commands as a replay script
 + Networking
 + GUI and 2D stuff
++ Set bindings, video options and other options from files
+~ When saving scene to xml or script: if attribute == defaultValue, then omit
 ~ Add more primitives for RenderableMesh (sphere, cilinder, cone, etc)
 ~ Fog
 ~ Transparency
