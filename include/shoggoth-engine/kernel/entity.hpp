@@ -74,7 +74,7 @@ public:
     const_component_iterator_t getComponentEnd() const;
     component_iterator_t getComponentEnd();
 
-    void setParent(Entity* parent);
+    void setParent(Entity* _parent);
     void setPositionAbs(const Vector3& position);
     void setPositionAbs(const scalar_t& posX, const scalar_t& posY, const scalar_t& posZ);
     void setPositionRel(const Vector3& position);
@@ -231,8 +231,8 @@ inline Entity::component_iterator_t Entity::getComponentEnd() {
 
 
 
-inline void Entity::setParent(Entity* parent) {
-    m_parent = parent;
+inline void Entity::setParent(Entity* _parent) {
+    m_parent = _parent;
 }
 
 inline void Entity::setPositionAbs(const Vector3& position) {

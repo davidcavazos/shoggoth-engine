@@ -45,8 +45,8 @@ const string XML_LINEAR_ATTENUATION = "linearattenuation";
 const string XML_QUADRATIC_ATTENUATION = "quadraticattenuation";
 
 
-Light::Light(Entity* const entity, Renderer* renderer):
-    Component(COMPONENT_LIGHT, entity),
+Light::Light(Entity* const _entity, Renderer* renderer):
+    Component(COMPONENT_LIGHT, _entity),
     m_renderer(renderer),
     m_lightType(LIGHT_POINTLIGHT),
     m_ambient(0.0f, 0.0f, 0.0f, 1.0f),

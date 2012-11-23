@@ -168,9 +168,9 @@ inline Quaternion Transform::getRotationQuat() const {
 
 inline void Transform::getOpenGLMatrix(float* openGL) const {
     m_rotation.getOpenGLSubMatrix(openGL);
-    openGL[12] = m_position.getX();
-    openGL[13] = m_position.getY();
-    openGL[14] = m_position.getZ();
+    openGL[12] = float(m_position.getX());
+    openGL[13] = float(m_position.getY());
+    openGL[14] = float(m_position.getZ());
     openGL[15] = 1.0f;
 }
 
@@ -240,18 +240,18 @@ inline btTransform trans(const Quaternion& q, const Vector3& v) {
 }
 
 inline btMatrix3x3 mat3x3(const Matrix3x3& m) {
-    return btMatrix3x3(m.get(0, 0), m.get(0, 1), m.get(0, 2),
-                       m.get(1, 0), m.get(1, 1), m.get(1, 2),
-                       m.get(2, 0), m.get(2, 1), m.get(2, 2)
+    return btMatrix3x3(btScalar(m.get(0, 0)), btScalar(m.get(0, 1)), btScalar(m.get(0, 2)),
+                       btScalar(m.get(1, 0)), btScalar(m.get(1, 1)), btScalar(m.get(1, 2)),
+                       btScalar(m.get(2, 0)), btScalar(m.get(2, 1)), btScalar(m.get(2, 2))
     );
 }
 
 inline btQuaternion quat(const Quaternion& q) {
-    return btQuaternion(q.getX(), q.getY(), q.getZ(), q.getW());
+    return btQuaternion(btScalar(q.getX()), btScalar(q.getY()), btScalar(q.getZ()), btScalar(q.getW()));
 }
 
 inline btVector3 vect(const Vector3& v) {
-    return btVector3(v.getX(), v.getY(), v.getZ());
+    return btVector3(btScalar(v.getX()), btScalar(v.getY()), btScalar(v.getZ()));
 }
 
 #endif // TRANSFORM_HPP

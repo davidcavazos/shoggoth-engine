@@ -39,7 +39,7 @@ class PhysicsWorld;
 
 class Component {
 public:
-    Component(const std::string& type, Entity* const entity);
+    Component(const std::string& type, Entity* const _entity);
     virtual ~Component();
 
     const Entity* getEntity() const;

@@ -81,7 +81,7 @@ const Color4 COLOR_WHITE = Color4(1.0f, 1.0f, 1.0f, 1.0f);
 
 class Light: public Component {
 public:
-    Light(Entity*const entity, Renderer* renderer);
+    Light(Entity*const _entity, Renderer* renderer);
     ~Light();
 
     const light_t& getLightType() const;

@@ -55,7 +55,7 @@ typedef enum {
 
 class RigidBody: public Component {
 public:
-    RigidBody(Entity* const entity, Resources* resources, PhysicsWorld* physicsWorld);
+    RigidBody(Entity* const _entity, Resources* resources, PhysicsWorld* physicsWorld);
     ~RigidBody();
 
     btRigidBody* bulletRigidBody();

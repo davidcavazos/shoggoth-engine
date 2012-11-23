@@ -40,7 +40,7 @@ class Model;
 
 class RenderableMesh: public Component {
 public:
-    RenderableMesh(Entity* const entity, Renderer* renderer, Resources* resources);
+    RenderableMesh(Entity* const _entity, Renderer* renderer, Resources* resources);
     ~RenderableMesh();
 
     const Model* getModel() const;

@@ -80,17 +80,17 @@ Demo::~Demo() {
 }
 
 void Demo::loadScene() {
-//     // model            faces (triangles)
-//     // icosphere1              20
-//     // icosphere2              80
-//     // icosphere3             320
-//     // icosphere4           1,280
-//     // icosphere5           5,120
-//     // icosphere6          20,480
-//     // icosphere7          81,920
-//     // icosphere8         327,680
-//     // icosphere9       1,310,720
-//     // icosphere10      5,242,880
+    // model            faces (triangles)
+    // icosphere1              20
+    // icosphere2              80
+    // icosphere3             320
+    // icosphere4           1,280
+    // icosphere5           5,120
+    // icosphere6          20,480
+    // icosphere7          81,920
+    // icosphere8         327,680
+    // icosphere9       1,310,720
+    // icosphere10      5,242,880
 
     cout << "Loading scene..." << endl;
     m_scene.loadFromXML("scene.xml");
@@ -188,13 +188,13 @@ string Demo::cmdPrint(std::deque<std::string>& args) {
 }
 
 string Demo::cmdOnMouseMotion(std::deque<std::string>&) {
-    float sensitivity = 0.05;
+    float sensitivity = 0.05f;
     mouse_motion_t motion = m_device.getInputs()->getLastMouseMotion();
 
-    string x = string("body yaw-global ") + boost::lexical_cast<string>(motion.xrel * sensitivity);
+    string x = string("body yaw-global ") + boost::lexical_cast<string>(float(motion.xrel) * sensitivity);
     Terminal::pushCommand(x);
 
-    string y = string("camera1 pitch ") + boost::lexical_cast<string>(motion.yrel * sensitivity);
+    string y = string("camera1 pitch ") + boost::lexical_cast<string>(float(motion.yrel) * sensitivity);
     Terminal::pushCommand(y);
     return "";
 }

@@ -48,7 +48,7 @@ public:
     const std::deque<std::string>& getArguments() const;
     std::deque<std::string>& arguments();
     const std::string& getArgument(const size_t i) const;
-    void setArguments(const std::deque<std::string>& arguments);
+    void setArguments(const std::deque<std::string>& args);
     const std::string& getOutput() const;
 
     void appendToArguments(const std::string& newArg);
@@ -88,8 +88,8 @@ inline const std::string& Command::getArgument(const size_t i) const {
     return m_empty;
 }
 
-inline void Command::setArguments(const std::deque<std::string>& arguments) {
-    m_arguments = arguments;
+inline void Command::setArguments(const std::deque<std::string>& args) {
+    m_arguments = args;
 }
 
 inline const std::string& Command::getOutput() const {

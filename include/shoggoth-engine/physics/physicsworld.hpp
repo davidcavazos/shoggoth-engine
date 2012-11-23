@@ -83,7 +83,7 @@ private:
 
 inline void PhysicsWorld::setMinExpectedFramerate(const double minExpectedFramerate) {
     double minTimestep = 1.0 / minExpectedFramerate;
-    m_maxSubsteps = minTimestep / FIXED_TIMESTEP + 2;
+    m_maxSubsteps = int(minTimestep / FIXED_TIMESTEP) + 2;
 }
 
 inline btCollisionShape* PhysicsWorld::findCollisionShape(const std::string& shapeId) {

@@ -186,8 +186,11 @@ void Device::processEvents(bool& isRunning) {
             motion.xrel = event.motion.xrel;
             motion.yrel = event.motion.yrel;
             ms_inputs.onMouseMotion(motion);
-            SDL_WarpMouse(m_halfWidth, m_halfHeight);
+            SDL_WarpMouse(Uint16(m_halfWidth), Uint16(m_halfHeight));
             break; }
+        default:
+            // ignore other events
+            break;
         }
     }
     set<size_t>::iterator it;

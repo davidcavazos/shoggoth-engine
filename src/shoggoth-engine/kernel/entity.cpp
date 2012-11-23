@@ -37,9 +37,9 @@ using namespace std;
 
 const size_t INDENT_SIZE = 2;
 
-Entity::Entity(Entity* parent, const string& objectName, const Device* device):
+Entity::Entity(Entity* _parent, const string& objectName, const Device* device):
     CommandObject(objectName),
-    m_parent(parent),
+    m_parent(_parent),
     m_device(device),
     m_children(),
     m_components(),
@@ -260,20 +260,20 @@ string Entity::cmdPositionRel(deque<string>& args) {
 string Entity::cmdOrientationAbsYPR(deque<string>& args) {
     if (args.size() < 3)
         return "Error: too few arguments";
-    scalar_t yaw = boost::lexical_cast<scalar_t>(args[0]);
-    scalar_t pitch = boost::lexical_cast<scalar_t>(args[1]);
-    scalar_t roll = boost::lexical_cast<scalar_t>(args[2]);
-    setOrientationAbs(yaw, pitch, roll);
+    scalar_t _yaw = boost::lexical_cast<scalar_t>(args[0]);
+    scalar_t _pitch = boost::lexical_cast<scalar_t>(args[1]);
+    scalar_t _roll = boost::lexical_cast<scalar_t>(args[2]);
+    setOrientationAbs(_yaw, _pitch, _roll);
     return "";
 }
 
 string Entity::cmdOrientationRelYPR(deque<string>& args) {
     if (args.size() < 3)
         return "Error: too few arguments";
-    scalar_t yaw = boost::lexical_cast<scalar_t>(args[0]);
-    scalar_t pitch = boost::lexical_cast<scalar_t>(args[1]);
-    scalar_t roll = boost::lexical_cast<scalar_t>(args[2]);
-    setOrientationRel(yaw, pitch, roll);
+    scalar_t _yaw = boost::lexical_cast<scalar_t>(args[0]);
+    scalar_t _pitch = boost::lexical_cast<scalar_t>(args[1]);
+    scalar_t _roll = boost::lexical_cast<scalar_t>(args[2]);
+    setOrientationRel(_yaw, _pitch, _roll);
     return "";
 }
 

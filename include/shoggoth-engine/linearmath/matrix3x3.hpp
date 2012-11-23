@@ -265,17 +265,17 @@ inline void Matrix3x3::getEuler(scalar_t& yaw, scalar_t& pitch, scalar_t& roll) 
 }
 
 inline void Matrix3x3::getOpenGLSubMatrix(float* openGLSubMatrix) const {
-    openGLSubMatrix[ 0] = getRow(0).getX();
-    openGLSubMatrix[ 1] = getRow(1).getX();
-    openGLSubMatrix[ 2] = getRow(2).getX();
+    openGLSubMatrix[ 0] = float(getRow(0).getX());
+    openGLSubMatrix[ 1] = float(getRow(1).getX());
+    openGLSubMatrix[ 2] = float(getRow(2).getX());
     openGLSubMatrix[ 3] = 0.0f;
-    openGLSubMatrix[ 4] = getRow(0).getY();
-    openGLSubMatrix[ 5] = getRow(1).getY();
-    openGLSubMatrix[ 6] = getRow(2).getY();
+    openGLSubMatrix[ 4] = float(getRow(0).getY());
+    openGLSubMatrix[ 5] = float(getRow(1).getY());
+    openGLSubMatrix[ 6] = float(getRow(2).getY());
     openGLSubMatrix[ 7] = 0.0f;
-    openGLSubMatrix[ 8] = getRow(0).getZ();
-    openGLSubMatrix[ 9] = getRow(1).getZ();
-    openGLSubMatrix[10] = getRow(2).getZ();
+    openGLSubMatrix[ 8] = float(getRow(0).getZ());
+    openGLSubMatrix[ 9] = float(getRow(1).getZ());
+    openGLSubMatrix[10] = float(getRow(2).getZ());
     openGLSubMatrix[11] = 0.0f;
 }
 

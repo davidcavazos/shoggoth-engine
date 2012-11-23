@@ -83,7 +83,7 @@ public:
     Vector3 cross(const Vector3& v) const;
     Vector3& normalize();
     Vector3 normalized() const;
-    Vector3 rotate(const Vector3& axis, const scalar_t& angle) const;
+    Vector3 rotate(const Vector3& axis, const scalar_t& _angle) const;
     Vector3 rotate(const Quaternion& q) const;
     Vector3 lerp(const Vector3& v, const scalar_t& t) const;
 
@@ -334,11 +334,11 @@ inline Vector3 Vector3::normalized() const {
     return *this / length();
 }
 
-inline Vector3 Vector3::rotate(const Vector3& axis, const scalar_t& angle) const {
+inline Vector3 Vector3::rotate(const Vector3& axis, const scalar_t& _angle) const {
     Vector3 o = axis * axis.dot(*this);
     Vector3 x = *this - o;
     Vector3 y = axis.cross(*this);
-    return o + x * std::cos(angle) + y * std::sin(angle);
+    return o + x * std::cos(_angle) + y * std::sin(_angle);
 }
 
 inline Vector3 Vector3::rotate(const Quaternion& q) const {

@@ -37,7 +37,7 @@ public:
     Quaternion();
     Quaternion(const Quaternion& q);
     Quaternion(const scalar_t& w, const scalar_t& x, const scalar_t& y, const scalar_t& z);
-    Quaternion(const Vector3& axis, const scalar_t& angle);
+    Quaternion(const Vector3& axis, const scalar_t& _angle);
     Quaternion(const scalar_t& yaw, const scalar_t& pitch, const scalar_t& roll);
     Quaternion(const btQuaternion& q);
 
@@ -71,7 +71,7 @@ public:
     void setZ(const scalar_t& z);
     void setValue(const scalar_t& w, const scalar_t& x, const scalar_t& y, const scalar_t& z);
     void setValue(const Quaternion& q);
-    void setAxisAngle(const Vector3& axis, const scalar_t& angle);
+    void setAxisAngle(const Vector3& axis, const scalar_t& _angle);
     void setEuler(const scalar_t& yaw, const scalar_t& pitch, const scalar_t& roll);
     void setValue(const btQuaternion& q);
 
@@ -119,8 +119,8 @@ inline Quaternion::Quaternion(const scalar_t& w, const scalar_t& x, const scalar
     setValue(w, x, y, z);
 }
 
-inline Quaternion::Quaternion(const Vector3& axis, const scalar_t& angle) {
-    setAxisAngle(axis, angle);
+inline Quaternion::Quaternion(const Vector3& axis, const scalar_t& _angle) {
+    setAxisAngle(axis, _angle);
 }
 
 inline Quaternion::Quaternion(const scalar_t& yaw, const scalar_t& pitch, const scalar_t& roll) {
@@ -269,8 +269,8 @@ inline void Quaternion::setValue(const Quaternion& q) {
     setValue(q.getW(), q.getX(), q.getY(), q.getZ());
 }
 
-inline void Quaternion::setAxisAngle(const Vector3& axis, const scalar_t& angle) {
-    const scalar_t halfAngle = angle * HALF;
+inline void Quaternion::setAxisAngle(const Vector3& axis, const scalar_t& _angle) {
+    const scalar_t halfAngle = _angle * HALF;
     const scalar_t s = std::sin(halfAngle) / axis.length();
     setValue(std::cos(halfAngle), axis.getX() * s, axis.getY() * s, axis.getZ() * s);
 }

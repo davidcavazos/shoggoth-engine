@@ -39,8 +39,8 @@ using namespace boost::property_tree;
 const string XML_RENDERABLEMESH_MODEL = "model";
 
 
-RenderableMesh::RenderableMesh(Entity* const entity, Renderer* renderer, Resources* resources):
-    Component(COMPONENT_RENDERABLEMESH, entity),
+RenderableMesh::RenderableMesh(Entity* const _entity, Renderer* renderer, Resources* resources):
+    Component(COMPONENT_RENDERABLEMESH, _entity),
     m_renderer(renderer),
     m_resources(resources),
     m_model(0)
@@ -77,21 +77,21 @@ void RenderableMesh::loadFromFile(const string& fileName) {
 }
 
 void RenderableMesh::loadFromPtree(const string& path, const ptree& tree) {
-    string model = tree.get<string>(xmlPath(path + XML_RENDERABLEMESH_MODEL), "empty");
-    stringstream ss(model);
-    ss >> model;
-    if (model.compare(RENDERABLEMESH_BOX_DESCRIPTION) == 0) {
+    string _model = tree.get<string>(xmlPath(path + XML_RENDERABLEMESH_MODEL), "empty");
+    stringstream ss(_model);
+    ss >> _model;
+    if (_model.compare(RENDERABLEMESH_BOX_DESCRIPTION) == 0) {
         double x, y, z;
         ss >> x >> y >> z;
         loadBox(x, y, z);
     }
-    else if (model.compare(RENDERABLEMESH_FILE_DESCRIPTION) == 0) {
+    else if (_model.compare(RENDERABLEMESH_FILE_DESCRIPTION) == 0) {
         string file;
         ss >> file;
         loadFromFile(file);
     }
     else
-        cerr << "Error: unknown renderablemesh model type: " << model << endl;
+        cerr << "Error: unknown renderablemesh model type: " << _model << endl;
 }
 
 void RenderableMesh::saveToPtree(const string& path, ptree& tree) const {

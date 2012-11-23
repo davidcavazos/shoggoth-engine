@@ -75,7 +75,7 @@ public:
     void setUvCoords(const float* uvCoords, const size_t size);
     void setIndices(const std::vector<unsigned int>& indices);
     void setIndices(const unsigned int* indices, const size_t size);
-    void setMaterial(const Material& material);
+    void setMaterial(const Material& _material);
 
     void uploadToGPU();
 
@@ -232,8 +232,8 @@ inline void Mesh::setUvCoords(const float* uvCoords, const size_t size) {
         m_uvCoords[i] = uvCoords[i];
 }
 
-inline void Mesh::setMaterial(const Material& material) {
-    m_material = material;
+inline void Mesh::setMaterial(const Material& _material) {
+    m_material = _material;
 }
 
 #endif // MESH_HPP

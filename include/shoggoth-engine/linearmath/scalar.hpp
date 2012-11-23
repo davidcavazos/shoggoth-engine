@@ -50,8 +50,16 @@ inline double degToRad(const double deg) {
     return deg * DEG_TO_RAD_MULT;
 }
 
+inline float degToRad(const float deg) {
+    return deg * float(DEG_TO_RAD_MULT);
+}
+
 inline double radToDeg(const double rad) {
     return rad * RAD_TO_DEG_MULT;
+}
+
+inline float radToDeg(const float rad) {
+    return rad * float(RAD_TO_DEG_MULT);
 }
 
 #endif // SCALAR_HPP

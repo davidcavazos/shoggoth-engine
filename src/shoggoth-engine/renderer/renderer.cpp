@@ -109,7 +109,7 @@ Renderer::Renderer(const string& objectName, const Device* device):
     m_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
 
     // version techniques
-    int openGLVersionInt = floor(openGLVersion * 10.0 + 0.5);
+    int openGLVersionInt = int(floor(openGLVersion * 10.0 + 0.5));
     switch (openGLVersionInt) {
     case 43: // 4.3
     case 42: // 4.2
@@ -850,10 +850,10 @@ void Renderer::openGLProjectionMatrixPerspective(float perspectiveFOV, float asp
 string Renderer::cmdAmbientLight(deque<string>& args) {
     if (args.size() < 4)
         return "Error: too few arguments";
-    double r = boost::lexical_cast<double>(args[0]);
-    double g = boost::lexical_cast<double>(args[1]);
-    double b = boost::lexical_cast<double>(args[2]);
-    double a = boost::lexical_cast<double>(args[3]);
+    float r = boost::lexical_cast<float>(args[0]);
+    float g = boost::lexical_cast<float>(args[1]);
+    float b = boost::lexical_cast<float>(args[2]);
+    float a = boost::lexical_cast<float>(args[3]);
     setAmbientLight(r, g, b, a);
     return "";
 }

@@ -97,7 +97,9 @@ void PhysicsWorld::unregisterRigidBody(RigidBody* body) {
 }
 
 void PhysicsWorld::stepSimulation(const double currentTimeSeconds) {
-    m_dynamicsWorld->stepSimulation(currentTimeSeconds - m_lastTime, m_maxSubsteps, FIXED_TIMESTEP);
+    m_dynamicsWorld->stepSimulation(btScalar(currentTimeSeconds - m_lastTime),
+                                    m_maxSubsteps,
+                                    btScalar(FIXED_TIMESTEP));
     m_lastTime = currentTimeSeconds;
 
     updateRigidBodies();

@@ -33,8 +33,8 @@ using namespace boost::property_tree;
 
 const string XML_HEALTH = "health";
 
-TestComponent::TestComponent(Entity* const entity):
-    Component(COMPONENT_TESTCOMPONENT, entity),
+TestComponent::TestComponent(Entity* const _entity):
+    Component(COMPONENT_TESTCOMPONENT, _entity),
     m_health(100.0)
 {
     m_entity->registerAttribute("health", boost::bind(&TestComponent::cmdHealth, this, _1));

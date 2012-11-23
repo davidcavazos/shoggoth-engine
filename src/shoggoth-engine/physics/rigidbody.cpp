@@ -55,8 +55,8 @@ const string XML_RIGIDBODY_GRAVITY = "gravity";
 
 
 
-RigidBody::RigidBody(Entity* const entity, Resources* resources, PhysicsWorld* physicsWorld):
-    Component(COMPONENT_RIGIDBODY, entity),
+RigidBody::RigidBody(Entity* const _entity, Resources* resources, PhysicsWorld* physicsWorld):
+    Component(COMPONENT_RIGIDBODY, _entity),
     m_resources(resources),
     m_physicsWorld(physicsWorld),
     m_shapeId(""),
@@ -169,28 +169,28 @@ void RigidBody::setTransform(const Vector3& position, const Quaternion& orientat
 void RigidBody::setMass(const double mass) {
     m_mass = mass;
     btVector3 inertia;
-    m_rigidBody->getCollisionShape()->calculateLocalInertia(m_mass, inertia);
-    m_rigidBody->setMassProps(mass, inertia);
+    m_rigidBody->getCollisionShape()->calculateLocalInertia(btScalar(m_mass), inertia);
+    m_rigidBody->setMassProps(btScalar(m_mass), inertia);
 }
 
 void RigidBody::setDamping(const double linear, const double angular) {
-    m_rigidBody->setDamping(linear, angular);
+    m_rigidBody->setDamping(btScalar(linear), btScalar(angular));
 }
 
 void RigidBody::setFriction(const double friction) {
-    m_rigidBody->setFriction(friction);
+    m_rigidBody->setFriction(btScalar(friction));
 }
 
 void RigidBody::setRollingFriction(const double rollingFriction) {
-    m_rigidBody->setRollingFriction(rollingFriction);
+    m_rigidBody->setRollingFriction(btScalar(rollingFriction));
 }
 
 void RigidBody::setRestitution(const double restitution) {
-    m_rigidBody->setRestitution(restitution);
+    m_rigidBody->setRestitution(btScalar(restitution));
 }
 
 void RigidBody::setSleepingThresholds(const double linear, const double angular) {
-    m_rigidBody->setSleepingThresholds(linear, angular);
+    m_rigidBody->setSleepingThresholds(btScalar(linear), btScalar(angular));
 }
 
 void RigidBody::setLinearFactor(const Vector3& linearFactor) {
@@ -218,7 +218,7 @@ void RigidBody::addSphere(const double mass, const double radius) {
 
     btCollisionShape* shape = m_physicsWorld->findCollisionShape(m_shapeId);
     if (shape == 0) {
-        shape = new btSphereShape(radius);
+        shape = new btSphereShape(btScalar(radius));
         m_physicsWorld->registerCollisionShape(m_shapeId, shape);
     }
     addRigidBody(mass, shape);
@@ -232,7 +232,9 @@ void RigidBody::addBox(const double mass, const double lengthX, const double len
 
     btCollisionShape* shape = m_physicsWorld->findCollisionShape(m_shapeId);
     if (shape == 0) {
-        shape = new btBoxShape(btVector3(lengthX * 0.5, lengthY * 0.5, lengthZ * 0.5));
+        shape = new btBoxShape(btVector3(btScalar(lengthX * 0.5),
+                                         btScalar(lengthY * 0.5),
+                                         btScalar(lengthZ * 0.5)));
         m_physicsWorld->registerCollisionShape(m_shapeId, shape);
     }
     addRigidBody(mass, shape);
@@ -245,7 +247,9 @@ void RigidBody::addCylinder(const double mass, const double radius, const double
 
     btCollisionShape* shape = m_physicsWorld->findCollisionShape(m_shapeId);
     if (shape == 0) {
-        shape = new btCylinderShape(btVector3(radius, height, radius));
+        shape = new btCylinderShape(btVector3(btScalar(radius),
+                                              btScalar(height),
+                                              btScalar(radius)));
         m_physicsWorld->registerCollisionShape(m_shapeId, shape);
     }
     addRigidBody(mass, shape);
@@ -258,7 +262,7 @@ void RigidBody::addCapsule(const double mass, const double radius, const double 
 
     btCollisionShape* shape = m_physicsWorld->findCollisionShape(m_shapeId);
     if (shape == 0) {
-        shape = new btCapsuleShape(radius, height);
+        shape = new btCapsuleShape(btScalar(radius), btScalar(height));
         m_physicsWorld->registerCollisionShape(m_shapeId, shape);
     }
     addRigidBody(mass, shape);
@@ -271,7 +275,7 @@ void RigidBody::addCone(const double mass, const double radius, const double hei
 
     btCollisionShape* shape = m_physicsWorld->findCollisionShape(m_shapeId);
     if (shape == 0) {
-        shape = new btConeShape(radius, height);
+        shape = new btConeShape(btScalar(radius), btScalar(height));
         m_physicsWorld->registerCollisionShape(m_shapeId, shape);
     }
     addRigidBody(mass, shape);
@@ -453,10 +457,10 @@ RigidBody& RigidBody::operator=(const RigidBody&) {
 void RigidBody::addRigidBody(const double mass, btCollisionShape* shape) {
     m_mass = mass;
     btVector3 inertia;
-    shape->calculateLocalInertia(m_mass, inertia);
+    shape->calculateLocalInertia(btScalar(m_mass), inertia);
     btDefaultMotionState* motion = new btDefaultMotionState(
             trans(m_entity->getOrientationAbs(), m_entity->getPositionAbs()));
-    m_rigidBody = new btRigidBody(m_mass, motion, shape, inertia);
+    m_rigidBody = new btRigidBody(btScalar(m_mass), motion, shape, inertia);
     m_physicsWorld->registerRigidBody(this);
 }
 

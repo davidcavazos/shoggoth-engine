@@ -32,8 +32,8 @@
 
 using namespace std;
 
-Component::Component(const string& type, Entity* const entity):
-    m_entity(entity),
+Component::Component(const string& type, Entity* const _entity):
+    m_entity(_entity),
     m_type(type),
     m_description()
 {

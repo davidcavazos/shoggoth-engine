@@ -48,7 +48,7 @@ typedef struct {
 
 class Camera: public Component {
 public:
-    Camera(Entity*const entity, Renderer* renderer);
+    Camera(Entity*const _entity, Renderer* renderer);
     ~Camera();
 
     camera_t getCameraType() const;
@@ -61,7 +61,7 @@ public:
     float getNearDistance() const;
     float getFarDistance() const;
     void setCameraType(const camera_t cameraType);
-    void setHasChanged(const bool hasChanged);
+    void setHasChanged(const bool _hasChanged);
     void setViewport(const int posX, const int posY, const size_t width, const size_t height);
     void setPerspectiveFOV(const float fov);
     void setOrthoHeight(const float orthoHeight);
@@ -147,8 +147,8 @@ inline void Camera::setCameraType(const camera_t cameraType) {
     m_hasChanged = true;
 }
 
-inline void Camera::setHasChanged(const bool hasChanged) {
-    m_hasChanged = hasChanged;
+inline void Camera::setHasChanged(const bool _hasChanged) {
+    m_hasChanged = _hasChanged;
 }
 
 inline void Camera::setViewport(const int posX, const int posY, const size_t width, const size_t height) {
@@ -156,7 +156,7 @@ inline void Camera::setViewport(const int posX, const int posY, const size_t wid
     m_viewport.posY = posY;
     m_viewport.width = width;
     m_viewport.height = height;
-    m_aspectRatio = static_cast<float>(m_viewport.width) / m_viewport.height;
+    m_aspectRatio = float(m_viewport.width) / float(m_viewport.height);
     m_hasChanged = true;
 }
 

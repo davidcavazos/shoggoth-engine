@@ -33,7 +33,7 @@ const std::string COMPONENT_TESTCOMPONENT = "testcomponent";
 
 class TestComponent: public Component {
 public:
-    TestComponent(Entity* const entity);
+    TestComponent(Entity* const _entity);
     ~TestComponent();
 
     double getHealth() const;

@@ -49,6 +49,8 @@ bool charIsSpace(const char c) {
     switch (c) {
     case ' ': case '\t': case '\n': case '\r':
         return true;
+    default:
+        return false;
     }
     return false;
 }
