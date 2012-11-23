@@ -3,7 +3,7 @@ project(shoggoth-engine)
 
 # Compiler flags
 if (CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "-Wall -Wextra -Weffc++")
+    set(CMAKE_CXX_FLAGS "-Wall -Wextra -Weffc++ -Wconversion -Wswitch-default -Wswitch-enum -Wshadow -Wmissing-include-dirs")
 #     set(CMAKE_EXE_LINKER_FLAGS "-lSDL")
 endif()
 
