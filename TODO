@@ -37,3 +37,17 @@ Describe general information (opengl screen coordinates, vectors format X Y Z an
 Mipmap generation
 Texture filtering (nearest, linear and anisotropic)
 Texture compression (when fixed)
+
+Visual Studio warnings:
+c:\program files\microsoft visual studio 10.0\vc\include\bullet\bulletcollision\broadphasecollision\btDbvtBroadphase.h(62): warning C4099: 'btDbvtBroadphase' : type name first seen using 'class' now seen using 'struct'
+2>          C:/Users/Mono/Documents/GitHub/shoggoth-engine/include\shoggoth-engine/renderer/culling.hpp(38) : see declaration of 'btDbvtBroadphase'
+
+2>c:\program files\microsoft visual studio 10.0\vc\include\bullet\LinearMath/btDefaultMotionState.h(7): warning C4099: 'btDefaultMotionState' : type name first seen using 'class' now seen using 'struct'
+2>          C:/Users/Mono/Documents/GitHub/shoggoth-engine/include\shoggoth-engine/physics/rigidbody.hpp(47) : see declaration of 'btDefaultMotionState'
+2>C:/Users/Mono/Documents/GitHub/shoggoth-engine/include\shoggoth-engine/renderer/culling.hpp(38): warning C4099: 'btDbvtBroadphase' : type name first seen using 'struct' now seen using 'class'
+2>          c:\program files\microsoft visual studio 10.0\vc\include\bullet\BulletCollision/BroadphaseCollision/btDbvtBroadphase.h(62) : see declaration of 'btDbvtBroadphase'
+
+2>C:/Users/Mono/Documents/GitHub/shoggoth-engine/include\shoggoth-engine/renderer/culling.hpp(38): warning C4099: 'btDbvtBroadphase' : type name first seen using 'struct' now seen using 'class'
+2>          c:\program files\microsoft visual studio 10.0\vc\include\bullet\BulletCollision/BroadphaseCollision/btDbvtBroadphase.h(62) : see declaration of 'btDbvtBroadphase'
+2>C:/Users/Mono/Documents/GitHub/shoggoth-engine/include\shoggoth-engine/physics/rigidbody.hpp(47): warning C4099: 'btDefaultMotionState' : type name first seen using 'struct' now seen using 'class'
+2>          c:\program files\microsoft visual studio 10.0\vc\include\bullet\LinearMath/btDefaultMotionState.h(7) : see declaration of 'btDefaultMotionState'
