@@ -35,7 +35,7 @@ class Vector3;
 class Entity;
 class RenderableMesh;
 class btDispatcher;
-class btDbvtBroadphase;
+struct btDbvtBroadphase;
 class btCollisionConfiguration;
 class btCollisionWorld;
 class btCollisionShape;

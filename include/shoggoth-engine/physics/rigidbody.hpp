@@ -44,7 +44,7 @@ class PhysicsWorld;
 class Resources;
 class btRigidBody;
 class btCollisionShape;
-class btDefaultMotionState;
+struct btDefaultMotionState;
 class btVector3;
 
 typedef enum {
