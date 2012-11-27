@@ -29,6 +29,7 @@
 
 #include <iostream>
 #include "shoggoth-engine/kernel/component.hpp"
+#include "shoggoth-engine/kernel/color4.hpp"
 
 const std::string COMPONENT_LIGHT = "light";
 
@@ -39,45 +40,6 @@ typedef enum {
     LIGHT_SPOTLIGHT,
     LIGHT_DIRECTIONAL
 } light_t;
-
-class Color4 {
-public:
-    Color4() {}
-    Color4(const float* rgba) {setRGBA(rgba);}
-    Color4(const float r, const float g, const float b, const float a) {setRGBA(r, g, b, a);}
-
-    const float* getRGBA() const {return m_rgba;}
-    float getR() const {return m_rgba[0];}
-    float getG() const {return m_rgba[1];}
-    float getB() const {return m_rgba[2];}
-    float getA() const {return m_rgba[3];}
-    void setRGBA(const float* rgba) {
-        m_rgba[0] = rgba[0];
-        m_rgba[1] = rgba[1];
-        m_rgba[2] = rgba[2];
-        m_rgba[3] = rgba[3];
-    }
-    void setRGBA(const float r, const float g, const float b, const float a) {
-        m_rgba[0] = r;
-        m_rgba[1] = g;
-        m_rgba[2] = b;
-        m_rgba[3] = a;
-    }
-    void setR(const float r) {m_rgba[0] = r;}
-    void setG(const float g) {m_rgba[1] = g;}
-    void setB(const float b) {m_rgba[2] = b;}
-    void setA(const float a) {m_rgba[3] = a;}
-
-private:
-    float m_rgba[4];
-};
-
-const Color4 COLOR_BLACK = Color4(0.0f, 0.0f, 0.0f, 1.0f);
-const Color4 COLOR_RED =   Color4(1.0f, 0.0f, 0.0f, 1.0f);
-const Color4 COLOR_BLUE =  Color4(0.0f, 1.0f, 0.0f, 1.0f);
-const Color4 COLOR_GREEN = Color4(0.0f, 0.0f, 1.0f, 1.0f);
-const Color4 COLOR_WHITE = Color4(1.0f, 1.0f, 1.0f, 1.0f);
-
 
 class Light: public Component {
 public:
