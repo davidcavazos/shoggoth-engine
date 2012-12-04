@@ -132,41 +132,41 @@ bool ModelLoader::import(const string& fileName, Model& model, Renderer* rendere
             }
         }
 
-        // material
-        aiColor3D color;
-        aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        // diffuse color
-        material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-        model.mesh(n)->material()->setColor(MATERIAL_COLOR_DIFFUSE, color.r, color.g, color.b);
-        // specular color
-        material->Get(AI_MATKEY_COLOR_SPECULAR, color);
-        model.mesh(n)->material()->setColor(MATERIAL_COLOR_SPECULAR, color.r, color.g, color.b);
-        // ambient color
-        material->Get(AI_MATKEY_COLOR_AMBIENT, color);
-        model.mesh(n)->material()->setColor(MATERIAL_COLOR_AMBIENT, color.r, color.g, color.b);
-        // emissive color
-        material->Get(AI_MATKEY_COLOR_EMISSIVE, color);
-        model.mesh(n)->material()->setColor(MATERIAL_COLOR_EMISSIVE, color.r, color.g, color.b);
-        // shininess
-        float shininess = 0.0f;
-        float strength = 1.0f;
-        material->Get(AI_MATKEY_SHININESS, shininess);
-        material->Get(AI_MATKEY_SHININESS_STRENGTH, strength);
-        model.mesh(n)->material()->setShininess(shininess * strength);
-
-        // texture maps
-        if (scene->HasTextures()) {
-            cerr << "Support for meshes with embedded textures is not implemented" << endl;
-            return true;
-        }
-        Texture* texture;
-        aiString file;
-        // diffuse map
-        if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
-            material->GetTexture(aiTextureType_DIFFUSE, 0, &file);
-            texture = resources->generateTextureFromFile(modelDir + file.C_Str());
-            model.mesh(n)->material()->setTextureMap(MATERIAL_DIFFUSE_MAP, texture);
-        }
+//         // material
+//         aiColor3D color;
+//         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+//         // diffuse color
+//         material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+//         model.mesh(n)->material()->setColor(MATERIAL_COLOR_DIFFUSE, color.r, color.g, color.b);
+//         // specular color
+//         material->Get(AI_MATKEY_COLOR_SPECULAR, color);
+//         model.mesh(n)->material()->setColor(MATERIAL_COLOR_SPECULAR, color.r, color.g, color.b);
+//         // ambient color
+//         material->Get(AI_MATKEY_COLOR_AMBIENT, color);
+//         model.mesh(n)->material()->setColor(MATERIAL_COLOR_AMBIENT, color.r, color.g, color.b);
+//         // emissive color
+//         material->Get(AI_MATKEY_COLOR_EMISSIVE, color);
+//         model.mesh(n)->material()->setColor(MATERIAL_COLOR_EMISSIVE, color.r, color.g, color.b);
+//         // shininess
+//         float shininess = 0.0f;
+//         float strength = 1.0f;
+//         material->Get(AI_MATKEY_SHININESS, shininess);
+//         material->Get(AI_MATKEY_SHININESS_STRENGTH, strength);
+//         model.mesh(n)->material()->setShininess(shininess * strength);
+//
+//         // texture maps
+//         if (scene->HasTextures()) {
+//             cerr << "Support for meshes with embedded textures is not implemented" << endl;
+//             return true;
+//         }
+//         Texture* texture;
+//         aiString file;
+//         // diffuse map
+//         if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
+//             material->GetTexture(aiTextureType_DIFFUSE, 0, &file);
+//             texture = resources->generateTextureFromFile(modelDir + file.C_Str());
+//             model.mesh(n)->material()->setTextureMap(MATERIAL_DIFFUSE_MAP, texture);
+//         }
     }
     return true;
 }
@@ -210,40 +210,40 @@ bool ModelLoader::loadBinary(const string& fileName, Model& model, Renderer* ren
         model.mesh(n)->m_uvCoords.resize(size);
         file.read(reinterpret_cast<char*>(&model.mesh(n)->m_uvCoords[0]), size * sizeof(float));
 
-        // material
-        color_t color;
-        // diffuse color
-        file.read(reinterpret_cast<char*>(&color), sizeof(color_t));
-        model.mesh(n)->material()->setColor(MATERIAL_COLOR_DIFFUSE, color);
-        // specular color
-        file.read(reinterpret_cast<char*>(&color), sizeof(color_t));
-        model.mesh(n)->material()->setColor(MATERIAL_COLOR_SPECULAR, color);
-        // ambient color
-        file.read(reinterpret_cast<char*>(&color), sizeof(color_t));
-        model.mesh(n)->material()->setColor(MATERIAL_COLOR_AMBIENT, color);
-        // emissive color
-        file.read(reinterpret_cast<char*>(&color), sizeof(color_t));
-        model.mesh(n)->material()->setColor(MATERIAL_COLOR_EMISSIVE, color);
-        // shininess
-        float shininess;
-        file.read(reinterpret_cast<char*>(&shininess), sizeof(float));
-        model.mesh(n)->material()->setShininess(shininess);
-
-        // texture maps
-        Texture* texture;
-        char* temp;
-        string mapName;
-        // diffuse map
-        file.read(reinterpret_cast<char*>(&size), sizeof(size_t));
-        temp = new char[size + 1];
-        file.read(reinterpret_cast<char*>(temp), size * sizeof(char));
-        temp[size] = '\0';
-        mapName = temp;
-        delete[] temp;
-        if (mapName.length() > 0) {
-            texture = resources->generateTextureFromFile(mapName);
-            model.mesh(n)->material()->setTextureMap(MATERIAL_DIFFUSE_MAP, texture);
-        }
+//         // material
+//         color_t color;
+//         // diffuse color
+//         file.read(reinterpret_cast<char*>(&color), sizeof(color_t));
+//         model.mesh(n)->material()->setColor(MATERIAL_COLOR_DIFFUSE, color);
+//         // specular color
+//         file.read(reinterpret_cast<char*>(&color), sizeof(color_t));
+//         model.mesh(n)->material()->setColor(MATERIAL_COLOR_SPECULAR, color);
+//         // ambient color
+//         file.read(reinterpret_cast<char*>(&color), sizeof(color_t));
+//         model.mesh(n)->material()->setColor(MATERIAL_COLOR_AMBIENT, color);
+//         // emissive color
+//         file.read(reinterpret_cast<char*>(&color), sizeof(color_t));
+//         model.mesh(n)->material()->setColor(MATERIAL_COLOR_EMISSIVE, color);
+//         // shininess
+//         float shininess;
+//         file.read(reinterpret_cast<char*>(&shininess), sizeof(float));
+//         model.mesh(n)->material()->setShininess(shininess);
+//
+//         // texture maps
+//         Texture* texture;
+//         char* temp;
+//         string mapName;
+//         // diffuse map
+//         file.read(reinterpret_cast<char*>(&size), sizeof(size_t));
+//         temp = new char[size + 1];
+//         file.read(reinterpret_cast<char*>(temp), size * sizeof(char));
+//         temp[size] = '\0';
+//         mapName = temp;
+//         delete[] temp;
+//         if (mapName.length() > 0) {
+//             texture = resources->generateTextureFromFile(mapName);
+//             model.mesh(n)->material()->setTextureMap(MATERIAL_DIFFUSE_MAP, texture);
+//         }
     }
     file.close();
     return true;
@@ -287,35 +287,35 @@ bool ModelLoader::writeBinary(const std::string& fileName, Model& model) {
         file.write(reinterpret_cast<char*>(&size), sizeof(size_t));
         file.write(reinterpret_cast<char*>(&model.mesh(n)->m_uvCoords[0]), size * sizeof(float));
 
-        // material
-        color_t color;
-        // diffuse color
-        color = model.mesh(n)->material()->getColor(MATERIAL_COLOR_DIFFUSE);
-        file.write(reinterpret_cast<char*>(&color), sizeof(color_t));
-        // specular color
-        color = model.mesh(n)->material()->getColor(MATERIAL_COLOR_SPECULAR);
-        file.write(reinterpret_cast<char*>(&color), sizeof(color_t));
-        // ambient color
-        color = model.mesh(n)->material()->getColor(MATERIAL_COLOR_AMBIENT);
-        file.write(reinterpret_cast<char*>(&color), sizeof(color_t));
-        // emissive color
-        color = model.mesh(n)->material()->getColor(MATERIAL_COLOR_EMISSIVE);
-        file.write(reinterpret_cast<char*>(&color), sizeof(color_t));
-        // shininess
-        float shininess = model.mesh(n)->material()->getShininess();
-        file.write(reinterpret_cast<char*>(&shininess), sizeof(float));
-
-        // texture maps
-        const Texture* texture;
-        string mapName;
-        // diffuse map
-        texture = model.mesh(n)->getMaterial()->getTextureMap(MATERIAL_DIFFUSE_MAP);
-        if (texture != 0) {
-            mapName = texture->getFileName();
-            size = mapName.length();
-            file.write(reinterpret_cast<char*>(&size), sizeof(size_t));
-            file.write(reinterpret_cast<char*>(&mapName[0]), size * sizeof(char));
-        }
+//         // material
+//         color_t color;
+//         // diffuse color
+//         color = model.mesh(n)->material()->getColor(MATERIAL_COLOR_DIFFUSE);
+//         file.write(reinterpret_cast<char*>(&color), sizeof(color_t));
+//         // specular color
+//         color = model.mesh(n)->material()->getColor(MATERIAL_COLOR_SPECULAR);
+//         file.write(reinterpret_cast<char*>(&color), sizeof(color_t));
+//         // ambient color
+//         color = model.mesh(n)->material()->getColor(MATERIAL_COLOR_AMBIENT);
+//         file.write(reinterpret_cast<char*>(&color), sizeof(color_t));
+//         // emissive color
+//         color = model.mesh(n)->material()->getColor(MATERIAL_COLOR_EMISSIVE);
+//         file.write(reinterpret_cast<char*>(&color), sizeof(color_t));
+//         // shininess
+//         float shininess = model.mesh(n)->material()->getShininess();
+//         file.write(reinterpret_cast<char*>(&shininess), sizeof(float));
+//
+//         // texture maps
+//         const Texture* texture;
+//         string mapName;
+//         // diffuse map
+//         texture = model.mesh(n)->getMaterial()->getTextureMap(MATERIAL_DIFFUSE_MAP);
+//         if (texture != 0) {
+//             mapName = texture->getFileName();
+//             size = mapName.length();
+//             file.write(reinterpret_cast<char*>(&size), sizeof(size_t));
+//             file.write(reinterpret_cast<char*>(&mapName[0]), size * sizeof(char));
+//         }
     }
     file.close();
     return true;
