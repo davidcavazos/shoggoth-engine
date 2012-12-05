@@ -14,6 +14,9 @@ set(ENGINE_SRC_FILES
     kernel/inputs.cpp
     kernel/device.cpp
 
+    renderer/opengl.cpp
+    renderer/shader.cpp
+    renderer/material.cpp
     renderer/camera.cpp
     renderer/light.cpp
     renderer/renderablemesh.cpp
@@ -22,7 +25,6 @@ set(ENGINE_SRC_FILES
 
     resources/texture.cpp
     resources/modelloader.cpp
-    resources/material.cpp
     resources/mesh.cpp
     resources/model.cpp
     resources/resources.cpp

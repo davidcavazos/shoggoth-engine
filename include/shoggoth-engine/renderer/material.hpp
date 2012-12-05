@@ -37,7 +37,7 @@ class Texture;
 
 class Material {
 public:
-    Material(const bool useShaders_ARB);
+    Material();
     Material(const Material& rhs);
 
     Material& operator=(const Material& rhs);

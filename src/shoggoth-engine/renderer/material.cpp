@@ -127,8 +127,8 @@ istream& operator>>(istream& in, mat4_t& m) {
 }
 
 
-Material::Material(const bool useShaders_ARB):
-    m_shader(useShaders_ARB),
+Material::Material():
+    m_shader(),
     m_vertexShaderFile(),
     m_fragmentShaderFile(),
     m_diffuseColor(0.8f, 0.8f, 0.8f, 1.0f),

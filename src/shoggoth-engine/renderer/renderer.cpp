@@ -35,6 +35,7 @@
 #include "shoggoth-engine/renderer/camera.hpp"
 #include "shoggoth-engine/renderer/renderablemesh.hpp"
 #include "shoggoth-engine/renderer/light.hpp"
+#include "shoggoth-engine/renderer/opengl.hpp"
 #include "shoggoth-engine/resources/model.hpp"
 #include "shoggoth-engine/resources/texture.hpp"
 
@@ -46,205 +47,11 @@ Renderer::Renderer(const string& objectName, const Device* device):
     m_activeCamera(0),
     m_cameras(),
     m_lights(),
-    m_models(),
-    m_dataUploadMode(DATA_UPLOAD_VERTEX_ARRAY),
-    m_mipMapGenerationMode(MIPMAP_GENERATION_GLU),
-    m_isAnisotropicFilteringSupported(false),
-    m_maxAnisotropy(1.0f),
-    m_anisotropy(1.0f),
-    m_textureFilteringMode(TEXTURE_FILTERING_NEAREST),
-    m_textureCompressionMode(TEXTURE_COMPRESSION_NONE),
-    m_renderingMethod(RENDERING_METHOD_FIXED_PIPELINE)
+    m_models()
 {
     registerAttribute("ambient-light", boost::bind(&Renderer::cmdAmbientLight, this, _1));
     registerAttribute("texture-filtering", boost::bind(&Renderer::cmdTextureFiltering, this, _1));
     registerAttribute("anisotropy", boost::bind(&Renderer::cmdAnisotropy, this, _1));
-
-    double openGLVersion;
-    double shaderLanguageVersion;
-    GLint integer;
-
-    stringstream ss;
-    ss << glGetString(GL_SHADING_LANGUAGE_VERSION) << " " << glGetString(GL_VERSION);
-    ss >> shaderLanguageVersion >> openGLVersion;
-
-    // general information
-    cout << endl;
-    cout << "OpenGL Driver Info" << endl;
-    cout << "==================" << endl;
-    cout << "Vendor: " << glGetString(GL_VENDOR) << endl;
-    cout << "Version: " << glGetString(GL_VERSION) << endl;
-    cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
-    cout << "Renderer: " << glGetString(GL_RENDERER) << endl;
-
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &integer);
-    cout << "Max texture size: " << integer << "x" << integer << endl;
-    glGetIntegerv(GL_MAX_LIGHTS, &integer);
-    cout << "Max lights: " << integer << endl;
-    glGetIntegerv(GL_MAX_CLIP_PLANES, &integer);
-    cout << "Max clip planes: " << integer << endl;
-    glGetIntegerv(GL_MAX_MODELVIEW_STACK_DEPTH, &integer);
-    cout << "Max ModelView stack depth: " << integer << endl;
-    glGetIntegerv(GL_MAX_PROJECTION_STACK_DEPTH, &integer);
-    cout << "Max Projection stack depth: " << integer << endl;
-    glGetIntegerv(GL_MAX_ATTRIB_STACK_DEPTH, &integer);
-    cout << "Max Attribute stack depth: " << integer << endl;
-    glGetIntegerv(GL_MAX_TEXTURE_STACK_DEPTH, &integer);
-    cout << "Max Texture stack depth: " << integer << endl;
-    glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &integer);
-    cout << "Max vertices: " << integer << endl;
-    glGetIntegerv(GL_MAX_ELEMENTS_INDICES, &integer);
-    cout << "Max indices: " << integer << endl;
-
-    // capabilities
-    if (openGLVersion >= 3.0)
-        cout << "Using OpenGL Core " << openGLVersion << endl;
-    else
-        cout << "Using OpenGL Legacy " << openGLVersion << endl;
-
-    // default techniques
-    m_dataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
-    m_mipMapGenerationMode = MIPMAP_GENERATION_GLU;
-    m_textureFilteringMode = TEXTURE_FILTERING_LINEAR;
-    m_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
-
-    // version techniques
-    int openGLVersionInt = int(floor(openGLVersion * 10.0 + 0.5));
-    switch (openGLVersionInt) {
-    case 43: // 4.3
-    case 42: // 4.2
-    case 41: // 4.1
-    case 40: // 4.0
-    case 33: // 3.3
-    case 32: // 3.2
-    case 31: // 3.1
-    case 30: // 3.0
-    case 21: // 2.1
-    case 20: // 2.0
-        m_textureCompressionMode = TEXTURE_COMPRESSION;
-        m_dataUploadMode = DATA_UPLOAD_VERTEX_BUFFER_OBJECT;
-        m_mipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER;
-        m_renderingMethod = RENDERING_METHOD_SHADERS;
-        break;
-    case 15: // 1.5
-        m_textureCompressionMode = TEXTURE_COMPRESSION;
-        m_dataUploadMode = DATA_UPLOAD_VERTEX_BUFFER_OBJECT;
-        m_mipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER;
-        m_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
-        break;
-    case 14: // 1.4
-        m_textureCompressionMode = TEXTURE_COMPRESSION;
-        m_dataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
-        m_mipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER;
-        m_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
-        break;
-    case 13: // 1.3
-        m_textureCompressionMode = TEXTURE_COMPRESSION;
-        m_dataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
-        m_mipMapGenerationMode = MIPMAP_GENERATION_GLU;
-        m_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
-        break;
-    case 12: // 1.2
-    case 11: // 1.1
-        m_textureCompressionMode = TEXTURE_COMPRESSION_NONE;
-        m_dataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
-        m_mipMapGenerationMode = MIPMAP_GENERATION_GLU;
-        m_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
-        break;
-    default:
-        cerr << "Error: unsupported OpenGL version: " << openGLVersion << endl;
-    }
-
-    // extension techniques
-    glGetIntegerv(GL_NUM_EXTENSIONS, &integer);
-    cout << "Extensions: " << integer << endl;
-    if (glewInit() != GLEW_OK)
-        cerr << "Error: failed to initialize GLEW" << endl;
-
-    if (m_dataUploadMode == DATA_UPLOAD_VERTEX_ARRAY &&
-        glewIsSupported("GL_ARB_vertex_buffer_object"))
-        m_dataUploadMode = DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT;
-    if (m_mipMapGenerationMode == MIPMAP_GENERATION_GLU &&
-        glewIsSupported("GL_SGIS_generate_mipmap"))
-        m_mipMapGenerationMode = MIPMAP_GENERATION_TEX_PARAMETER_EXT;
-    if (glewIsSupported("GL_EXT_texture_filter_anisotropic")) {
-        m_isAnisotropicFilteringSupported = true;
-        glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &m_maxAnisotropy);
-        cout << "Anisotropic texture filtering supported, max: " << m_maxAnisotropy << endl;
-    }
-    else
-        cout << "Anisotropic texture filtering not supported" << endl;
-    if (m_textureCompressionMode == TEXTURE_COMPRESSION_NONE &&
-        m_mipMapGenerationMode != MIPMAP_GENERATION_GLU &&
-        glewIsSupported("GL_ARB_texture_compression"))
-        m_textureCompressionMode = TEXTURE_COMPRESSION_EXT;
-
-    switch (m_dataUploadMode) {
-    case DATA_UPLOAD_VERTEX_ARRAY:
-        cout << "Using Vertex Array Objects" << endl;
-        break;
-    case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
-        cout << "Using Vertex Buffer Objects EXT extension" << endl;
-        break;
-    case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
-        cout << "Using Vertex Buffer Objects" << endl;
-        break;
-    default:
-        cerr << "Error: invalid data_upload_t: " << m_dataUploadMode << endl;
-    }
-    switch (m_mipMapGenerationMode) {
-    case MIPMAP_GENERATION_GLU:
-        cout << "Using mipmaps glu" << endl;
-        break;
-    case MIPMAP_GENERATION_TEX_PARAMETER_EXT:
-        cout << "Using mipmaps SGIS extension" << endl;
-        break;
-    case MIPMAP_GENERATION_TEX_PARAMETER:
-        cout << "Using mipmaps" << endl;
-        break;
-    default:
-        cerr << "Error: invalid mipmap_generation_t: " << m_mipMapGenerationMode << endl;
-    }
-    switch (m_textureCompressionMode) {
-    case TEXTURE_COMPRESSION_NONE:
-        cout << "Texture compression not supported" << endl;
-        break;
-    case TEXTURE_COMPRESSION_EXT:
-        cout << "Using texture compression ARB extension" << endl;
-        break;
-    case TEXTURE_COMPRESSION:
-        cout << "Using texture compression" << endl;
-        break;
-    default:
-        cerr << "Error: invalid texture_compression_t: " << m_textureCompressionMode << endl;
-    }
-    cout << "Forcing no texture compression!!" << endl;
-    m_textureCompressionMode = TEXTURE_COMPRESSION_NONE;
-
-    switch (m_renderingMethod) {
-    case RENDERING_METHOD_FIXED_PIPELINE:
-        cout << "Using fixed pipeline" << endl;
-        break;
-    case RENDERING_METHOD_SHADERS:
-        cout << "Using shaders" << endl;
-        break;
-    default:
-        cerr << "Error: invalid rendering_method_t: " << m_renderingMethod << endl;
-    }
-    cout << endl;
-
-    // always
-    glFrontFace(GL_CCW); // redundant
-    glCullFace(GL_BACK); // redundant
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_TEXTURE_2D);
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_NORMAL_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
     Culling::initialize();
 }
@@ -292,7 +99,7 @@ void Renderer::draw() {
 
     // frustum culling
     set<RenderableMesh*> modelsInFrustum;
-    Culling::performFrustumCulling(m_projectionMatrix, m_activeCamera->getEntity(), modelsInFrustum);
+    Culling::performFrustumCulling(OpenGL::projectionMatrix(), m_activeCamera->getEntity(), modelsInFrustum);
 
     // set meshes
     set<RenderableMesh*>::const_iterator it;
@@ -307,65 +114,46 @@ void Renderer::draw() {
             const Mesh* mesh = model->getMesh(n);
             const Material* mtl = mesh->getMaterial();
 
-            // set material
-            glMaterialfv(GL_FRONT, GL_DIFFUSE, mtl->getColor(MATERIAL_COLOR_DIFFUSE).rgb);
-            glMaterialfv(GL_FRONT, GL_SPECULAR, mtl->getColor(MATERIAL_COLOR_SPECULAR).rgb);
-            glMaterialfv(GL_FRONT, GL_AMBIENT, mtl->getColor(MATERIAL_COLOR_AMBIENT).rgb);
-            glMaterialfv(GL_FRONT, GL_EMISSION, mtl->getColor(MATERIAL_COLOR_EMISSIVE).rgb);
-            glMaterialf(GL_FRONT, GL_SHININESS, mtl->getShininess());
+            mtl->useMaterial();
 
-            // set textures
-            if (mtl->getTextureMap(MATERIAL_DIFFUSE_MAP) != 0)
-                glBindTexture(GL_TEXTURE_2D, mtl->getTextureMap(MATERIAL_DIFFUSE_MAP)->getId());
-            else
-                glBindTexture(GL_TEXTURE_2D, 0);
+//             // set material
+//             glMaterialfv(GL_FRONT, GL_DIFFUSE, mtl->getColor(MATERIAL_COLOR_DIFFUSE).rgb);
+//             glMaterialfv(GL_FRONT, GL_SPECULAR, mtl->getColor(MATERIAL_COLOR_SPECULAR).rgb);
+//             glMaterialfv(GL_FRONT, GL_AMBIENT, mtl->getColor(MATERIAL_COLOR_AMBIENT).rgb);
+//             glMaterialfv(GL_FRONT, GL_EMISSION, mtl->getColor(MATERIAL_COLOR_EMISSIVE).rgb);
+//             glMaterialf(GL_FRONT, GL_SHININESS, mtl->getShininess());
+//
+//             // set textures
+//             if (mtl->getTextureMap(MATERIAL_DIFFUSE_MAP) != 0)
+//                 glBindTexture(GL_TEXTURE_2D, mtl->getTextureMap(MATERIAL_DIFFUSE_MAP)->getId());
+//             else
+//                 glBindTexture(GL_TEXTURE_2D, 0);
 
             // draw mesh
-            switch (m_dataUploadMode) {
-            case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
-                glBindBuffer(GL_ARRAY_BUFFER, mesh->getMeshId());
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->getIndicesId());
+            if (OpenGL::areShadersSupported()) {
+                // bind buffers
+                gl::bindDataBuffer(mesh->getMeshId());
+                gl::bindIndexBuffer(mesh->getIndicesId());
 
-                glVertexPointer(3, GL_FLOAT, 0, 0);
-                glNormalPointer(GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes()));
-                glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes() + mesh->getNormalsBytes()));
-                glDrawElements(GL_TRIANGLES, mesh->getIndicesSize(), GL_UNSIGNED_INT, 0);
+                // draw
+                gl::vertexAttribPointer(VERTEX_ARRAY_INDEX, 0);
+                gl::vertexAttribPointer(NORMALS_ARRAY_INDEX, mesh->getVerticesBytes());
+                gl::drawElements(mesh->getIndicesSize());
 
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-                glBindBuffer(GL_ARRAY_BUFFER, 0);
-                break;
-            case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
-                glBindBufferARB(GL_ARRAY_BUFFER_ARB, mesh->getMeshId());
-                glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mesh->getIndicesId());
-
-                glVertexPointer(3, GL_FLOAT, 0, 0);
-                glNormalPointer(GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes()));
-                glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes() + mesh->getNormalsBytes()));
-                glDrawElements(GL_TRIANGLES, mesh->getIndicesSize(), GL_UNSIGNED_INT, 0);
-
-                glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
-                glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-                break;
-            case DATA_UPLOAD_VERTEX_ARRAY:
+                // unbind buffers
+                gl::bindDataBuffer(0);
+                gl::bindIndexBuffer(0);
+            }
+            else {
                 glVertexPointer(3, GL_FLOAT, 0, mesh->getVerticesPtr());
                 glNormalPointer(GL_FLOAT, 0, mesh->getNormalsPtr());
                 glTexCoordPointer(2, GL_FLOAT, 0, mesh->getUvCoordsPtr());
-                glDrawElements(GL_TRIANGLES, mesh->getIndicesSize(), GL_UNSIGNED_INT, mesh->getIndicesPtr());
-                break;
-            default:
-                cerr << "Error: invalid data_upload_t: " << m_dataUploadMode << endl;
+                glDrawElements(GL_TRIANGLES, GLsizei(mesh->getIndicesSize()), GL_UNSIGNED_INT, mesh->getIndicesPtr());
             }
         }
         glPopMatrix();
     }
     m_device->swapBuffers();
-}
-
-void Renderer::setTextureFilteringMode(const texture_filtering_t& textureFiltering) {
-    if (textureFiltering == TEXTURE_FILTERING_ANISOTROPIC && !m_isAnisotropicFilteringSupported)
-        cerr << "Warning: anisotropic texture filtering not supported, ignoring change" << endl;
-    else
-        m_textureFilteringMode = textureFiltering;
 }
 
 void Renderer::setAmbientLight(const float r, const float g, const float b, const float a) {
@@ -559,8 +347,8 @@ void Renderer::uploadTexture(unsigned int& textureId, const Texture& texture) {
         glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, GL_TRUE);
         break;
     case MIPMAP_GENERATION_GLU:
-        gluBuild2DMipmaps(GL_TEXTURE_2D, texture.getBytesPerPixel(), texture.getWidth(),
-                          texture.getHeight(), textureFormat, GL_UNSIGNED_BYTE, texture.getPixels());
+        gluBuild2DMipmaps(GL_TEXTURE_2D, GLint(texture.getBytesPerPixel()), GLint(texture.getWidth()),
+                          GLsizei(texture.getHeight()), textureFormat, GL_UNSIGNED_BYTE, texture.getPixels());
         break;
     default:
         cerr << "Error: invalid mipmap_generation_t: " << m_mipMapGenerationMode << endl;
@@ -568,18 +356,18 @@ void Renderer::uploadTexture(unsigned int& textureId, const Texture& texture) {
     if (m_mipMapGenerationMode != MIPMAP_GENERATION_GLU) {
         switch (m_textureCompressionMode) {
         case TEXTURE_COMPRESSION_NONE:
-            glTexImage2D(GL_TEXTURE_2D, 0, texture.getBytesPerPixel(), texture.getWidth(),
-                    texture.getHeight(), 0, textureFormat, GL_UNSIGNED_BYTE, texture.getPixels());
+            glTexImage2D(GL_TEXTURE_2D, 0, GLint(texture.getBytesPerPixel()), GLint(texture.getWidth()),
+                    GLsizei(texture.getHeight()), 0, textureFormat, GL_UNSIGNED_BYTE, texture.getPixels());
             break;
         case TEXTURE_COMPRESSION_EXT:
-            glCompressedTexImage2DARB(GL_TEXTURE_2D, 0, texture.getBytesPerPixel(), texture.getWidth(),
-                    texture.getHeight(), 0, texture.getWidth() * texture.getHeight(), texture.getPixels());
+            glCompressedTexImage2DARB(GL_TEXTURE_2D, 0, GLint(texture.getBytesPerPixel()), GLint(texture.getWidth()),
+                    GLsizei(texture.getHeight()), 0, GLsizei(texture.getWidth() * texture.getHeight()), texture.getPixels());
             break;
         case TEXTURE_COMPRESSION:
 //             glCompressedTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA, texture.getWidth(),
 //                     texture.getHeight(), 0, (texture.getWidth() * texture.getHeight()) / 2, texture.getPixels());
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGB, texture.getWidth(),
-                    texture.getHeight(), 0, textureFormat, GL_UNSIGNED_BYTE, texture.getPixels());
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGB, GLint(texture.getWidth()),
+                    GLsizei(texture.getHeight()), 0, textureFormat, GL_UNSIGNED_BYTE, texture.getPixels());
             break;
         default:
             cerr << "Error: invalid texture_compression_t: " << m_textureCompressionMode << endl;
@@ -716,7 +504,7 @@ void Renderer::initLighting() const {
 void Renderer::initCamera() {
     m_activeCamera->setViewport(0, 0, m_device->getWinWidth(), m_device->getWinHeight());
     viewport_t view = m_activeCamera->getViewport();
-    glViewport(view.posX, view.posY, view.width, view.height);
+    glViewport(view.posX, view.posY, GLsizei(view.width), GLsizei(view.height));
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -788,61 +576,6 @@ void Renderer::displayLegacyLights() const {
         }
         ++itLight;
     }
-}
-
-void Renderer::openGLProjectionMatrixOrthographic(float width, float height, float near, float far) {
-    // implementation from http://db-in.com/blog/2011/04/cameras-on-opengl-es-2-x/
-    float deltaZ = far - near;
-
-    m_projectionMatrix[ 0] =  2.0f / width;
-    m_projectionMatrix[ 1] =  0.0f;
-    m_projectionMatrix[ 2] =  0.0f;
-    m_projectionMatrix[ 3] =  0.0f;
-
-    m_projectionMatrix[ 4] =  0.0f;
-    m_projectionMatrix[ 5] = -2.0f / height;
-    m_projectionMatrix[ 6] =  0.0f;
-    m_projectionMatrix[ 7] =  0.0f;
-
-    m_projectionMatrix[ 8] =  0.0f;
-    m_projectionMatrix[ 9] =  0.0f;
-    m_projectionMatrix[10] = -2.0f / deltaZ;
-    m_projectionMatrix[11] =  0.0f;
-
-    m_projectionMatrix[12] = -1.0f;
-    m_projectionMatrix[13] =  1.0f;
-    m_projectionMatrix[14] = -(far + near) / deltaZ;
-    m_projectionMatrix[15] =  1.0f;
-}
-
-void Renderer::openGLProjectionMatrixPerspective(float perspectiveFOV, float aspectRatio, float near, float far) {
-    // Mesa 9.0 glu implementation
-    float deltaZ = far - near;
-    float radians = degToRad(perspectiveFOV) * 0.5f;
-    float sine = sin(radians);
-    if ((deltaZ == 0.0f) || (sine == 0.0f) || (aspectRatio == 0.0f))
-        return;
-    float cotangent = cos(radians) / sine;
-
-    m_projectionMatrix[ 0] =  cotangent / aspectRatio;
-    m_projectionMatrix[ 1] =  0.0f;
-    m_projectionMatrix[ 2] =  0.0f;
-    m_projectionMatrix[ 3] =  0.0f;
-
-    m_projectionMatrix[ 4] =  0.0f;
-    m_projectionMatrix[ 5] =  cotangent;
-    m_projectionMatrix[ 6] =  0.0f;
-    m_projectionMatrix[ 7] =  0.0f;
-
-    m_projectionMatrix[ 8] =  0.0f;
-    m_projectionMatrix[ 9] =  0.0f;
-    m_projectionMatrix[10] = -(far + near) / deltaZ;
-    m_projectionMatrix[11] = -1.0f;
-
-    m_projectionMatrix[12] =  0.0f;
-    m_projectionMatrix[13] =  0.0f;
-    m_projectionMatrix[14] = -2.0f * near * far / deltaZ;
-    m_projectionMatrix[15] =  0.0f;
 }
 
 

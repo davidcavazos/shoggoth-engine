@@ -27,7 +27,7 @@
 #ifndef MESH_HPP
 #define MESH_HPP
 
-#include "material.hpp"
+#include "shoggoth-engine/renderer/material.hpp"
 
 class Renderer;
 class ModelLoader;

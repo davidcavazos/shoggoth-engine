@@ -97,20 +97,6 @@ private:
 
 
 
-inline std::ostream& operator<<(std::ostream& out, const Color4& rhs) {
-    out << rhs.getR() << " " << rhs.getG() << " " << rhs.getB() << " " << rhs.getA();
-    return out;
-}
-
-inline std::istream& operator>>(std::istream& in, Color4& rhs) {
-    float r, g, b, a;
-    in >> r >> g >> b >> a;
-    rhs.setRGBA(r, g, b, a);
-    return in;
-}
-
-
-
 inline const light_t& Light::getLightType() const {
     return m_lightType;
 }
