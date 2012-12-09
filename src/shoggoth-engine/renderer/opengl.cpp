@@ -27,11 +27,13 @@
 #include "shoggoth-engine/renderer/opengl.hpp"
 
 #include <sstream>
-#include <GL/glew.h>
 #include "shoggoth-engine/linearmath/scalar.hpp"
 
 using namespace std;
 
+float OpenGL::ms_projectionMatrix[16] = {0};
+float OpenGL::ms_modelViewMatrix[16] = {0};
+float OpenGL::ms_modelViewProjectionMatrix[16] = {0};
 float OpenGL::ms_openGLVersion = 1.1f;
 float OpenGL::ms_shaderLanguageVersion = 1.0f;
 data_upload_t OpenGL::ms_dataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
@@ -44,8 +46,6 @@ texture_compression_t OpenGL::ms_textureCompressionMode = TEXTURE_COMPRESSION_NO
 rendering_method_t OpenGL::ms_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
 bool OpenGL::ms_areVBOsSupported = false;
 bool OpenGL::ms_areShadersSupported = false;
-
-const size_t ERRORS_LOG_BUFFER_SIZE = 1024;
 
 
 void OpenGL::detectCapabilities() {
@@ -161,8 +161,10 @@ void OpenGL::detectCapabilities() {
         glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &ms_maxAnisotropy);
         cout << "Anisotropic texture filtering supported, max: " << ms_maxAnisotropy << endl;
     }
-    else
+    else {
+        ms_isAnisotropicFilteringSupported = false;
         cout << "Anisotropic texture filtering not supported" << endl;
+    }
 
     if (ms_textureCompressionMode == TEXTURE_COMPRESSION_NONE &&
         ms_mipMapGenerationMode != MIPMAP_GENERATION_GLU &&
@@ -178,6 +180,8 @@ void OpenGL::detectCapabilities() {
     {
         ms_renderingMethod = RENDERING_METHOD_SHADERS_EXT;
     }
+    cout << "NOTE: Forcing Fixed Pipeline" << endl;
+    ms_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
 
     switch (ms_dataUploadMode) {
     case DATA_UPLOAD_VERTEX_ARRAY:
@@ -240,12 +244,14 @@ void OpenGL::detectCapabilities() {
         cout << "Using shaders ARB extension" << endl;
         glEnableVertexAttribArrayARB(VERTEX_ARRAY_INDEX);
         glEnableVertexAttribArrayARB(NORMALS_ARRAY_INDEX);
+        glEnableVertexAttribArrayARB(UVCOORDS_ARRAY_INDEX);
         ms_areShadersSupported = true;
         break;
     case RENDERING_METHOD_SHADERS:
         cout << "Using shaders" << endl;
         glEnableVertexAttribArray(VERTEX_ARRAY_INDEX);
         glEnableVertexAttribArray(NORMALS_ARRAY_INDEX);
+        glEnableVertexAttribArray(UVCOORDS_ARRAY_INDEX);
         ms_areShadersSupported = true;
         break;
     default:
@@ -314,205 +320,4 @@ void OpenGL::projectionMatrixPerspective(float perspectiveFOV, float aspectRatio
     ms_projectionMatrix[13] =  0.0f;
     ms_projectionMatrix[14] = -2.0f * near * far / deltaZ;
     ms_projectionMatrix[15] =  0.0f;
-}
-
-
-
-void gl::bindDataBuffer(const unsigned int vboId) {
-    if (OpenGL::dataUploadMode() == DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT)
-        glBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
-    else
-        glBindBuffer(GL_ARRAY_BUFFER, vboId);
-}
-
-void gl::bindIndexBuffer(const unsigned int indicesId) {
-    if (OpenGL::dataUploadMode() == DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT)
-        glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, indicesId);
-    else
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesId);
-}
-
-void gl::vertexAttribPointer(const unsigned int dataIndex, const size_t bytesOffset) {
-    if (OpenGL::dataUploadMode() == DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT)
-        glVertexAttribPointerARB(dataIndex, 3, GL_FLOAT, GL_FALSE, 0, (void*)(bytesOffset));
-    else
-        glVertexAttribPointer(dataIndex, 3, GL_FLOAT, GL_FALSE, 0, (void*)(bytesOffset));
-}
-
-void gl::drawElements(const size_t totalIndices) {
-    glDrawElements(GL_TRIANGLES, GLsizei(totalIndices), GL_UNSIGNED_INT, 0);
-}
-
-
-
-unsigned int gl::createVertexShader() {
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT)
-        return glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
-    return glCreateShader(GL_VERTEX_SHADER);
-}
-
-unsigned int gl::createFragmentShader() {
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT)
-        return glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
-    return glCreateShader(GL_FRAGMENT_SHADER);
-}
-
-void gl::deleteShader(const unsigned int shaderId) {
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT)
-        glDeleteObjectARB(shaderId);
-    else
-        glDeleteShader(shaderId);
-}
-
-bool gl::shaderSource(const unsigned int shaderId, const std::string& source) {
-    GLint length;
-    const char* src = source.c_str();
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT) {
-        glShaderSourceARB(shaderId, 1, &src, 0);
-        glGetObjectParameterivARB(shaderId, GL_OBJECT_SHADER_SOURCE_LENGTH_ARB, &length);
-    }
-    else {
-        glShaderSource(shaderId, 1, &src, 0);
-        glGetShaderiv(shaderId, GL_SHADER_SOURCE_LENGTH, &length);
-    }
-    if (length <= 0)
-        return false;
-    return true;
-}
-
-bool gl::compileShader(const unsigned int shaderId) {
-    GLint success;
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT) {
-        glCompileShaderARB(shaderId);
-        glGetObjectParameterivARB(shaderId, GL_OBJECT_COMPILE_STATUS_ARB, &success);
-    }
-    else {
-        glCompileShader(shaderId);
-        glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success);
-    }
-    if (success == GL_FALSE)
-        return false;
-    return true;
-}
-
-string gl::getShaderInfoLog(const unsigned int shaderId) {
-    char shaderLog[ERRORS_LOG_BUFFER_SIZE];
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT)
-        glGetInfoLogARB(shaderId, ERRORS_LOG_BUFFER_SIZE, 0, shaderLog);
-    else
-        glGetShaderInfoLog(shaderId, ERRORS_LOG_BUFFER_SIZE, 0, shaderLog);
-    return string(shaderLog);
-}
-
-unsigned int gl::createProgram() {
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT)
-        return glCreateProgramObjectARB();
-    return glCreateProgram();
-}
-
-void gl::deleteProgram(const unsigned int programId) {
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT)
-        glDeleteObjectARB(programId);
-    else
-        glDeleteProgram(programId);
-}
-
-void gl::attachShader(const unsigned int programId, const unsigned int shaderId) {
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT)
-        glAttachObjectARB(programId, shaderId);
-    else
-        glAttachShader(programId, shaderId);
-}
-
-void gl::detachShader(const unsigned int programId, const unsigned int shaderId) {
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT)
-        glDetachObjectARB(programId, shaderId);
-    else
-        glDetachShader(programId, shaderId);
-}
-
-bool gl::linkProgram(const unsigned int programId) {
-    GLint success;
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT) {
-        glLinkProgramARB(programId);
-        glGetProgramivARB(programId, GL_OBJECT_LINK_STATUS_ARB, &success);
-    }
-    else {
-        glLinkProgram(programId);
-        glGetProgramiv(programId, GL_LINK_STATUS, &success);
-    }
-    if (success == GL_FALSE)
-        return false;
-    return true;
-}
-
-string gl::getProgramInfoLog(const unsigned int programId) {
-    char programLog[ERRORS_LOG_BUFFER_SIZE];
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT)
-        glGetInfoLogARB(programId, ERRORS_LOG_BUFFER_SIZE, 0, programLog);
-    else
-        glGetProgramInfoLog(programId, ERRORS_LOG_BUFFER_SIZE, 0, programLog);
-    return string(programLog);
-}
-
-void gl::useProgram(const unsigned int programId) {
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT)
-        glUseProgramObjectARB(programId);
-    else
-        glUseProgram(programId);
-}
-
-int gl::getUniformLocation(const unsigned int programId, const string& name) {
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT)
-        return glGetUniformLocationARB(programId, name.c_str());
-    return glGetUniformLocation(programId, name.c_str());
-}
-
-void gl::useUniform1(const int location, const float* value) {
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT)
-        glUniform1fvARB(location, 1, value);
-    else
-        glUniform1fv(location, 1, value);
-}
-
-void gl::useUniform2(const int location, const float* value) {
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT)
-        glUniform2fvARB(location, 1, value);
-    else
-        glUniform2fv(location, 1, value);
-}
-
-void gl::useUniform3(const int location, const float* value) {
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT)
-        glUniform3fvARB(location, 1, value);
-    else
-        glUniform3fv(location, 1, value);
-}
-
-void gl::useUniform4(const int location, const float* value) {
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT)
-        glUniform4fvARB(location, 1, value);
-    else
-        glUniform4fv(location, 1, value);
-}
-
-void gl::useUniform2x2(const int location, const float* value) {
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT)
-        glUniformMatrix2fvARB(location, 1, GL_FALSE, value);
-    else
-        glUniformMatrix2fv(location, 1, GL_FALSE, value);
-}
-
-void gl::useUniform3x3(const int location, const float* value) {
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT)
-        glUniformMatrix3fvARB(location, 1, GL_FALSE, value);
-    else
-        glUniformMatrix3fv(location, 1, GL_FALSE, value);
-}
-
-void gl::useUniform4x4(const int location, const float* value) {
-    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT)
-        glUniformMatrix4fvARB(location, 1, GL_FALSE, value);
-    else
-        glUniformMatrix4fv(location, 1, GL_FALSE, value);
 }

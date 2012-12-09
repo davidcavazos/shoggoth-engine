@@ -42,6 +42,7 @@ const string GLSL_NORMAL = "_normal";
 
 
 Shader::Shader():
+    m_isShaderCreated(false),
     m_vertexShaderId(0),
     m_fragmentShaderId(0),
     m_shaderProgramId(0),
@@ -55,11 +56,13 @@ Shader::Shader():
 {}
 
 Shader::~Shader() {
-    gl::detachShader(m_fragmentShaderId);
-    gl::detachShader(m_vertexShaderId);
-    gl::deleteShader(m_fragmentShaderId);
-    gl::deleteShader(m_vertexShaderId);
-    gl::deleteProgram(m_shaderProgramId);
+    if (m_isShaderCreated) {
+        gl::detachShader(m_shaderProgramId, m_fragmentShaderId);
+        gl::detachShader(m_shaderProgramId, m_vertexShaderId);
+        gl::deleteShader(m_fragmentShaderId);
+        gl::deleteShader(m_vertexShaderId);
+        gl::deleteProgram(m_shaderProgramId);
+    }
 
     map<int, float*>::const_iterator it;
     for (it = m_uniform1.begin(); it != m_uniform1.end(); ++it)
@@ -120,6 +123,7 @@ bool Shader::loadShaderProgram(const string& vertexFile, const string& fragmentF
         cerr << "Error: shader program not created" << endl;
         return false;
     }
+    m_isShaderCreated = true;
     return true;
 }
 
@@ -218,7 +222,7 @@ bool Shader::loadShaderFile(const unsigned int shaderId, const string& fileName)
         return false;
     }
     file.seekg(0, std::ios::end);
-    size_t size = file.tellg();
+    size_t size = size_t(file.tellg());
     source.resize(size);
     file.seekg(0);
     file.read(&source[0], size);

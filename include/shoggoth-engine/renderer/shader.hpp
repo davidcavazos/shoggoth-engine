@@ -47,6 +47,7 @@ public:
     void setUniformMatrix4x4(const std::string& name, const float* value);
 
 private:
+    bool m_isShaderCreated;
     unsigned int m_vertexShaderId;
     unsigned int m_fragmentShaderId;
     unsigned int m_shaderProgramId;

@@ -31,6 +31,7 @@
 #include <boost/foreach.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include "shoggoth-engine/renderer/opengl.hpp"
 #include "shoggoth-engine/resources/texture.hpp"
 
 using namespace std;
@@ -292,5 +293,20 @@ bool Material::loadFromFile(const std::string& fileName) {
 }
 
 void Material::useMaterial() const {
-    m_shader.useShader();
+    if (OpenGL::areShadersSupported())
+        m_shader.useShader();
+    else {
+        // set material
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, m_diffuseColor.getRGBA());
+        glMaterialfv(GL_FRONT, GL_SPECULAR, m_specularColor.getRGBA());
+        glMaterialfv(GL_FRONT, GL_AMBIENT, m_ambientColor.getRGBA());
+        glMaterialfv(GL_FRONT, GL_EMISSION, m_emissiveColor.getRGBA());
+        glMaterialf(GL_FRONT, GL_SHININESS, m_shininess);
+
+        // set textures
+//         if (mtl->getTextureMap(MATERIAL_DIFFUSE_MAP) != 0)
+//             glBindTexture(GL_TEXTURE_2D, mtl->getTextureMap(MATERIAL_DIFFUSE_MAP)->getId());
+//         else
+//             glBindTexture(GL_TEXTURE_2D, 0);
+    }
 }

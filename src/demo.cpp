@@ -36,6 +36,7 @@
 #include "shoggoth-engine/renderer/renderablemesh.hpp"
 #include "shoggoth-engine/renderer/camera.hpp"
 #include "shoggoth-engine/renderer/light.hpp"
+#include <shoggoth-engine/renderer/opengl.hpp>
 #include "shoggoth-engine/physics/rigidbody.hpp"
 #include "testcomponent.hpp"
 
@@ -72,8 +73,8 @@ Demo::Demo(const string& objectName,
     registerCommand("fire-sphere", boost::bind(&Demo::cmdFireSphere, this, _1));
 
     m_device.setResolution(800, 600);
-    m_renderer.setTextureFilteringMode(TEXTURE_FILTERING_ANISOTROPIC);
-    m_renderer.setAnisotropy(4.0f);
+    OpenGL::setTextureFilteringMode(TEXTURE_FILTERING_ANISOTROPIC);
+    OpenGL::setAnisotropy(4.0f);
 }
 
 Demo::~Demo() {
@@ -130,7 +131,8 @@ void Demo::runMainLoop() {
 //     Terminal::processCommandsQueue();
 //     cout << SDL_GetTicks() - startTime << " ms" << endl;
 
-    cout << "Entering game loop" << endl;
+    cout << endl;
+    cout << "Entering main loop" << endl;
     m_isRunning = true;
     while (m_isRunning) {
         startTime = SDL_GetTicks();
@@ -162,6 +164,8 @@ void Demo::runMainLoop() {
         ss << setw(5) << fixed << setprecision(1) << m_device.getFps() << " fps";
         m_device.setTitle(ss.str());
     }
+    cout << "Ending main loop" << endl;
+    cout << endl;
 }
 
 string Demo::cmdQuit(std::deque<std::string>&) {

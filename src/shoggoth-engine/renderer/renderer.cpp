@@ -53,6 +53,7 @@ Renderer::Renderer(const string& objectName, const Device* device):
     registerAttribute("texture-filtering", boost::bind(&Renderer::cmdTextureFiltering, this, _1));
     registerAttribute("anisotropy", boost::bind(&Renderer::cmdAnisotropy, this, _1));
 
+    OpenGL::detectCapabilities();
     Culling::initialize();
 }
 
@@ -112,36 +113,29 @@ void Renderer::draw() {
         glMultMatrixf(m);
         for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
             const Mesh* mesh = model->getMesh(n);
-            const Material* mtl = mesh->getMaterial();
-
-            mtl->useMaterial();
-
-//             // set material
-//             glMaterialfv(GL_FRONT, GL_DIFFUSE, mtl->getColor(MATERIAL_COLOR_DIFFUSE).rgb);
-//             glMaterialfv(GL_FRONT, GL_SPECULAR, mtl->getColor(MATERIAL_COLOR_SPECULAR).rgb);
-//             glMaterialfv(GL_FRONT, GL_AMBIENT, mtl->getColor(MATERIAL_COLOR_AMBIENT).rgb);
-//             glMaterialfv(GL_FRONT, GL_EMISSION, mtl->getColor(MATERIAL_COLOR_EMISSIVE).rgb);
-//             glMaterialf(GL_FRONT, GL_SHININESS, mtl->getShininess());
-//
-//             // set textures
-//             if (mtl->getTextureMap(MATERIAL_DIFFUSE_MAP) != 0)
-//                 glBindTexture(GL_TEXTURE_2D, mtl->getTextureMap(MATERIAL_DIFFUSE_MAP)->getId());
-//             else
-//                 glBindTexture(GL_TEXTURE_2D, 0);
 
             // draw mesh
-            if (OpenGL::areShadersSupported()) {
+            mesh->getMaterial()->useMaterial();
+            if (OpenGL::areVBOsSupported()) {
                 // bind buffers
-                gl::bindDataBuffer(mesh->getMeshId());
+                gl::bindVboBuffer(mesh->getMeshId());
                 gl::bindIndexBuffer(mesh->getIndicesId());
 
                 // draw
-                gl::vertexAttribPointer(VERTEX_ARRAY_INDEX, 0);
-                gl::vertexAttribPointer(NORMALS_ARRAY_INDEX, mesh->getVerticesBytes());
+                if (OpenGL::areShadersSupported()) {
+                    gl::vertexAttribPointer(VERTEX_ARRAY_INDEX, 0);
+                    gl::vertexAttribPointer(NORMALS_ARRAY_INDEX, mesh->getVerticesBytes());
+                    gl::vertexAttribPointer(UVCOORDS_ARRAY_INDEX, mesh->getVerticesBytes() + mesh->getNormalsBytes());
+                }
+                else {
+                    glVertexPointer(3, GL_FLOAT, 0, 0);
+                    glNormalPointer(GL_FLOAT, 0, (GLvoid*)mesh->getVerticesBytes());
+                    glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(mesh->getVerticesBytes() + mesh->getNormalsBytes()));
+                }
                 gl::drawElements(mesh->getIndicesSize());
 
                 // unbind buffers
-                gl::bindDataBuffer(0);
+                gl::bindVboBuffer(0);
                 gl::bindIndexBuffer(0);
             }
             else {
@@ -203,99 +197,32 @@ void Renderer::updateLegacyLights() const {
 }
 
 void Renderer::uploadModel(unsigned int& meshId, unsigned int& indicesId, const Mesh& mesh) {
-    int bufferSize;
     size_t verticesBytes = mesh.getVerticesBytes();
     size_t normalsBytes = mesh.getNormalsBytes();
     size_t uvCoordsBytes = mesh.getUvCoordsBytes();
     size_t indicesBytes = mesh.getIndicesBytes();
-    switch (m_dataUploadMode) {
-    case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
-        glGenBuffers(1, &meshId);
-        glBindBuffer(GL_ARRAY_BUFFER, meshId);
-        glBufferData(GL_ARRAY_BUFFER,
-                        verticesBytes + normalsBytes + uvCoordsBytes,
-                        0,
-                        GL_STATIC_DRAW);
-        glBufferSubData(GL_ARRAY_BUFFER,
-                        0,
-                        verticesBytes,
-                        mesh.getVerticesPtr());
-        glBufferSubData(GL_ARRAY_BUFFER,
-                        verticesBytes,
-                        normalsBytes,
-                        mesh.getNormalsPtr());
-        glBufferSubData(GL_ARRAY_BUFFER,
-                        verticesBytes + normalsBytes,
-                        uvCoordsBytes,
-                        mesh.getUvCoordsPtr());
-        glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-        if(verticesBytes + normalsBytes + uvCoordsBytes != (size_t)bufferSize)
+    if (OpenGL::areVBOsSupported()) {
+        meshId = gl::genBuffer();
+        gl::bindVboBuffer(meshId);
+        gl::vboBufferBytes(verticesBytes + normalsBytes + uvCoordsBytes);
+        gl::vboBufferSubData(0, verticesBytes, mesh.getVerticesPtr());
+        gl::vboBufferSubData(verticesBytes, normalsBytes, mesh.getNormalsPtr());
+        gl::vboBufferSubData(verticesBytes + normalsBytes, uvCoordsBytes, mesh.getUvCoordsPtr());
+        if (verticesBytes + normalsBytes + uvCoordsBytes != gl::getVboBufferBytes())
             cerr << "Error: data size is mismatch with input array" << endl;
 
-        glGenBuffers(1, &indicesId);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesId);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                        indicesBytes,
-                        mesh.getIndicesPtr(),
-                        GL_STATIC_DRAW);
-        glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-        if(indicesBytes != (size_t)bufferSize)
+        indicesId = gl::genBuffer();
+        gl::bindIndexBuffer(indicesId);
+        gl::indexBufferData(indicesBytes, mesh.getIndicesPtr());
+        if (indicesBytes != gl::getIndexBufferBytes())
             cerr << "Error: data size is mismatch with input array" << endl;
-        break;
-    case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
-        glGenBuffersARB(1, &meshId);
-        glBindBufferARB(GL_ARRAY_BUFFER_ARB, meshId);
-        glBufferDataARB(GL_ARRAY_BUFFER_ARB,
-                        verticesBytes + normalsBytes + uvCoordsBytes,
-                        0,
-                        GL_STATIC_DRAW_ARB);
-        glBufferSubDataARB(GL_ARRAY_BUFFER_ARB,
-                            0,
-                            verticesBytes,
-                            mesh.getVerticesPtr());
-        glBufferSubDataARB(GL_ARRAY_BUFFER_ARB,
-                            verticesBytes,
-                            normalsBytes,
-                            mesh.getNormalsPtr());
-        glBufferSubDataARB(GL_ARRAY_BUFFER_ARB,
-                            verticesBytes + normalsBytes,
-                            uvCoordsBytes,
-                            mesh.getUvCoordsPtr());
-        glGetBufferParameterivARB(GL_ARRAY_BUFFER_ARB, GL_BUFFER_SIZE_ARB, &bufferSize);
-        if(verticesBytes + normalsBytes + uvCoordsBytes != (size_t)bufferSize)
-            cerr << "Error: data size is mismatch with input array" << endl;
-
-        glGenBuffersARB(1, &indicesId);
-        glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, indicesId);
-        glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB,
-                        indicesBytes,
-                        mesh.getIndicesPtr(),
-                        GL_STATIC_DRAW_ARB);
-        glGetBufferParameterivARB(GL_ELEMENT_ARRAY_BUFFER_ARB, GL_BUFFER_SIZE_ARB, &bufferSize);
-        if(indicesBytes != (size_t)bufferSize)
-            cerr << "Error: data size is mismatch with input array" << endl;
-        break;
-    case DATA_UPLOAD_VERTEX_ARRAY:
-        break;
-    default:
-        cerr << "Error: invalid data_upload_t: " << m_dataUploadMode << endl;
     }
 }
 
 void Renderer::deleteModel(const unsigned int meshId, const unsigned int indicesId) {
-    switch (m_dataUploadMode) {
-    case DATA_UPLOAD_VERTEX_BUFFER_OBJECT:
-        glDeleteBuffers(1, &meshId);
-        glDeleteBuffers(1, &indicesId);
-        break;
-    case DATA_UPLOAD_VERTEX_BUFFER_OBJECT_EXT:
-        glDeleteBuffersARB(1, &meshId);
-        glDeleteBuffersARB(1, &indicesId);
-        break;
-    case DATA_UPLOAD_VERTEX_ARRAY:
-        break;
-    default:
-        cerr << "Error: invalid data_upload_t: " << m_dataUploadMode << endl;
+    if (OpenGL::areVBOsSupported()) {
+        gl::deleteBuffer(meshId);
+        gl::deleteBuffer(indicesId);
     }
 }
 
@@ -324,22 +251,22 @@ void Renderer::uploadTexture(unsigned int& textureId, const Texture& texture) {
         cerr << "Error: invalid texture_format_t: " << texture.getTextureFormat() << endl;
         textureFormat = GL_RGBA;
     }
-    switch (m_textureFilteringMode) {
+    switch (OpenGL::textureFilteringMode()) {
     case TEXTURE_FILTERING_NEAREST:
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         break;
     case TEXTURE_FILTERING_ANISOTROPIC:
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, m_anisotropy);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, OpenGL::anisotropy());
         // fallthrough
     case TEXTURE_FILTERING_LINEAR:
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         break;
     default:
-        cerr << "Error: invalid texture_filtering_t: " << m_textureFilteringMode << endl;
+        cerr << "Error: invalid texture_filtering_t: " << OpenGL::textureFilteringMode() << endl;
     }
-    switch (m_mipMapGenerationMode) {
+    switch (OpenGL::mipMapGenerationMode()) {
     case MIPMAP_GENERATION_TEX_PARAMETER:
         glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE); // 1.4
         break;
@@ -351,10 +278,10 @@ void Renderer::uploadTexture(unsigned int& textureId, const Texture& texture) {
                           GLsizei(texture.getHeight()), textureFormat, GL_UNSIGNED_BYTE, texture.getPixels());
         break;
     default:
-        cerr << "Error: invalid mipmap_generation_t: " << m_mipMapGenerationMode << endl;
+        cerr << "Error: invalid mipmap_generation_t: " << OpenGL::mipMapGenerationMode() << endl;
     }
-    if (m_mipMapGenerationMode != MIPMAP_GENERATION_GLU) {
-        switch (m_textureCompressionMode) {
+    if (OpenGL::mipMapGenerationMode() != MIPMAP_GENERATION_GLU) {
+        switch (OpenGL::textureCompressionMode()) {
         case TEXTURE_COMPRESSION_NONE:
             glTexImage2D(GL_TEXTURE_2D, 0, GLint(texture.getBytesPerPixel()), GLint(texture.getWidth()),
                     GLsizei(texture.getHeight()), 0, textureFormat, GL_UNSIGNED_BYTE, texture.getPixels());
@@ -370,7 +297,7 @@ void Renderer::uploadTexture(unsigned int& textureId, const Texture& texture) {
                     GLsizei(texture.getHeight()), 0, textureFormat, GL_UNSIGNED_BYTE, texture.getPixels());
             break;
         default:
-            cerr << "Error: invalid texture_compression_t: " << m_textureCompressionMode << endl;
+            cerr << "Error: invalid texture_compression_t: " << OpenGL::textureCompressionMode() << endl;
         }
     }
 }
@@ -409,15 +336,7 @@ Renderer::Renderer(const Renderer& rhs):
     m_activeCamera(rhs.m_activeCamera),
     m_cameras(rhs.m_cameras),
     m_lights(rhs.m_lights),
-    m_models(rhs.m_models),
-    m_dataUploadMode(rhs.m_dataUploadMode),
-    m_mipMapGenerationMode(rhs.m_mipMapGenerationMode),
-    m_isAnisotropicFilteringSupported(rhs.m_isAnisotropicFilteringSupported),
-    m_maxAnisotropy(rhs.m_maxAnisotropy),
-    m_anisotropy(rhs.m_anisotropy),
-    m_textureFilteringMode(rhs.m_textureFilteringMode),
-    m_textureCompressionMode(rhs.m_textureCompressionMode),
-    m_renderingMethod(rhs.m_renderingMethod)
+    m_models(rhs.m_models)
 {
     cerr << "Renderer copy constructor should not be called" << endl;
 }
@@ -510,7 +429,7 @@ void Renderer::initCamera() {
     glLoadIdentity();
     switch (m_activeCamera->getCameraType()) {
     case CAMERA_ORTHOGRAPHIC:
-        openGLProjectionMatrixOrthographic(
+        OpenGL::projectionMatrixOrthographic(
             m_activeCamera->getOrthoWidth(),
             m_activeCamera->getOrthoHeight(),
             m_activeCamera->getNearDistance(),
@@ -518,7 +437,7 @@ void Renderer::initCamera() {
         );
         break;
     case CAMERA_PROJECTION:
-        openGLProjectionMatrixPerspective(
+        OpenGL::projectionMatrixPerspective(
             m_activeCamera->getPerspectiveFOV(),
             m_activeCamera->getAspectRatio(),
             m_activeCamera->getNearDistance(),
@@ -528,7 +447,7 @@ void Renderer::initCamera() {
     default:
         cerr << "Error: invalid camera_t: " << m_activeCamera->getCameraType() << endl;
     }
-    glMultMatrixf(m_projectionMatrix);
+    glMultMatrixf(OpenGL::projectionMatrix());
     glMatrixMode(GL_MODELVIEW);
 }
 
@@ -595,9 +514,7 @@ string Renderer::cmdTextureFiltering(deque<string>& args) {
     if (args.size() < 1)
         return "Error: too few arguments";
     texture_filtering_t filtering = (texture_filtering_t)boost::lexical_cast<int>(args[0]);
-    if (filtering == TEXTURE_FILTERING_ANISOTROPIC && !m_isAnisotropicFilteringSupported)
-        return "Anisotropic texture filtering not supported, ignoring change";
-    m_textureFilteringMode = filtering;
+    OpenGL::setTextureFilteringMode(filtering);
     return "";
 }
 
@@ -605,6 +522,6 @@ string Renderer::cmdAnisotropy(deque<string>& args) {
     if (args.size() < 1)
         return "Error: too few arguments";
     float anisotropy = boost::lexical_cast<float>(args[0]);
-    setAnisotropy(anisotropy);
-    return string("Anisotropy set to: ") + boost::lexical_cast<string>(m_anisotropy);
+    OpenGL::setAnisotropy(anisotropy);
+    return "";
 }
