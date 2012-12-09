@@ -63,36 +63,33 @@ Model* Resources::generateBox(const string& identifier, const double lengthX, co
     float x = static_cast<float>(lengthX * 0.5);
     float y = static_cast<float>(lengthY * 0.5);
     float z = static_cast<float>(lengthZ * 0.5);
-    float vertices[] = {
-         x,  y,  z,  -x,  y,  z,  -x, -y,  z,   x, -y,  z, // v0,v1,v2,v3 (front)
-         x,  y,  z,   x, -y,  z,   x, -y, -z,   x,  y, -z, // v0,v3,v4,v5 (right)
-         x,  y,  z,   x,  y, -z,  -x,  y, -z,  -x,  y,  z, // v0,v5,v6,v1 (top)
-        -x,  y,  z,  -x,  y, -z,  -x, -y, -z,  -x, -y,  z, // v1,v6,v7,v2 (left)
-        -x, -y, -z,   x, -y, -z,   x, -y,  z,  -x, -y,  z, // v7,v4,v3,v2 (bottom)
-         x, -y, -z,  -x, -y, -z,  -x,  y, -z,   x,  y, -z  // v4,v7,v6,v5 (back)
-    };
-    float normals[] = {
-         0,  0,  1,   0,  0,  1,   0,  0,  1,   0,  0,  1, // v0,v1,v2,v3 (front)
-         1,  0,  0,   1,  0,  0,   1,  0,  0,   1,  0,  0, // v0,v3,v4,v5 (right)
-         0,  1,  0,   0,  1,  0,   0,  1,  0,   0,  1,  0, // v0,v5,v6,v1 (top)
-        -1,  0,  0,  -1,  0,  0,  -1,  0,  0,  -1,  0,  0, // v1,v6,v7,v2 (left)
-         0, -1,  0,   0, -1,  0,   0, -1,  0,   0, -1,  0, // v7,v4,v3,v2 (bottom)
-         0,  0, -1,   0,  0, -1,   0,  0, -1,   0,  0, -1  // v4,v7,v6,v5 (back)
-    };
-    unsigned int indices[] = {
-         0,  1,  2,   2,  3,  0,  // front
-         4,  5,  6,   6,  7,  4,  // right
-         8,  9, 10,  10, 11,  8,  // top
-        12, 13, 14,  14, 15, 12,  // left
-        16, 17, 18,  18, 19, 16,  // bottom
-        20, 21, 22,  22, 23, 20   // back
+    float vertices[][12] = {
+        { x,  y,  z,  -x,  y,  z,  -x, -y,  z,   x, -y,  z}, // front
+        { x,  y,  z,   x,  y, -z,  -x,  y, -z,  -x,  y,  z}, // top
+        {-x, -y, -z,   x, -y, -z,   x, -y,  z,  -x, -y,  z}, // bottom
+        { x,  y,  z,   x, -y,  z,   x, -y, -z,   x,  y, -z}, // right
+        {-x,  y,  z,  -x,  y, -z,  -x, -y, -z,  -x, -y,  z}, // left
+        { x, -y, -z,  -x, -y, -z,  -x,  y, -z,   x,  y, -z}  // back
     };
 
+    float normals[][12] = {
+        { 0,  0,  1,   0,  0,  1,   0,  0,  1,   0,  0,  1}, // front
+        { 0,  1,  0,   0,  1,  0,   0,  1,  0,   0,  1,  0}, // top
+        { 0, -1,  0,   0, -1,  0,   0, -1,  0,   0, -1,  0}, // bottom
+        { 1,  0,  0,   1,  0,  0,   1,  0,  0,   1,  0,  0}, // right
+        {-1,  0,  0,  -1,  0,  0,  -1,  0,  0,  -1,  0,  0}, // left
+        { 0,  0, -1,   0,  0, -1,   0,  0, -1,   0,  0, -1}  // back
+    };
+
+    unsigned int indices[] = {0,  1,  2,   2,  3,  0};
+
     model = new Model(identifier, m_renderer);
-    model->setTotalMeshes(1);
-    model->mesh(0)->setVertices(vertices, 72);
-    model->mesh(0)->setNormals(normals, 72);
-    model->mesh(0)->setIndices(indices, 36);
+    model->setTotalMeshes(6);
+    for (size_t i = 0; i < model->getTotalMeshes(); ++i) {
+        model->mesh(i)->setVertices(vertices[i], 12);
+        model->mesh(i)->setNormals(normals[i], 12);
+        model->mesh(i)->setIndices(indices, 6);
+    }
     registerModel(model);
     model->uploadToGPU();
     return model;

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<material>
+    <_diffuseColor>1 0 0 1</_diffuseColor>
+</material>
+<customVertexShader>shaders/default.vert</customVertexShader>
+<customFragmentShader>shaders/gouraud.frag</customFragmentShader>

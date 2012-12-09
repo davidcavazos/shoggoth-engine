@@ -215,13 +215,15 @@ bool Material::loadFromFile(const std::string& fileName) {
     ptree tree;
     read_xml(fileName, tree, xml_parser::trim_whitespace);
 
-    m_vertexShaderFile = tree.get<string>(MATERIAL_CUSTOM_VERTEX_SHADER, MATERIAL_DEFAULT_VERTEX_SHADER);
-    m_fragmentShaderFile = tree.get<string>(MATERIAL_CUSTOM_FRAGMENT_SHADER, MATERIAL_DEFAULT_FRAGMENT_SHADER);
+    if (OpenGL::areShadersSupported()) {
+        m_vertexShaderFile = tree.get<string>(MATERIAL_CUSTOM_VERTEX_SHADER, MATERIAL_DEFAULT_VERTEX_SHADER);
+        m_fragmentShaderFile = tree.get<string>(MATERIAL_CUSTOM_FRAGMENT_SHADER, MATERIAL_DEFAULT_FRAGMENT_SHADER);
 
-    string subdirectory = fileName.substr(0, fileName.find_first_of("/\\") + 1);
-    m_vertexShaderFile = subdirectory + m_vertexShaderFile;
-    m_fragmentShaderFile = subdirectory + m_fragmentShaderFile;
-    m_shader.loadShaderProgram(m_vertexShaderFile, m_fragmentShaderFile);
+        string subdirectory = fileName.substr(0, fileName.find_first_of("/\\") + 1);
+        m_vertexShaderFile = subdirectory + m_vertexShaderFile;
+        m_fragmentShaderFile = subdirectory + m_fragmentShaderFile;
+        m_shader.loadShaderProgram(m_vertexShaderFile, m_fragmentShaderFile);
+    }
 
     if (tree.find(XML_ROOT_NODE) == tree.not_found()) {
         cerr << "Error loading material: <material> root node not found" << endl;
@@ -232,58 +234,71 @@ bool Material::loadFromFile(const std::string& fileName) {
             continue;
         else if (v.first.compare(MATERIAL_DIFFUSE_COLOR) == 0) {
             m_diffuseColor = tree.get<Color4>(XML_ROOT_NODE + "." + MATERIAL_DIFFUSE_COLOR);
-            m_shader.setUniform4(MATERIAL_DIFFUSE_COLOR, m_diffuseColor.getRGBA());
+            if (OpenGL::areShadersSupported())
+                m_shader.setUniform4(MATERIAL_DIFFUSE_COLOR, m_diffuseColor.getRGBA());
         }
         else if (v.first.compare(MATERIAL_AMBIENT_COLOR) == 0) {
             m_ambientColor = tree.get<Color4>(XML_ROOT_NODE + "." + MATERIAL_AMBIENT_COLOR);
-            m_shader.setUniform4(MATERIAL_AMBIENT_COLOR, m_ambientColor.getRGBA());
+            if (OpenGL::areShadersSupported())
+                m_shader.setUniform4(MATERIAL_AMBIENT_COLOR, m_ambientColor.getRGBA());
         }
         else if (v.first.compare(MATERIAL_EMISSIVE_COLOR) == 0) {
             m_emissiveColor = tree.get<Color4>(XML_ROOT_NODE + "." + MATERIAL_EMISSIVE_COLOR);
-            m_shader.setUniform4(MATERIAL_EMISSIVE_COLOR, m_emissiveColor.getRGBA());
+            if (OpenGL::areShadersSupported())
+                m_shader.setUniform4(MATERIAL_EMISSIVE_COLOR, m_emissiveColor.getRGBA());
         }
         else if (v.first.compare(MATERIAL_SPECULAR_COLOR) == 0) {
             m_specularColor = tree.get<Color4>(XML_ROOT_NODE + "." + MATERIAL_SPECULAR_COLOR);
-            m_shader.setUniform4(MATERIAL_SPECULAR_COLOR, m_specularColor.getRGBA());
+            if (OpenGL::areShadersSupported())
+                m_shader.setUniform4(MATERIAL_SPECULAR_COLOR, m_specularColor.getRGBA());
         }
         else if (v.first.compare(MATERIAL_SHININESS) == 0) {
             m_shininess = tree.get<float>(XML_ROOT_NODE + "." + MATERIAL_SHININESS);
-            m_shader.setUniform1(MATERIAL_SHININESS, m_shininess);
+            if (OpenGL::areShadersSupported())
+                m_shader.setUniform1(MATERIAL_SHININESS, m_shininess);
         }
         else if (v.first.compare(MATERIAL_OPACITY) == 0) {
             m_opacity = tree.get<float>(XML_ROOT_NODE + "." + MATERIAL_OPACITY);
-            m_shader.setUniform1(MATERIAL_OPACITY, m_opacity);
+            if (OpenGL::areShadersSupported())
+                m_shader.setUniform1(MATERIAL_OPACITY, m_opacity);
         }
         else { // custom attribute
             string name = XML_ROOT_NODE + "." + v.first;
             string type = tree.get<string>(name + "." + XML_ATTRIBUTE + "." + MATERIAL_CUSTOM_ATTRIBUTE_TYPE);
             if (type.compare(TYPE_FLOAT) == 0) {
                 float value = tree.get<float>(name);
-                m_shader.setUniform1(v.first, value);
+                if (OpenGL::areShadersSupported())
+                    m_shader.setUniform1(v.first, value);
             }
             else if (type.compare(TYPE_VEC4) == 0) {
                 vec4_t vec4 = tree.get<vec4_t>(name);
-                m_shader.setUniform4(v.first, vec4.v);
+                if (OpenGL::areShadersSupported())
+                    m_shader.setUniform4(v.first, vec4.v);
             }
             else if (type.compare(TYPE_VEC3) == 0) {
                 vec3_t vec3 = tree.get<vec3_t>(name);
-                m_shader.setUniform3(v.first, vec3.v);
+                if (OpenGL::areShadersSupported())
+                    m_shader.setUniform3(v.first, vec3.v);
             }
             else if (type.compare(TYPE_VEC2) == 0) {
                 vec2_t vec2 = tree.get<vec2_t>(name);
-                m_shader.setUniform2(v.first, vec2.v);
+                if (OpenGL::areShadersSupported())
+                    m_shader.setUniform2(v.first, vec2.v);
             }
             else if (type.compare(TYPE_MAT4) == 0) {
                 mat4_t mat4 = tree.get<mat4_t>(name);
-                m_shader.setUniformMatrix4x4(v.first, mat4.m);
+                if (OpenGL::areShadersSupported())
+                    m_shader.setUniformMatrix4x4(v.first, mat4.m);
             }
             else if (type.compare(TYPE_MAT3) == 0) {
                 mat3_t mat3 = tree.get<mat3_t>(name);
-                m_shader.setUniformMatrix3x3(v.first, mat3.m);
+                if (OpenGL::areShadersSupported())
+                    m_shader.setUniformMatrix3x3(v.first, mat3.m);
             }
             else if (type.compare(TYPE_MAT2) == 0) {
                 mat2_t mat2 = tree.get<mat2_t>(name);
-                m_shader.setUniformMatrix2x2(v.first, mat2.m);
+                if (OpenGL::areShadersSupported())
+                    m_shader.setUniformMatrix2x2(v.first, mat2.m);
             }
             else
                 cerr << "Error: undefined data type for attribute: " << type << " " << name << endl;

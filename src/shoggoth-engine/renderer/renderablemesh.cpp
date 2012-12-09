@@ -37,6 +37,8 @@ using namespace std;
 using namespace boost::property_tree;
 
 const string XML_RENDERABLEMESH_MODEL = "model";
+const string XML_MATERIAL = "material";
+const string XML_DEFAULT_MATERIAL = "**default**";
 
 
 RenderableMesh::RenderableMesh(Entity* const _entity, Renderer* renderer, Resources* resources):
@@ -90,8 +92,22 @@ void RenderableMesh::loadFromPtree(const string& path, const ptree& tree) {
         ss >> file;
         loadFromFile(file);
     }
-    else
+    else {
         cerr << "Error: unknown renderablemesh model type: " << _model << endl;
+        return;
+    }
+
+    // apply material to all meshes
+    string materialName;
+    for (size_t i = 0; i < m_model->getTotalMeshes(); ++i) {
+        materialName = tree.get<string>(xmlPath(path + XML_MATERIAL + boost::lexical_cast<string>(i)), "");
+        if (materialName.empty())
+            materialName = tree.get<string>(xmlPath(path + XML_MATERIAL), XML_DEFAULT_MATERIAL);
+        Material material;
+        if (materialName.compare(XML_DEFAULT_MATERIAL) != 0)
+            material.loadFromFile(materialName);
+        m_model->mesh(i)->setMaterial(material);
+    }
 }
 
 void RenderableMesh::saveToPtree(const string& path, ptree& tree) const {

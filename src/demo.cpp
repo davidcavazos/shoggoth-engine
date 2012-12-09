@@ -94,7 +94,7 @@ void Demo::loadScene() {
     // icosphere10      5,242,880
 
     cout << "Loading scene..." << endl;
-    m_scene.loadFromXML("scene.xml");
+    m_scene.loadFromXML("assets/scenes/demo.xml");
 }
 
 void Demo::bindInputs() {
