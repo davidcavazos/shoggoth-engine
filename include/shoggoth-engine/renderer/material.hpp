@@ -42,10 +42,13 @@ public:
 
     Material& operator=(const Material& rhs);
 
+    const std::string& getFileName() const;
+
     bool loadFromFile(const std::string& fileName);
     void useMaterial() const;
 
 private:
+    std::string m_fileName;
     Shader m_shader;
     std::string m_vertexShaderFile;
     std::string m_fragmentShaderFile;
@@ -66,5 +69,11 @@ private:
     Texture* m_refractionMap;
     Texture* m_lightMap;
 };
+
+
+
+inline const std::string& Material::getFileName() const {
+    return m_fileName;
+}
 
 #endif // MATERIAL_HPP

@@ -112,6 +112,11 @@ void RenderableMesh::loadFromPtree(const string& path, const ptree& tree) {
 
 void RenderableMesh::saveToPtree(const string& path, ptree& tree) const {
     tree.put(xmlPath(path + XML_RENDERABLEMESH_MODEL), getDescription());
+
+    for (size_t i = 0; i < m_model->getTotalMeshes(); ++i) {
+        if (!m_model->mesh(i)->getMaterial()->getFileName().empty())
+            tree.put(xmlPath(path + XML_MATERIAL), m_model->mesh(i)->getMaterial()->getFileName());
+    }
 }
 
 

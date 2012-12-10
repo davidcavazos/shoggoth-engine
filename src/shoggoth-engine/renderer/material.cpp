@@ -129,6 +129,7 @@ istream& operator>>(istream& in, mat4_t& m) {
 
 
 Material::Material():
+    m_fileName(),
     m_shader(),
     m_vertexShaderFile(),
     m_fragmentShaderFile(),
@@ -151,6 +152,7 @@ Material::Material():
 {}
 
 Material::Material(const Material& rhs):
+    m_fileName(rhs.m_fileName),
     m_shader(rhs.m_shader),
     m_vertexShaderFile(rhs.m_vertexShaderFile),
     m_fragmentShaderFile(rhs.m_fragmentShaderFile),
@@ -175,6 +177,7 @@ Material::Material(const Material& rhs):
 Material& Material::operator=(const Material& rhs) {
     if (this == &rhs)
         return *this;
+    m_fileName = rhs.m_fileName;
     m_shader = rhs.m_shader;
     m_vertexShaderFile = rhs.m_vertexShaderFile;
     m_fragmentShaderFile = rhs.m_fragmentShaderFile;
@@ -205,21 +208,22 @@ Material& Material::operator=(const Material& rhs) {
 // }
 
 bool Material::loadFromFile(const std::string& fileName) {
-    ifstream fin(fileName.c_str());
+    m_fileName = fileName;
+    ifstream fin(m_fileName.c_str());
     if (!fin.is_open() || !fin.good()) {
-        cerr << "Error: could not open material file: " << fileName << endl;
+        cerr << "Error: could not open material file: " << m_fileName << endl;
         return false;
     }
     fin.close();
 
     ptree tree;
-    read_xml(fileName, tree, xml_parser::trim_whitespace);
+    read_xml(m_fileName, tree, xml_parser::trim_whitespace);
 
     if (OpenGL::areShadersSupported()) {
         m_vertexShaderFile = tree.get<string>(MATERIAL_CUSTOM_VERTEX_SHADER, MATERIAL_DEFAULT_VERTEX_SHADER);
         m_fragmentShaderFile = tree.get<string>(MATERIAL_CUSTOM_FRAGMENT_SHADER, MATERIAL_DEFAULT_FRAGMENT_SHADER);
 
-        string subdirectory = fileName.substr(0, fileName.find_first_of("/\\") + 1);
+        string subdirectory = m_fileName.substr(0, m_fileName.find_first_of("/\\") + 1);
         m_vertexShaderFile = subdirectory + m_vertexShaderFile;
         m_fragmentShaderFile = subdirectory + m_fragmentShaderFile;
         m_shader.loadShaderProgram(m_vertexShaderFile, m_fragmentShaderFile);
