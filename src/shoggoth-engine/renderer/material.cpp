@@ -227,7 +227,7 @@ bool Material::loadFromFile(const std::string& fileName) {
         m_vertexShaderFile = tree.get<string>(MATERIAL_CUSTOM_VERTEX_SHADER, MATERIAL_DEFAULT_VERTEX_SHADER);
         m_fragmentShaderFile = tree.get<string>(MATERIAL_CUSTOM_FRAGMENT_SHADER, MATERIAL_DEFAULT_FRAGMENT_SHADER);
 
-        string subdirectory = m_fileName.substr(0, m_fileName.find_first_of("/\\") + 1);
+        string subdirectory = m_fileName.substr(0, m_fileName.find_last_of("/\\") + 1);
         m_vertexShaderFile = subdirectory + m_vertexShaderFile;
         m_fragmentShaderFile = subdirectory + m_fragmentShaderFile;
         m_shader.loadShaderProgram(m_vertexShaderFile, m_fragmentShaderFile);
