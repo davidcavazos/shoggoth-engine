@@ -33,8 +33,7 @@
 #include <bullet/BulletCollision/CollisionShapes/btShapeHull.h>
 #include "shoggoth-engine/linearmath/transform.hpp"
 #include "shoggoth-engine/kernel/entity.hpp"
-#include "shoggoth-engine/resources/model.hpp"
-#include "shoggoth-engine/resources/resources.hpp"
+#include "shoggoth-engine/kernel/model.hpp"
 #include "shoggoth-engine/physics/physicsworld.hpp"
 
 using namespace std;
@@ -55,9 +54,8 @@ const string XML_RIGIDBODY_GRAVITY = "gravity";
 
 
 
-RigidBody::RigidBody(Entity* const _entity, Resources* resources, PhysicsWorld* physicsWorld):
+RigidBody::RigidBody(Entity*const _entity, PhysicsWorld* physicsWorld):
     Component(COMPONENT_RIGIDBODY, _entity),
-    m_resources(resources),
     m_physicsWorld(physicsWorld),
     m_shapeId(""),
     m_rigidBody(0),
@@ -287,13 +285,14 @@ void RigidBody::addConvexHull(const double mass, const string& fileName) {
     btCollisionShape* shape = m_physicsWorld->findCollisionShape(m_shapeId);
     if (shape == 0) {
         // build original mesh from file
-        Model* model = m_resources->generateModelFromFile(fileName);
+        Model model("convex-hull");
+        model.generateFromFile(fileName);
         cout << "Generating convex hull from file: " << fileName << endl;
         vector<float> points;
-        for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
-            points.reserve(points.size() + model->mesh(n)->getVerticesSize());
-            for (size_t i = 0; i < model->mesh(n)->getVerticesSize(); ++i) {
-                points.push_back(model->mesh(n)->getVertex(i));
+        for (size_t n = 0; n < model.getTotalMeshes(); ++n) {
+            points.reserve(points.size() + model.mesh(n)->getVerticesSize());
+            for (size_t i = 0; i < model.mesh(n)->getVerticesSize(); ++i) {
+                points.push_back(model.mesh(n)->getVertex(i));
             }
         }
         btConvexShape* originalConvexShape = new btConvexHullShape(&points[0], points.size() / 3, sizeof(float) * 3);
@@ -319,16 +318,17 @@ void RigidBody::addConcaveHull(const double mass, const string& fileName) {
     btCollisionShape* shape = m_physicsWorld->findCollisionShape(m_shapeId);
     if (shape == 0) {
         // build mesh from file
-        Model* model = m_resources->generateModelFromFile(fileName);
+        Model model("convex-hull");
+        model.generateFromFile(fileName);
         cout << "Generating concave hull from file: " << fileName << endl;
         btTriangleIndexVertexArray* triangles = new btTriangleIndexVertexArray();
-        for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
+        for (size_t n = 0; n < model.getTotalMeshes(); ++n) {
             btIndexedMesh indexedMesh;
-            indexedMesh.m_numTriangles = model->mesh(n)->getIndicesSize() / 3;
-            indexedMesh.m_triangleIndexBase = (const unsigned char*)model->mesh(n)->getIndicesPtr();
+            indexedMesh.m_numTriangles = model.mesh(n)->getIndicesSize() / 3;
+            indexedMesh.m_triangleIndexBase = (const unsigned char*)(model.mesh(n)->getIndicesPtr());
             indexedMesh.m_triangleIndexStride = sizeof(unsigned int);
-            indexedMesh.m_numVertices = model->mesh(n)->getVerticesSize();
-            indexedMesh.m_vertexBase = (const unsigned char*)model->mesh(n)->getVerticesPtr();
+            indexedMesh.m_numVertices = model.mesh(n)->getVerticesSize();
+            indexedMesh.m_vertexBase = (const unsigned char*)(model.mesh(n)->getVerticesPtr());
             indexedMesh.m_vertexStride = sizeof(float);
             triangles->addIndexedMesh(indexedMesh);
         }
@@ -440,7 +440,6 @@ void RigidBody::saveToPtree(const string& path, ptree& tree) const {
 
 RigidBody::RigidBody(const RigidBody& rhs):
     Component(rhs.m_type, rhs.m_entity),
-    m_resources(rhs.m_resources),
     m_physicsWorld(rhs.m_physicsWorld),
     m_shapeId(rhs.m_shapeId),
     m_rigidBody(rhs.m_rigidBody),

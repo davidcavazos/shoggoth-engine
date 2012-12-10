@@ -24,41 +24,57 @@
  */
 
 
-#ifndef RESOURCES_HPP
-#define RESOURCES_HPP
+#ifndef MODEL_HPP
+#define MODEL_HPP
 
 #include <string>
-#include <boost/unordered_map.hpp>
-#include "shoggoth-engine/kernel/commandobject.hpp"
+#include "mesh.hpp"
 
-class Renderer;
-class Model;
-class Texture;
+class ModelLoader;
 
-class Resources: public CommandObject {
+class Model {
 public:
-    Resources(const std::string& objectName, Renderer* renderer);
-    ~Resources();
+    friend class ModelLoader;
 
-    Model* generateBox(const std::string& identifier, const double lengthX, const double lengthY, const double lengthZ);
-    Model* generateModelFromFile(const std::string& fileName);
-    Texture* generateTextureFromFile(const std::string& fileName);
-    std::string listsToString();
+    Model(const std::string& identifier);
+
+    const std::string& getIdentifier() const;
+    size_t getTotalMeshes() const;
+    const Mesh* getMesh(const size_t index) const;
+    Mesh* mesh(const size_t index);
+    void setIdentifier(const std::string& identifier);
+
+    void generateBox(const double lengthX, const double lengthY, const double lengthZ);
+    void generateFromFile(const std::string& fileName);
 
 private:
-    typedef boost::unordered_map<std::string, Model*> models_map_t;
-    typedef boost::unordered_map<std::string, Texture*> textures_map_t;
-    Renderer* m_renderer;
-    models_map_t m_modelsMap;
-    textures_map_t m_texturesMap;
+    std::string m_identifier;
+    std::vector<Mesh> m_meshes;
 
-    Resources(const Resources& rhs);
-    Resources& operator=(const Resources&);
-
-    void registerModel(Model* model);
-    void registerTexture(Texture* texture);
-    Model* findModel(const std::string& identifier);
-    Texture* findTexture(const std::string& fileName);
+    Model(const Model& rhs);
+    Model& operator=(const Model&);
 };
 
-#endif // RESOURCES_HPP
+
+
+inline const std::string& Model::getIdentifier() const {
+    return m_identifier;
+}
+
+inline size_t Model::getTotalMeshes() const {
+    return m_meshes.size();
+}
+
+inline const Mesh* Model::getMesh(const size_t index) const {
+    return &m_meshes[index];
+}
+
+inline Mesh* Model::mesh(const size_t index) {
+    return &m_meshes[index];
+}
+
+inline void Model::setIdentifier(const std::string& identifier) {
+    m_identifier = identifier;
+}
+
+#endif // MODEL_HPP

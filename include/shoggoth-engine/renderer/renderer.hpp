@@ -29,6 +29,7 @@
 
 #include <string>
 #include <set>
+#include <boost/unordered_map.hpp>
 #include "shoggoth-engine/kernel/commandobject.hpp"
 
 class Device;
@@ -38,6 +39,8 @@ class Camera;
 class Light;
 class RenderableMesh;
 class Mesh;
+class Model;
+class Material;
 class Texture;
 
 class Renderer: public CommandObject {
@@ -52,13 +55,23 @@ public:
     void unregisterLight(Light* light);
     void registerRenderableMesh(RenderableMesh* model);
     void unregisterRenderableMesh(RenderableMesh* model);
+
+    void registerModel(Model* model);
+    void unregisterModel(Model* model);
+    Model* findModel(const std::string& identifier);
+    void registerTexture(Texture* texture);
+    void unregisterTexture(Texture* texture);
+    Texture* findTexture(const std::string& fileName);
+    void registerMaterial(Material* material);
+    void unregisterMaterial(Material* material);
+    Material* findMaterial(const std::string& fileName);
     void setAmbientLight(const float r, const float g, const float b, const float a = 1.0f);
 
     void updateLegacyLights() const;
-    void uploadModel(unsigned int& meshId, unsigned int& indicesId, const Mesh& mesh);
-    void deleteModel(const unsigned int meshId, const unsigned int indicesId);
-    void uploadTexture(unsigned int& textureId, const Texture& texture);
-    void deleteTexture(const unsigned int textureId);
+    void uploadMeshToGPU(Mesh& mesh);
+    void deleteMeshFromGPU(const Mesh& mesh);
+    void uploadTextureToGPU(Texture& texture);
+    void deleteTextureFromGPU(const Texture& texture);
     std::string listsToString() const;
 
 private:
@@ -66,7 +79,11 @@ private:
     Camera* m_activeCamera;
     std::set<Camera*> m_cameras;
     std::set<Light*> m_lights;
-    std::set<RenderableMesh*> m_models;
+    std::set<RenderableMesh*> m_renderableMeshes;
+    boost::unordered_map<std::string, Model*> m_models;
+    boost::unordered_map<std::string, Material*> m_materials;
+    boost::unordered_map<std::string, Texture*> m_textures;
+    Material* m_defaultMaterial;
 
     Renderer(const Renderer& rhs);
     Renderer& operator=(const Renderer& rhs);
@@ -102,11 +119,11 @@ inline void Renderer::unregisterLight(Light* light) {
 }
 
 inline void Renderer::registerRenderableMesh(RenderableMesh* model) {
-    m_models.insert(model);
+    m_renderableMeshes.insert(model);
 }
 
 inline void Renderer::unregisterRenderableMesh(RenderableMesh* model) {
-    m_models.erase(model);
+    m_renderableMeshes.erase(model);
 }
 
 #endif // RENDERER_HPP

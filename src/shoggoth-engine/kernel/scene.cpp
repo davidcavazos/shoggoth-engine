@@ -45,13 +45,11 @@ Scene::Scene(const std::string& objectName,
              const ComponentFactory* componentFactory,
              const Device* device,
              Renderer* renderer,
-             Resources* resources,
              PhysicsWorld* physicsWorld):
     CommandObject(objectName),
     m_componentFactory(componentFactory),
     m_device(device),
     m_renderer(renderer),
-    m_resources(resources),
     m_physicsWorld(physicsWorld),
     m_rootName(rootNodeName),
     m_root(new Entity(0, m_rootName, m_device))
@@ -134,7 +132,6 @@ Scene::Scene(const Scene& rhs):
     m_componentFactory(rhs.m_componentFactory),
     m_device(rhs.m_device),
     m_renderer(rhs.m_renderer),
-    m_resources(rhs.m_resources),
     m_physicsWorld(rhs.m_physicsWorld),
     m_rootName(rhs.m_rootName),
     m_root(rhs.m_root)

@@ -52,7 +52,6 @@ const double MISSILE_SIZE = 0.5;
 Demo::Demo(const string& objectName,
            const string& deviceName,
            const string& rendererName,
-           const string& resourcesName,
            const string& physicsWorldName,
            const string& sceneName,
            const string& rootNodeName):
@@ -60,10 +59,9 @@ Demo::Demo(const string& objectName,
     m_isRunning(false),
     m_device(deviceName),
     m_renderer(rendererName, &m_device),
-    m_resources(resourcesName, &m_renderer),
     m_physicsWorld(physicsWorldName),
-    m_componentFactory(&m_renderer, &m_resources, &m_physicsWorld),
-    m_scene(sceneName, rootNodeName, &m_componentFactory, &m_device, &m_renderer, &m_resources, &m_physicsWorld)
+    m_componentFactory(&m_renderer, &m_physicsWorld),
+    m_scene(sceneName, rootNodeName, &m_componentFactory, &m_device, &m_renderer, &m_physicsWorld)
 {
     registerCommand("quit", boost::bind(&Demo::cmdQuit, this, _1));
     registerCommand("run", boost::bind(&Demo::cmdRunCommand, this, _1));
@@ -214,10 +212,10 @@ string Demo::cmdFireCube(std::deque<std::string>&) {
         cube->setPositionAbs(camera->getPositionAbs() + orientationUnit);
         cube->setOrientationAbs(camera->getOrientationAbs());
 
-        RenderableMesh* cubeMesh = new RenderableMesh(cube, &m_renderer, &m_resources);
+        RenderableMesh* cubeMesh = new RenderableMesh(cube, &m_renderer);
         cubeMesh->loadBox(MISSILE_SIZE, MISSILE_SIZE, MISSILE_SIZE);
 
-        RigidBody* cubeBody = new RigidBody(cube, &m_resources, &m_physicsWorld);
+        RigidBody* cubeBody = new RigidBody(cube, &m_physicsWorld);
         cubeBody->addBox(1.0, MISSILE_SIZE, MISSILE_SIZE, MISSILE_SIZE);
         cubeBody->setLinearVelocity(orientationUnit * FIRE_SPEED);
     }
@@ -236,10 +234,10 @@ string Demo::cmdFireSphere(std::deque<std::string>&) {
         model->setOrientationAbs(camera->getOrientationAbs());
 
         string modelName = "assets/meshes/materialtest.dae";
-        RenderableMesh* cubeMesh = new RenderableMesh(model, &m_renderer, &m_resources);
+        RenderableMesh* cubeMesh = new RenderableMesh(model, &m_renderer);
         cubeMesh->loadFromFile(modelName);
 
-        RigidBody* cubeBody = new RigidBody(model, &m_resources, &m_physicsWorld);
+        RigidBody* cubeBody = new RigidBody(model, &m_physicsWorld);
         cubeBody->addConvexHull(1.0, modelName);
         cubeBody->setLinearVelocity(orientationUnit * FIRE_SPEED);
     }

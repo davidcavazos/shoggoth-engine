@@ -27,6 +27,7 @@
 #ifndef RENDERABLEMESH_HPP
 #define RENDERABLEMESH_HPP
 
+#include <vector>
 #include "shoggoth-engine/kernel/component.hpp"
 
 const std::string COMPONENT_RENDERABLEMESH = "renderablemesh";
@@ -35,28 +36,29 @@ const std::string RENDERABLEMESH_BOX_DESCRIPTION = "$box";
 const std::string RENDERABLEMESH_FILE_DESCRIPTION = "$file";
 
 class Renderer;
-class Resources;
 class Model;
+class Material;
 
 class RenderableMesh: public Component {
 public:
-    RenderableMesh(Entity* const _entity, Renderer* renderer, Resources* resources);
+    RenderableMesh(Entity* const _entity, Renderer* renderer);
     ~RenderableMesh();
 
     const Model* getModel() const;
-
+    const Material* getMaterial(const size_t meshIndex) const;
     Model* model();
 
     void loadBox(const double lengthX, const double lengthY, const double lengthZ);
     void loadFromFile(const std::string& fileName);
+    void assignMaterial(const size_t meshIndex, const std::string& fileName);
 
     void loadFromPtree(const std::string& path, const boost::property_tree::ptree& tree);
     void saveToPtree(const std::string& path, boost::property_tree::ptree& tree) const;
 
 private:
     Renderer* m_renderer;
-    Resources* m_resources;
     Model* m_model;
+    std::vector<Material*> m_materials;
 
     RenderableMesh(const RenderableMesh& rhs);
     RenderableMesh& operator=(const RenderableMesh&);
@@ -71,7 +73,9 @@ inline const Model* RenderableMesh::getModel() const {
     return m_model;
 }
 
-
+inline const Material* RenderableMesh::getMaterial(const size_t meshIndex) const {
+    return m_materials[meshIndex];
+}
 
 inline Model* RenderableMesh::model() {
     return m_model;

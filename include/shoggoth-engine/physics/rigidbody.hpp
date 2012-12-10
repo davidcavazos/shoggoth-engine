@@ -41,7 +41,6 @@ const std::string COLLISION_SHAPE_CONVEX = "#convex";
 const std::string COLLISION_SHAPE_CONCAVE = "#concave";
 
 class PhysicsWorld;
-class Resources;
 class btRigidBody;
 class btCollisionShape;
 struct btDefaultMotionState;
@@ -55,7 +54,7 @@ typedef enum {
 
 class RigidBody: public Component {
 public:
-    RigidBody(Entity* const _entity, Resources* resources, PhysicsWorld* physicsWorld);
+    RigidBody(Entity* const _entity, PhysicsWorld* physicsWorld);
     ~RigidBody();
 
     btRigidBody* bulletRigidBody();
@@ -102,7 +101,6 @@ public:
     void saveToPtree(const std::string& path, boost::property_tree::ptree& tree) const;
 
 private:
-    Resources* m_resources;
     PhysicsWorld* m_physicsWorld;
     std::string m_shapeId;
     btRigidBody* m_rigidBody;

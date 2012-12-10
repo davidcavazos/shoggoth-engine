@@ -24,26 +24,56 @@
  */
 
 
-#include "shoggoth-engine/resources/model.hpp"
+#include "shoggoth-engine/kernel/model.hpp"
 
 #include <iostream>
+#include "shoggoth-engine/kernel/modelloader.hpp"
 
 using namespace std;
 
-Model::Model(const std::string& identifier, Renderer* renderer):
+Model::Model(const std::string& identifier):
     m_identifier(identifier),
-    m_renderer(renderer),
     m_meshes()
 {}
 
-void Model::uploadToGPU() {
-    for (size_t i = 0; i < m_meshes.size(); ++i)
-        m_meshes[i].uploadToGPU();
+void Model::generateBox(const double lengthX, const double lengthY, const double lengthZ) {
+    float x = float(lengthX * 0.5);
+    float y = float(lengthY * 0.5);
+    float z = float(lengthZ * 0.5);
+    float vertices[][12] = {
+        { x,  y,  z,  -x,  y,  z,  -x, -y,  z,   x, -y,  z}, // front
+        { x,  y,  z,   x,  y, -z,  -x,  y, -z,  -x,  y,  z}, // top
+        {-x, -y, -z,   x, -y, -z,   x, -y,  z,  -x, -y,  z}, // bottom
+        { x,  y,  z,   x, -y,  z,   x, -y, -z,   x,  y, -z}, // right
+        {-x,  y,  z,  -x,  y, -z,  -x, -y, -z,  -x, -y,  z}, // left
+        { x, -y, -z,  -x, -y, -z,  -x,  y, -z,   x,  y, -z}  // back
+    };
+
+    float normals[][12] = {
+        { 0,  0,  1,   0,  0,  1,   0,  0,  1,   0,  0,  1}, // front
+        { 0,  1,  0,   0,  1,  0,   0,  1,  0,   0,  1,  0}, // top
+        { 0, -1,  0,   0, -1,  0,   0, -1,  0,   0, -1,  0}, // bottom
+        { 1,  0,  0,   1,  0,  0,   1,  0,  0,   1,  0,  0}, // right
+        {-1,  0,  0,  -1,  0,  0,  -1,  0,  0,  -1,  0,  0}, // left
+        { 0,  0, -1,   0,  0, -1,   0,  0, -1,   0,  0, -1}  // back
+    };
+
+    unsigned int indices[] = {0,  1,  2,   2,  3,  0};
+
+    m_meshes.resize(6);
+    for (size_t i = 0; i < m_meshes.size(); ++i) {
+        mesh(i)->setVertices(vertices[i], 12);
+        mesh(i)->setNormals(normals[i], 12);
+        mesh(i)->setIndices(indices, 6);
+    }
+}
+
+void Model::generateFromFile(const string& fileName) {
+    ModelLoader::load(fileName, *this);
 }
 
 Model::Model(const Model& rhs):
     m_identifier(rhs.m_identifier),
-    m_renderer(rhs.m_renderer),
     m_meshes(rhs.m_meshes)
 {
     cerr << "Error: Model copy constructor should not be called!" << endl;

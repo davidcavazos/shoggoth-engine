@@ -32,7 +32,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include "shoggoth-engine/renderer/opengl.hpp"
-#include "shoggoth-engine/resources/texture.hpp"
+#include "shoggoth-engine/renderer/renderer.hpp"
+#include "shoggoth-engine/renderer/texture.hpp"
 
 using namespace std;
 using namespace boost::property_tree;
@@ -128,7 +129,8 @@ istream& operator>>(istream& in, mat4_t& m) {
 }
 
 
-Material::Material():
+Material::Material(Renderer* renderer):
+    m_renderer(renderer),
     m_fileName(),
     m_shader(),
     m_vertexShaderFile(),
@@ -152,6 +154,7 @@ Material::Material():
 {}
 
 Material::Material(const Material& rhs):
+    m_renderer(rhs.m_renderer),
     m_fileName(rhs.m_fileName),
     m_shader(rhs.m_shader),
     m_vertexShaderFile(rhs.m_vertexShaderFile),
@@ -177,6 +180,7 @@ Material::Material(const Material& rhs):
 Material& Material::operator=(const Material& rhs) {
     if (this == &rhs)
         return *this;
+    m_renderer = rhs.m_renderer;
     m_fileName = rhs.m_fileName;
     m_shader = rhs.m_shader;
     m_vertexShaderFile = rhs.m_vertexShaderFile;
@@ -309,6 +313,17 @@ bool Material::loadFromFile(const std::string& fileName) {
         }
     }
     return true;
+}
+
+Texture* Material::loadTextureFromFile(const string& fileName) {
+    Texture* texture;
+    texture = m_renderer->findTexture(fileName);
+    if (texture == 0) {
+        texture = new Texture(fileName, m_renderer);
+        texture->loadToGPU();
+        m_renderer->registerTexture(texture);
+    }
+    return texture;
 }
 
 void Material::useMaterial() const {

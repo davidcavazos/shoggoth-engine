@@ -30,8 +30,8 @@
 
 using namespace std;
 
-TestComponentFactory::TestComponentFactory(Renderer* renderer, Resources* resources, PhysicsWorld* physicsWorld):
-    DefaultComponentFactory(renderer, resources, physicsWorld)
+TestComponentFactory::TestComponentFactory(Renderer* renderer, PhysicsWorld* physicsWorld):
+    DefaultComponentFactory(renderer, physicsWorld)
 {}
 
 Component* TestComponentFactory::create(const string& name, Entity* entity) const {

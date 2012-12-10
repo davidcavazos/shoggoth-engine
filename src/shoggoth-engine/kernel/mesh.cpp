@@ -24,53 +24,38 @@
  */
 
 
-#include "shoggoth-engine/resources/mesh.hpp"
+#include "shoggoth-engine/kernel/mesh.hpp"
 
 #include <iostream>
-#include "shoggoth-engine/renderer/renderer.hpp"
 
 using namespace std;
 
-Mesh::Mesh(Renderer* renderer):
-    m_renderer(renderer),
-    m_meshId(0),
+Mesh::Mesh():
+    m_vboId(0),
     m_indicesId(0),
     m_vertices(),
     m_normals(),
     m_uvCoords(),
-    m_indices(),
-    m_material()
+    m_indices()
 {}
 
 Mesh::Mesh(const Mesh& rhs):
-    m_renderer(rhs.m_renderer),
-    m_meshId(rhs.m_meshId),
+    m_vboId(rhs.m_vboId),
     m_indicesId(rhs.m_indicesId),
     m_vertices(rhs.m_vertices),
     m_normals(rhs.m_normals),
     m_uvCoords(rhs.m_uvCoords),
-    m_indices(rhs.m_indices),
-    m_material(rhs.m_material)
+    m_indices(rhs.m_indices)
 {}
 
 Mesh& Mesh::operator=(const Mesh& rhs) {
     if (this == &rhs)
         return *this;
-    m_renderer = rhs.m_renderer;
-    m_meshId = rhs.m_meshId;
+    m_vboId = rhs.m_vboId;
     m_indicesId = rhs.m_indicesId;
     m_vertices = rhs.m_vertices;
     m_normals = rhs.m_normals;
     m_uvCoords = rhs.m_uvCoords;
     m_indices = rhs.m_indices;
-    m_material = rhs.m_material;
     return *this;
-}
-
-Mesh::~Mesh() {
-    m_renderer->deleteModel(m_meshId, m_indicesId);
-}
-
-void Mesh::uploadToGPU() {
-    m_renderer->uploadModel(m_meshId, m_indicesId, *this);
 }

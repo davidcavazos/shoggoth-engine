@@ -24,7 +24,7 @@
  */
 
 
-#include "shoggoth-engine/resources/texture.hpp"
+#include "shoggoth-engine/renderer/texture.hpp"
 
 #include <iostream>
 #include <SDL/SDL_image.h>
@@ -35,7 +35,7 @@ using namespace std;
 Texture::Texture(const string& fileName, Renderer* renderer):
     m_fileName(fileName),
     m_renderer(renderer),
-    m_textureId(0),
+    m_id(0),
     m_bytesPerPixel(0),
     m_width(0),
     m_height(0),
@@ -43,11 +43,7 @@ Texture::Texture(const string& fileName, Renderer* renderer):
     m_pixels(0)
 {}
 
-Texture::~Texture() {
-    m_renderer->deleteTexture(m_textureId);
-}
-
-void Texture::load() {
+void Texture::loadToGPU() {
     SDL_Surface* img = IMG_Load(m_fileName.c_str());
     if (img == 0) {
         cerr << "Error opening image file: " << m_fileName << endl;
@@ -84,7 +80,7 @@ void Texture::load() {
         cerr << "Warning: image is not truecolor: " << m_fileName << endl;
     }
 
-    m_renderer->uploadTexture(m_textureId, *this);
+    m_renderer->uploadTextureToGPU(*this);
     SDL_FreeSurface(img);
 }
 
@@ -93,7 +89,7 @@ void Texture::load() {
 Texture::Texture(const Texture& rhs):
     m_fileName(rhs.m_fileName),
     m_renderer(rhs.m_renderer),
-    m_textureId(rhs.m_textureId),
+    m_id(rhs.m_id),
     m_bytesPerPixel(rhs.m_bytesPerPixel),
     m_width(rhs.m_width),
     m_height(rhs.m_height),

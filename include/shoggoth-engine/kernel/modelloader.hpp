@@ -30,16 +30,14 @@
 #include <string>
 
 class Model;
-class Renderer;
-class Resources;
 
 class ModelLoader {
 public:
-    static bool load(const std::string& fileName, Model& model, Renderer* renderer, Resources* resources);
+    static bool load(const std::string& fileName, Model& model);
 
 private:
-    static bool import(const std::string& fileName, Model& model, Renderer* renderer, Resources* resources);
-    static bool loadBinary(const std::string& fileName, Model& model, Renderer* renderer, Resources* resources);
+    static bool import(const std::string& fileName, Model& model);
+    static bool loadBinary(const std::string& fileName, Model& model);
     static bool writeBinary(const std::string& fileName, Model& model);
 };
 

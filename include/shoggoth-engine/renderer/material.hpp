@@ -32,12 +32,13 @@
 #include "shoggoth-engine/renderer/shader.hpp"
 #include "shoggoth-engine/kernel/color4.hpp"
 
+class Renderer;
 class Texture;
 
 
 class Material {
 public:
-    Material();
+    Material(Renderer* renderer);
     Material(const Material& rhs);
 
     Material& operator=(const Material& rhs);
@@ -45,9 +46,11 @@ public:
     const std::string& getFileName() const;
 
     bool loadFromFile(const std::string& fileName);
+    Texture* loadTextureFromFile(const std::string& fileName);
     void useMaterial() const;
 
 private:
+    Renderer* m_renderer;
     std::string m_fileName;
     Shader m_shader;
     std::string m_vertexShaderFile;

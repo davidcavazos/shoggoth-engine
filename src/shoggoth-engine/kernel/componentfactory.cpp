@@ -26,23 +26,21 @@
 
 #include "shoggoth-engine/kernel/componentfactory.hpp"
 
+#include "shoggoth-engine/kernel/model.hpp"
 #include "shoggoth-engine/renderer/camera.hpp"
 #include "shoggoth-engine/renderer/light.hpp"
 #include "shoggoth-engine/renderer/renderablemesh.hpp"
-#include "shoggoth-engine/resources/model.hpp"
 #include "shoggoth-engine/physics/rigidbody.hpp"
 
 using namespace std;
 
-ComponentFactory::ComponentFactory(Renderer* renderer, Resources* resources, PhysicsWorld* physicsWorld):
+ComponentFactory::ComponentFactory(Renderer* renderer, PhysicsWorld* physicsWorld):
     m_renderer(renderer),
-    m_resources(resources),
     m_physicsWorld(physicsWorld)
 {}
 
 ComponentFactory::ComponentFactory(const ComponentFactory& rhs):
     m_renderer(rhs.m_renderer),
-    m_resources(rhs.m_resources),
     m_physicsWorld(rhs.m_physicsWorld)
 {}
 
@@ -53,22 +51,21 @@ ComponentFactory& ComponentFactory::operator=(const ComponentFactory& rhs) {
     if (this == &rhs)
         return *this;
     m_renderer = rhs.m_renderer;
-    m_resources = rhs.m_resources;
     m_physicsWorld = rhs.m_physicsWorld;
     return *this;
 }
 
 
 
-DefaultComponentFactory::DefaultComponentFactory(Renderer* renderer, Resources* resources, PhysicsWorld* physicsWorld):
-    ComponentFactory(renderer, resources, physicsWorld)
+DefaultComponentFactory::DefaultComponentFactory(Renderer* renderer, PhysicsWorld* physicsWorld):
+    ComponentFactory(renderer, physicsWorld)
 {}
 
 Component* DefaultComponentFactory::create(const string& name, Entity* entity) const {
     if (name.compare(COMPONENT_RENDERABLEMESH) == 0)
-        return new RenderableMesh(entity, m_renderer, m_resources);
+        return new RenderableMesh(entity, m_renderer);
     else if (name.compare(COMPONENT_RIGIDBODY) == 0)
-        return new RigidBody(entity, m_resources, m_physicsWorld);
+        return new RigidBody(entity, m_physicsWorld);
     else if (name.compare(COMPONENT_LIGHT) == 0)
         return new Light(entity, m_renderer);
     else if (name.compare(COMPONENT_CAMERA) == 0)

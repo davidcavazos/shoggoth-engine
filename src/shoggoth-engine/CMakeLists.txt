@@ -14,20 +14,19 @@ set(ENGINE_SRC_FILES
     kernel/inputs.cpp
     kernel/device.cpp
 
+    kernel/modelloader.cpp
+    kernel/mesh.cpp
+    kernel/model.cpp
+
     renderer/opengl.cpp
     renderer/shader.cpp
     renderer/material.cpp
+    renderer/texture.cpp
     renderer/camera.cpp
     renderer/light.cpp
     renderer/renderablemesh.cpp
     renderer/culling.cpp
     renderer/renderer.cpp
-
-    resources/texture.cpp
-    resources/modelloader.cpp
-    resources/mesh.cpp
-    resources/model.cpp
-    resources/resources.cpp
 
     physics/rigidbody.cpp
     physics/physicsworld.cpp

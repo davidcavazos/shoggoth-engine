@@ -37,7 +37,6 @@ class Component;
 class ComponentFactory;
 class Device;
 class Renderer;
-class Resources;
 class PhysicsWorld;
 
 class Scene: public CommandObject {
@@ -49,7 +48,6 @@ public:
           const ComponentFactory* componentFactory,
           const Device* device,
           Renderer* renderer,
-          Resources* resources,
           PhysicsWorld* physicsWorld);
     ~Scene();
 
@@ -66,7 +64,6 @@ protected:
     const ComponentFactory* m_componentFactory;
     const Device* m_device;
     Renderer* m_renderer;
-    Resources* m_resources;
     PhysicsWorld* m_physicsWorld;
     std::string m_rootName;
     Entity* m_root;

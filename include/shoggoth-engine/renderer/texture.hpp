@@ -42,7 +42,6 @@ typedef enum {
 class Texture {
 public:
     Texture(const std::string& fileName, Renderer* renderer);
-    ~Texture();
 
     const std::string& getFileName() const;
     unsigned int getId() const;
@@ -51,13 +50,14 @@ public:
     size_t getHeight() const;
     const texture_format_t& getTextureFormat() const;
     void* getPixels() const;
+    void setId(const unsigned int id);
 
-    void load();
+    void loadToGPU();
 
 private:
     std::string m_fileName;
     Renderer* m_renderer;
-    unsigned int m_textureId;
+    unsigned int m_id;
     size_t m_bytesPerPixel;
     size_t m_width;
     size_t m_height;
@@ -75,7 +75,7 @@ inline const std::string& Texture::getFileName() const {
 }
 
 inline unsigned int Texture::getId() const {
-    return m_textureId;
+    return m_id;
 }
 
 inline size_t Texture::getBytesPerPixel() const {
@@ -96,6 +96,10 @@ inline const texture_format_t& Texture::getTextureFormat() const {
 
 inline void* Texture::getPixels() const {
     return m_pixels;
+}
+
+inline void Texture::setId(const unsigned int id) {
+    m_id = id;
 }
 
 #endif // TEXTURE_HPP

@@ -28,10 +28,10 @@
 
 #include <sstream>
 #include "shoggoth-engine/kernel/entity.hpp"
+#include "shoggoth-engine/kernel/model.hpp"
 #include "shoggoth-engine/renderer/renderer.hpp"
 #include "shoggoth-engine/renderer/culling.hpp"
-#include "shoggoth-engine/resources/model.hpp"
-#include "shoggoth-engine/resources/resources.hpp"
+#include "shoggoth-engine/renderer/material.hpp"
 
 using namespace std;
 using namespace boost::property_tree;
@@ -41,11 +41,11 @@ const string XML_MATERIAL = "material";
 const string XML_DEFAULT_MATERIAL = "**default**";
 
 
-RenderableMesh::RenderableMesh(Entity* const _entity, Renderer* renderer, Resources* resources):
+RenderableMesh::RenderableMesh(Entity* const _entity, Renderer* renderer):
     Component(COMPONENT_RENDERABLEMESH, _entity),
     m_renderer(renderer),
-    m_resources(resources),
-    m_model(0)
+    m_model(0),
+    m_materials()
 {
     m_renderer->registerRenderableMesh(this);
 
@@ -68,14 +68,42 @@ void RenderableMesh::loadBox(const double lengthX, const double lengthY, const d
             boost::lexical_cast<string>(lengthX) + " " +
             boost::lexical_cast<string>(lengthY) + " " +
             boost::lexical_cast<string>(lengthZ);
-    m_model = m_resources->generateBox(m_description, lengthX, lengthY, lengthZ);
+    m_model = m_renderer->findModel(m_description);
+    if (m_model == 0) {
+        m_model = new Model(m_description);
+        m_model->generateBox(lengthX, lengthY, lengthZ);
+        m_renderer->registerModel(m_model);
+        for (size_t i = 0; i < m_model->getTotalMeshes(); ++i)
+            m_renderer->uploadMeshToGPU(*m_model->mesh(i));
+    }
+    m_materials.resize(m_model->getTotalMeshes());
     Culling::registerForCulling(this);
 }
 
 void RenderableMesh::loadFromFile(const string& fileName) {
     m_description = RENDERABLEMESH_FILE_DESCRIPTION + " " + fileName;
-    m_model = m_resources->generateModelFromFile(fileName);
+    m_model = m_renderer->findModel(m_description);
+    if (m_model == 0) {
+        m_model = new Model(m_description);
+        m_model->generateFromFile(fileName);
+        m_renderer->registerModel(m_model);
+        for (size_t i = 0; i < m_model->getTotalMeshes(); ++i)
+            m_renderer->uploadMeshToGPU(*m_model->mesh(i));
+    }
+    m_materials.resize(m_model->getTotalMeshes());
     Culling::registerForCulling(this);
+}
+
+void RenderableMesh::assignMaterial(const size_t meshIndex, const std::string& fileName) {
+    if (fileName.compare(XML_DEFAULT_MATERIAL) == 0)
+        return;
+    Material* material = m_renderer->findMaterial(fileName);
+    if (material == 0) {
+        material = new Material(m_renderer);
+        material->loadFromFile(fileName);
+        m_renderer->registerMaterial(material);
+    }
+    m_materials[meshIndex] = material;
 }
 
 void RenderableMesh::loadFromPtree(const string& path, const ptree& tree) {
@@ -103,19 +131,16 @@ void RenderableMesh::loadFromPtree(const string& path, const ptree& tree) {
         materialName = tree.get<string>(xmlPath(path + XML_MATERIAL + boost::lexical_cast<string>(i)), "");
         if (materialName.empty())
             materialName = tree.get<string>(xmlPath(path + XML_MATERIAL), XML_DEFAULT_MATERIAL);
-        Material material;
-        if (materialName.compare(XML_DEFAULT_MATERIAL) != 0)
-            material.loadFromFile(materialName);
-        m_model->mesh(i)->setMaterial(material);
+        assignMaterial(i, materialName);
     }
 }
 
 void RenderableMesh::saveToPtree(const string& path, ptree& tree) const {
     tree.put(xmlPath(path + XML_RENDERABLEMESH_MODEL), getDescription());
 
-    for (size_t i = 0; i < m_model->getTotalMeshes(); ++i) {
-        if (!m_model->mesh(i)->getMaterial()->getFileName().empty())
-            tree.put(xmlPath(path + XML_MATERIAL), m_model->mesh(i)->getMaterial()->getFileName());
+    for (size_t i = 0; i < m_materials.size(); ++i) {
+        if (m_materials[i] != 0)
+            tree.put(xmlPath(path + XML_MATERIAL + boost::lexical_cast<string>(i)), m_materials[i]->getFileName());
     }
 }
 
@@ -123,8 +148,8 @@ void RenderableMesh::saveToPtree(const string& path, ptree& tree) const {
 RenderableMesh::RenderableMesh(const RenderableMesh& rhs):
     Component(rhs.m_type, rhs.m_entity),
     m_renderer(rhs.m_renderer),
-    m_resources(rhs.m_resources),
-    m_model(rhs.m_model)
+    m_model(rhs.m_model),
+    m_materials(rhs.m_materials)
 {
     cerr << "Error: RenderableMesh copy constructor should not be called!" << endl;
 }

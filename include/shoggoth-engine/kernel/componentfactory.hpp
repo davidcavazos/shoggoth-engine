@@ -32,12 +32,11 @@
 class Entity;
 class Component;
 class Renderer;
-class Resources;
 class PhysicsWorld;
 
 class ComponentFactory {
 public:
-    ComponentFactory(Renderer* renderer, Resources* resources, PhysicsWorld* physicsWorld);
+    ComponentFactory(Renderer* renderer, PhysicsWorld* physicsWorld);
     ComponentFactory(const ComponentFactory& rhs);
     virtual ~ComponentFactory();
 
@@ -47,14 +46,13 @@ public:
 
 protected:
     Renderer* m_renderer;
-    Resources* m_resources;
     PhysicsWorld* m_physicsWorld;
 };
 
 
 class DefaultComponentFactory: public ComponentFactory {
 public:
-    DefaultComponentFactory(Renderer* renderer, Resources* resources, PhysicsWorld* physicsWorld);
+    DefaultComponentFactory(Renderer* renderer, PhysicsWorld* physicsWorld);
     Component* create(const std::string& name, Entity* entity) const;
 };
 

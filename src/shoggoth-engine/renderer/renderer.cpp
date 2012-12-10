@@ -32,12 +32,13 @@
 #include "shoggoth-engine/linearmath/transform.hpp"
 #include "shoggoth-engine/kernel/device.hpp"
 #include "shoggoth-engine/kernel/entity.hpp"
+#include "shoggoth-engine/kernel/model.hpp"
 #include "shoggoth-engine/renderer/camera.hpp"
-#include "shoggoth-engine/renderer/renderablemesh.hpp"
 #include "shoggoth-engine/renderer/light.hpp"
+#include "shoggoth-engine/renderer/material.hpp"
 #include "shoggoth-engine/renderer/opengl.hpp"
-#include "shoggoth-engine/resources/model.hpp"
-#include "shoggoth-engine/resources/texture.hpp"
+#include "shoggoth-engine/renderer/renderablemesh.hpp"
+#include "shoggoth-engine/renderer/texture.hpp"
 
 using namespace std;
 
@@ -47,7 +48,11 @@ Renderer::Renderer(const string& objectName, const Device* device):
     m_activeCamera(0),
     m_cameras(),
     m_lights(),
-    m_models()
+    m_renderableMeshes(),
+    m_models(),
+    m_materials(),
+    m_textures(),
+    m_defaultMaterial(new Material(this))
 {
     registerAttribute("ambient-light", boost::bind(&Renderer::cmdAmbientLight, this, _1));
     registerAttribute("texture-filtering", boost::bind(&Renderer::cmdTextureFiltering, this, _1));
@@ -60,10 +65,31 @@ Renderer::Renderer(const string& objectName, const Device* device):
 Renderer::~Renderer() {
     Culling::shutdown();
 
+    cout << "Destroying all textures and unloading from the GPU" << endl;
+    boost::unordered_map<string, Texture*>::const_iterator itTexture;
+    for (itTexture = m_textures.begin(); itTexture != m_textures.end(); ++itTexture) {
+        deleteTextureFromGPU(*itTexture->second);
+        delete itTexture->second;
+    }
+
+    cout << "Destroying all materials and unloading from the GPU" << endl;
+    delete m_defaultMaterial;
+    boost::unordered_map<string, Material*>::const_iterator itMat;
+    for (itMat = m_materials.begin(); itMat != m_materials.end(); ++itMat)
+        delete itMat->second; // automatically destroys and frees its shader program
+
+    cout << "Destroying all models and unloading from the GPU" << endl;
+    boost::unordered_map<string, Model*>::const_iterator itModel;
+    for (itModel = m_models.begin(); itModel != m_models.end(); ++itModel) {
+        for (size_t i = 0; i < itModel->second->getTotalMeshes(); ++i)
+            deleteMeshFromGPU(*itModel->second->mesh(i));
+        delete itModel->second;
+    }
+
     cout << "Destroying all renderable meshes" << endl;
-    set<RenderableMesh*>::const_iterator itMesh;
-    for (itMesh = m_models.begin(); itMesh != m_models.end(); ++itMesh)
-        delete *itMesh;
+    set<RenderableMesh*>::const_iterator itRend;
+    for (itRend = m_renderableMeshes.begin(); itRend != m_renderableMeshes.end(); ++itRend)
+        delete *itRend;
 
     cout << "Destroying all lights" << endl;
     set<Light*>::const_iterator itLight;
@@ -113,12 +139,16 @@ void Renderer::draw() {
         glMultMatrixf(m);
         for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
             const Mesh* mesh = model->getMesh(n);
+            const Material* material = (*it)->getMaterial(n);
 
             // draw mesh
-            mesh->getMaterial()->useMaterial();
+            if (material != 0)
+                material->useMaterial();
+            else
+                m_defaultMaterial->useMaterial();
             if (OpenGL::areVBOsSupported()) {
                 // bind buffers
-                gl::bindVboBuffer(mesh->getMeshId());
+                gl::bindVboBuffer(mesh->getVboId());
                 gl::bindIndexBuffer(mesh->getIndicesId());
 
                 // draw
@@ -148,6 +178,54 @@ void Renderer::draw() {
         glPopMatrix();
     }
     m_device->swapBuffers();
+}
+
+void Renderer::registerModel(Model* model) {
+    m_models.insert(pair<string, Model*>(model->getIdentifier(), model));
+}
+
+void Renderer::unregisterModel(Model* model) {
+    m_models.erase(model->getIdentifier());
+}
+
+Model* Renderer::findModel(const std::string& identifier) {
+    boost::unordered_map<string, Model*>::const_iterator it;
+    it = m_models.find(identifier);
+    if (it != m_models.end())
+        return it->second;
+    return 0;
+}
+
+void Renderer::registerTexture(Texture* texture) {
+    m_textures.insert(pair<string, Texture*>(texture->getFileName(), texture));
+}
+
+void Renderer::unregisterTexture(Texture* texture) {
+    m_textures.erase(texture->getFileName());
+}
+
+Texture* Renderer::findTexture(const std::string& fileName) {
+    boost::unordered_map<string, Texture*>::const_iterator it;
+    it = m_textures.find(fileName);
+    if (it != m_textures.end())
+        return it->second;
+    return 0;
+}
+
+void Renderer::registerMaterial(Material* material) {
+    m_materials.insert(pair<string, Material*>(material->getFileName(), material));
+}
+
+void Renderer::unregisterMaterial(Material* material) {
+    m_materials.erase(material->getFileName());
+}
+
+Material* Renderer::findMaterial(const std::string& fileName) {
+    boost::unordered_map<string, Material*>::const_iterator it;
+    it = m_materials.find(fileName);
+    if (it != m_materials.end())
+        return it->second;
+    return 0;
 }
 
 void Renderer::setAmbientLight(const float r, const float g, const float b, const float a) {
@@ -196,14 +274,15 @@ void Renderer::updateLegacyLights() const {
     }
 }
 
-void Renderer::uploadModel(unsigned int& meshId, unsigned int& indicesId, const Mesh& mesh) {
+void Renderer::uploadMeshToGPU(Mesh& mesh) {
     size_t verticesBytes = mesh.getVerticesBytes();
     size_t normalsBytes = mesh.getNormalsBytes();
     size_t uvCoordsBytes = mesh.getUvCoordsBytes();
     size_t indicesBytes = mesh.getIndicesBytes();
     if (OpenGL::areVBOsSupported()) {
-        meshId = gl::genBuffer();
-        gl::bindVboBuffer(meshId);
+        unsigned int id = gl::genBuffer();
+        mesh.setVboId(id);
+        gl::bindVboBuffer(mesh.getVboId());
         gl::vboBufferBytes(verticesBytes + normalsBytes + uvCoordsBytes);
         gl::vboBufferSubData(0, verticesBytes, mesh.getVerticesPtr());
         gl::vboBufferSubData(verticesBytes, normalsBytes, mesh.getNormalsPtr());
@@ -211,26 +290,29 @@ void Renderer::uploadModel(unsigned int& meshId, unsigned int& indicesId, const 
         if (verticesBytes + normalsBytes + uvCoordsBytes != gl::getVboBufferBytes())
             cerr << "Error: data size is mismatch with input array" << endl;
 
-        indicesId = gl::genBuffer();
-        gl::bindIndexBuffer(indicesId);
+        id = gl::genBuffer();
+        mesh.setIndicesId(id);
+        gl::bindIndexBuffer(mesh.getIndicesId());
         gl::indexBufferData(indicesBytes, mesh.getIndicesPtr());
         if (indicesBytes != gl::getIndexBufferBytes())
             cerr << "Error: data size is mismatch with input array" << endl;
     }
 }
 
-void Renderer::deleteModel(const unsigned int meshId, const unsigned int indicesId) {
+void Renderer::deleteMeshFromGPU(const Mesh& mesh) {
     if (OpenGL::areVBOsSupported()) {
-        gl::deleteBuffer(meshId);
-        gl::deleteBuffer(indicesId);
+        gl::deleteBuffer(mesh.getVboId());
+        gl::deleteBuffer(mesh.getIndicesId());
     }
 }
 
-void Renderer::uploadTexture(unsigned int& textureId, const Texture& texture) {
+void Renderer::uploadTextureToGPU(Texture& texture) {
     GLenum textureFormat;
 
-    glGenTextures(1, &textureId);
-    glBindTexture(GL_TEXTURE_2D, textureId);
+    unsigned int id;
+    glGenTextures(1, &id);
+    texture.setId(id);
+    glBindTexture(GL_TEXTURE_2D, texture.getId());
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -302,8 +384,9 @@ void Renderer::uploadTexture(unsigned int& textureId, const Texture& texture) {
     }
 }
 
-void Renderer::deleteTexture(const unsigned int textureId) {
-    glDeleteTextures(1, &textureId);
+void Renderer::deleteTextureFromGPU(const Texture& texture) {
+    unsigned int id = texture.getId();
+    glDeleteTextures(1, &id);
 }
 
 string Renderer::listsToString() const {
@@ -317,16 +400,25 @@ string Renderer::listsToString() const {
         ss << endl;
     }
 
-    ss << "Renderer Meshes List:" << endl;
-    set<RenderableMesh*>::const_iterator itMesh;
-    for (itMesh = m_models.begin(); itMesh != m_models.end(); ++itMesh)
-        ss << "  " << (*itMesh)->getDescription() << endl;
-
     ss << "Lights List:" << endl;
     set<Light*>::const_iterator itLight;
     for (itLight = m_lights.begin(); itLight != m_lights.end(); ++itLight)
         ss << "  " << (*itLight)->getDescription() << endl;
 
+    ss << "Renderable Meshes List:" << endl;
+    set<RenderableMesh*>::const_iterator itRend;
+    for (itRend = m_renderableMeshes.begin(); itRend != m_renderableMeshes.end(); ++itRend)
+        ss << "  " << (*itRend)->getDescription() << endl;
+
+    ss << "Models List:" << endl;
+    boost::unordered_map<string, Model*>::const_iterator itModel;
+    for (itModel = m_models.begin(); itModel != m_models.end(); ++itModel)
+        ss << "  " << itModel->second->getIdentifier() << endl;
+
+    ss << "Textures List:" << endl;
+    boost::unordered_map<string, Texture*>::const_iterator itTexture;
+    for (itTexture = m_textures.begin(); itTexture != m_textures.end(); ++itTexture)
+        ss << "  " << itTexture->second->getFileName() << endl;
     return ss.str();
 }
 
@@ -336,7 +428,11 @@ Renderer::Renderer(const Renderer& rhs):
     m_activeCamera(rhs.m_activeCamera),
     m_cameras(rhs.m_cameras),
     m_lights(rhs.m_lights),
-    m_models(rhs.m_models)
+    m_renderableMeshes(rhs.m_renderableMeshes),
+    m_models(rhs.m_models),
+    m_materials(rhs.m_materials),
+    m_textures(rhs.m_textures),
+    m_defaultMaterial(rhs.m_defaultMaterial)
 {
     cerr << "Renderer copy constructor should not be called" << endl;
 }

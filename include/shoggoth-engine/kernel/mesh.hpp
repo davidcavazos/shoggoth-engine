@@ -27,21 +27,20 @@
 #ifndef MESH_HPP
 #define MESH_HPP
 
-#include "shoggoth-engine/renderer/material.hpp"
+#include <vector>
+#include <cstddef>
 
-class Renderer;
 class ModelLoader;
 
 class Mesh {
 public:
     friend class ModelLoader;
 
-    Mesh(Renderer* renderer);
+    Mesh();
     Mesh(const Mesh& rhs);
     Mesh& operator=(const Mesh& rhs);
-    ~Mesh();
 
-    unsigned int getMeshId() const;
+    unsigned int getVboId() const;
     unsigned int getIndicesId() const;
     float getVertex(const size_t i) const;
     const std::vector<float>& getVertices() const;
@@ -63,10 +62,9 @@ public:
     const unsigned int* getIndicesPtr() const;
     size_t getIndicesSize() const;
     size_t getIndicesBytes() const;
-    const Material* getMaterial() const;
 
-    Material* material();
-
+    void setVboId(const unsigned int vboId);
+    void setIndicesId(const unsigned int indicesId);
     void setVertices(const std::vector<float>& vertices);
     void setVertices(const float* vertices, const size_t size);
     void setNormals(const std::vector<float>& normals);
@@ -75,25 +73,20 @@ public:
     void setUvCoords(const float* uvCoords, const size_t size);
     void setIndices(const std::vector<unsigned int>& indices);
     void setIndices(const unsigned int* indices, const size_t size);
-    void setMaterial(const Material& _material);
-
-    void uploadToGPU();
 
 private:
-    Renderer* m_renderer;
-    unsigned int m_meshId;
+    unsigned int m_vboId;
     unsigned int m_indicesId;
     std::vector<float> m_vertices;
     std::vector<float> m_normals;
     std::vector<float> m_uvCoords;
     std::vector<unsigned int> m_indices;
-    Material m_material;
 };
 
 
 
-inline unsigned int Mesh::getMeshId() const {
-    return m_meshId;
+inline unsigned int Mesh::getVboId() const {
+    return m_vboId;
 }
 
 inline unsigned int Mesh::getIndicesId() const {
@@ -144,7 +137,7 @@ inline float Mesh::getUvCoord(const size_t i) const {
     return m_uvCoords[i];
 }
 
-inline const std::vector< float >& Mesh::getUvCoords() const {
+inline const std::vector<float>& Mesh::getUvCoords() const {
     return m_uvCoords;
 }
 
@@ -180,17 +173,15 @@ inline size_t Mesh::getIndicesBytes() const {
     return m_indices.size() * sizeof(unsigned int);
 }
 
-inline const Material* Mesh::getMaterial() const {
-    return &m_material;
+
+
+inline void Mesh::setVboId(const unsigned int vboId) {
+    m_vboId = vboId;
 }
 
-
-
-inline Material* Mesh::material() {
-    return &m_material;
+inline void Mesh::setIndicesId(const unsigned int indicesId) {
+    m_indicesId = indicesId;
 }
-
-
 
 inline void Mesh::setVertices(const std::vector< float >& vertices) {
     m_vertices = vertices;
@@ -230,10 +221,6 @@ inline void Mesh::setUvCoords(const float* uvCoords, const size_t size) {
     m_uvCoords.resize(size);
     for (size_t i = 0; i < size; ++i)
         m_uvCoords[i] = uvCoords[i];
-}
-
-inline void Mesh::setMaterial(const Material& _material) {
-    m_material = _material;
 }
 
 #endif // MESH_HPP

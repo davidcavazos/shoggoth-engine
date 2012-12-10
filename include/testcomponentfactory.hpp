@@ -31,7 +31,7 @@
 
 class TestComponentFactory: public DefaultComponentFactory {
 public:
-    TestComponentFactory(Renderer* renderer, Resources* resources, PhysicsWorld* physicsWorld);
+    TestComponentFactory(Renderer* renderer, PhysicsWorld* physicsWorld);
     Component* create(const std::string& name, Entity* entity) const;
 };
 

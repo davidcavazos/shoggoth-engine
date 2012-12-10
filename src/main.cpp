@@ -33,7 +33,7 @@
 using namespace std;
 
 int main(int, char**) {
-    Demo demo("demo", "device", "renderer", "resources", "physics-world", "scene", "root");
+    Demo demo("demo", "device", "renderer", "physics-world", "scene", "root");
     demo.loadScene();
     demo.bindInputs();
     demo.runMainLoop();

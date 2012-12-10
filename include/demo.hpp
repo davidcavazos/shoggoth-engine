@@ -31,7 +31,6 @@
 #include "shoggoth-engine/kernel/scene.hpp"
 #include "shoggoth-engine/renderer/renderer.hpp"
 #include "shoggoth-engine/physics/physicsworld.hpp"
-#include "shoggoth-engine/resources/resources.hpp"
 #include "testcomponentfactory.hpp"
 
 class Demo: public CommandObject {
@@ -39,7 +38,6 @@ public:
     Demo(const std::string& objectName,
          const std::string& deviceName,
          const std::string& rendererName,
-         const std::string& resourcesName,
          const std::string& physicsWorldName,
          const std::string& sceneName,
          const std::string& rootNodeName);
@@ -53,7 +51,6 @@ private:
     bool m_isRunning;
     Device m_device;
     Renderer m_renderer;
-    Resources m_resources;
     PhysicsWorld m_physicsWorld;
     TestComponentFactory m_componentFactory;
     Scene m_scene;
