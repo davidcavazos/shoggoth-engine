@@ -75,7 +75,7 @@ Demo::Demo(const string& objectName,
     registerCommand("fire-cube", boost::bind(&Demo::cmdFireCube, this, _1));
     registerCommand("fire-sphere", boost::bind(&Demo::cmdFireModel, this, _1));
 
-    srand(time(0));
+    srand((unsigned int)(time(0)));
 
     g_materials.push_back("assets/materials/black.material");
     g_materials.push_back("assets/materials/blue.material");

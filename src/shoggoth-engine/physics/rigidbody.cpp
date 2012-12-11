@@ -295,7 +295,7 @@ void RigidBody::addConvexHull(const double mass, const string& fileName) {
                 points.push_back(model.mesh(n)->getVertex(i));
             }
         }
-        btConvexShape* originalConvexShape = new btConvexHullShape(&points[0], points.size() / 3, sizeof(float) * 3);
+        btConvexShape* originalConvexShape = new btConvexHullShape(&points[0], int(points.size() / 3), sizeof(float) * 3);
         points.clear();
 
         // convert to low polygon hull
@@ -324,10 +324,10 @@ void RigidBody::addConcaveHull(const double mass, const string& fileName) {
         btTriangleIndexVertexArray* triangles = new btTriangleIndexVertexArray();
         for (size_t n = 0; n < model.getTotalMeshes(); ++n) {
             btIndexedMesh indexedMesh;
-            indexedMesh.m_numTriangles = model.mesh(n)->getIndicesSize() / 3;
+            indexedMesh.m_numTriangles = int(model.mesh(n)->getIndicesSize() / 3);
             indexedMesh.m_triangleIndexBase = (const unsigned char*)(model.mesh(n)->getIndicesPtr());
             indexedMesh.m_triangleIndexStride = sizeof(unsigned int);
-            indexedMesh.m_numVertices = model.mesh(n)->getVerticesSize();
+            indexedMesh.m_numVertices = int(model.mesh(n)->getVerticesSize());
             indexedMesh.m_vertexBase = (const unsigned char*)(model.mesh(n)->getVerticesPtr());
             indexedMesh.m_vertexStride = sizeof(float);
             triangles->addIndexedMesh(indexedMesh);
