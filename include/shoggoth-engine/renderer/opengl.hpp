@@ -62,12 +62,18 @@ typedef enum {
 } rendering_method_t;
 
 const unsigned int VERTEX_ARRAY_INDEX = 0;
-const unsigned int NORMALS_ARRAY_INDEX = 1;
-const unsigned int UVCOORDS_ARRAY_INDEX = 2;
+const unsigned int NORMALS_ARRAY_INDEX = 2;
+const unsigned int UVCOORDS_ARRAY_INDEX = 8;
 
 
 class OpenGL {
 public:
+    static float ms_projectionMatrix[16];
+    static float ms_viewMatrix[16];
+    static float ms_modelMatrix[16];
+    static float ms_modelViewMatrix[16];
+    static float ms_modelViewProjectionMatrix[16];
+
     static float version();
     static float shaderLanguageVersion();
     static data_upload_t& dataUploadMode();
@@ -87,13 +93,6 @@ public:
     static void multMatrix(float* result, const float* a, const float* b);
     static void projectionMatrixOrthographic(float width, float height, float near, float far);
     static void projectionMatrixPerspective(float perspectiveFOV, float aspectRatio, float near, float far);
-
-public:
-    static float ms_projectionMatrix[16];
-    static float ms_viewMatrix[16];
-    static float ms_modelMatrix[16];
-    static float ms_modelViewMatrix[16];
-    static float ms_modelViewProjectionMatrix[16];
 
 private:
     static float ms_openGLVersion;
@@ -148,6 +147,7 @@ namespace gl {
     void useUniform2x2(const int location, const float* value);
     void useUniform3x3(const int location, const float* value);
     void useUniform4x4(const int location, const float* value);
+    void bindAttribLocation(const unsigned int programId, const unsigned int attribArrayIndex, const std::string& name);
 }
 
 
@@ -469,6 +469,13 @@ inline void gl::useUniform4x4(const int location, const float* value) {
         glUniformMatrix4fvARB(location, 1, GL_FALSE, value);
     else
         glUniformMatrix4fv(location, 1, GL_FALSE, value);
+}
+
+inline void gl::bindAttribLocation(const unsigned int programId, const unsigned int attribArrayIndex, const std::string& name) {
+    if (OpenGL::renderingMethod() == RENDERING_METHOD_SHADERS_EXT)
+        glBindAttribLocationARB(programId, attribArrayIndex, name.c_str());
+    else
+        glBindAttribLocation(programId, attribArrayIndex, name.c_str());
 }
 
 #endif // OPENGL_H

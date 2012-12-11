@@ -40,6 +40,7 @@ const string GLSL_PROJECTION_MATRIX = "_projectionMatrix";
 const string GLSL_MODEL_VIEW_PROJECTION_MATRIX = "_modelViewProjectionMatrix";
 const string GLSL_VERTEX = "_vertex";
 const string GLSL_NORMAL = "_normal";
+const string GLSL_UVCOORD = "_uvcoord";
 
 
 Shader::Shader():
@@ -120,6 +121,12 @@ bool Shader::loadShaderProgram(const string& vertexFile, const string& fragmentF
     m_shaderProgramId = gl::createProgram();
     gl::attachShader(m_shaderProgramId, m_vertexShaderId);
     gl::attachShader(m_shaderProgramId, m_fragmentShaderId);
+
+    // bind input attibutes
+    gl::bindAttribLocation(m_shaderProgramId, VERTEX_ARRAY_INDEX, GLSL_VERTEX);
+    gl::bindAttribLocation(m_shaderProgramId, NORMALS_ARRAY_INDEX, GLSL_NORMAL);
+    gl::bindAttribLocation(m_shaderProgramId, UVCOORDS_ARRAY_INDEX, GLSL_UVCOORD);
+
     bool linkedSuccesfully = gl::linkProgram(m_shaderProgramId);
     gl::deleteShader(m_fragmentShaderId);
     gl::deleteShader(m_vertexShaderId);
@@ -131,7 +138,7 @@ bool Shader::loadShaderProgram(const string& vertexFile, const string& fragmentF
     }
     m_isShaderCreated = true;
 
-    // find input locations
+    // find uniform locations
     m_viewMatrixLocation = gl::getUniformLocation(m_shaderProgramId, GLSL_VIEW_MATRIX);
     m_modelMatrixLocation = gl::getUniformLocation(m_shaderProgramId, GLSL_MODEL_MATRIX);
     m_modelViewMatrixLocation = gl::getUniformLocation(m_shaderProgramId, GLSL_MODEL_VIEW_MATRIX);
