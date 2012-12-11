@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <material>
-    <_diffuseColor>0.8 0 0 1</_diffuseColor>
-    <_specularColor>1 1 1 1</_specularColor>
-    <_ambientColor>0 0 0 1</_ambientColor>
+    <_diffuseMap>textures/color-grid.png</_diffuseMap>
+    <_diffuseColor>0.8 0.8 0.8 1</_diffuseColor>
+    <_specularColor>0 0 0 1</_specularColor>
+    <_ambientColor>0.2 0.2 0.2 1</_ambientColor>
     <_emissiveColor>0 0 0 1</_emissiveColor>
-    <_shininess>84</_shininess>
+    <_shininess>0</_shininess>
 </material>
 <customVertexShader>shaders/default.vert</customVertexShader>
 <customFragmentShader>shaders/gouraud.frag</customFragmentShader>

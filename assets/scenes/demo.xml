@@ -10,11 +10,11 @@
       <rigidbody type="component" collisionshape="#box 0.5 0.5 0.5" mass="1" damping="0 0" friction="0.5" rollingfriction="0.1" restitution="0" sleepingthresholds="0.8 1" linearfactor="1 1 1" linearvelocity="0 0 0" angularfactor="1 1 1" angularvelocity="0 0 0" gravity="0 -9.8 0"/>
     </cube>
     <model type="entity" position="1.5 5 0" orientation="1 0 0 0">
-        <renderablemesh type="component" model="$file assets/meshes/materialtest.dae" material0="assets/materials/red.material" material1="assets/materials/blue.material"/>
+        <renderablemesh type="component" model="$file assets/meshes/materialtest.dae" material0="assets/materials/grid.material" material1="assets/materials/color-grid.material"/>
       <rigidbody type="component" collisionshape="#convex assets/meshes/materialtest.dae" mass="10" damping="0 0" friction="0.5" rollingfriction="0.1" restitution="0" sleepingthresholds="0.8 1" linearfactor="1 1 1" linearvelocity="0 0 0" angularfactor="1 1 1" angularvelocity="0 0 0" gravity="0 -9.8 0"/>
     </model>
     <floor type="entity" position="0 -1 0" orientation="1 0 0 0">
-      <renderablemesh type="component" model="$box 100 1 100"/>
+      <renderablemesh type="component" model="$box 100 1 100" material="assets/materials/magenta.material"/>
       <rigidbody type="component" collisionshape="#box 100 1 100" mass="0" damping="0 0" friction="0.5" rollingfriction="0" restitution="0" sleepingthresholds="0.8 1" linearfactor="1 1 1" linearvelocity="0 0 0" angularfactor="1 1 1" angularvelocity="0 0 0" gravity="0 -9.8 0"/>
     </floor>
     <light1 type="entity" position="3 2 2" orientation="1 0 0 0">
@@ -29,7 +29,7 @@
       </camera1>
     </body>
     <test type="entity" position="0 8 -3" orientation="1 0 0 0">
-      <renderablemesh type="component" model="$box 3 3 3"/>
+      <renderablemesh type="component" model="$box 3 3 3" material="assets/materials/yellow.material"/>
       <rigidbody type="component" collisionshape="#box 3 3 3" mass="20" friction="1"/>
       <testcomponent type="component" health="100"/>
     </test>
