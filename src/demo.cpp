@@ -30,13 +30,16 @@
 #include <string>
 #include <fstream>
 #include <iomanip>
+#include <cstdlib>
+#include <ctime>
 #include <SDL/SDL.h>
 #include "shoggoth-engine/kernel/entity.hpp"
 #include "shoggoth-engine/kernel/terminal.hpp"
+#include "shoggoth-engine/kernel/model.hpp"
 #include "shoggoth-engine/renderer/renderablemesh.hpp"
 #include "shoggoth-engine/renderer/camera.hpp"
 #include "shoggoth-engine/renderer/light.hpp"
-#include <shoggoth-engine/renderer/opengl.hpp>
+#include "shoggoth-engine/renderer/opengl.hpp"
 #include "shoggoth-engine/physics/rigidbody.hpp"
 #include "testcomponent.hpp"
 
@@ -47,6 +50,8 @@ const unsigned int MILLISECONDS_LIMIT = 1000 / FRAMERATE_LIMIT;
 
 const double FIRE_SPEED = 50.0;
 const double MISSILE_SIZE = 0.5;
+
+vector<string> g_materials;
 
 
 Demo::Demo(const string& objectName,
@@ -68,7 +73,21 @@ Demo::Demo(const string& objectName,
     registerCommand("print-entity", boost::bind(&Demo::cmdPrint, this, _1));
     registerCommand("on-mouse-motion", boost::bind(&Demo::cmdOnMouseMotion, this, _1));
     registerCommand("fire-cube", boost::bind(&Demo::cmdFireCube, this, _1));
-    registerCommand("fire-sphere", boost::bind(&Demo::cmdFireSphere, this, _1));
+    registerCommand("fire-sphere", boost::bind(&Demo::cmdFireModel, this, _1));
+
+    srand(time(0));
+
+    g_materials.push_back("assets/materials/black.material");
+    g_materials.push_back("assets/materials/blue.material");
+    g_materials.push_back("assets/materials/color-grid.material");
+    g_materials.push_back("assets/materials/cyan.material");
+    g_materials.push_back("assets/materials/default.material");
+    g_materials.push_back("assets/materials/green.material");
+    g_materials.push_back("assets/materials/grid.material");
+    g_materials.push_back("assets/materials/magenta.material");
+    g_materials.push_back("assets/materials/red.material");
+    g_materials.push_back("assets/materials/white.material");
+    g_materials.push_back("assets/materials/yellow.material");
 
     m_device.setResolution(800, 600);
     OpenGL::setTextureFilteringMode(TEXTURE_FILTERING_ANISOTROPIC);
@@ -214,6 +233,8 @@ string Demo::cmdFireCube(std::deque<std::string>&) {
 
         RenderableMesh* cubeMesh = new RenderableMesh(cube, &m_renderer);
         cubeMesh->loadBox(MISSILE_SIZE, MISSILE_SIZE, MISSILE_SIZE);
+        for (size_t i = 0; i < cubeMesh->getModel()->getTotalMeshes(); ++i)
+            cubeMesh->assignMaterial(i, g_materials[rand() % g_materials.size()]);
 
         RigidBody* cubeBody = new RigidBody(cube, &m_physicsWorld);
         cubeBody->addBox(1.0, MISSILE_SIZE, MISSILE_SIZE, MISSILE_SIZE);
@@ -222,7 +243,7 @@ string Demo::cmdFireCube(std::deque<std::string>&) {
     return "";
 }
 
-string Demo::cmdFireSphere(std::deque<std::string>&) {
+string Demo::cmdFireModel(std::deque<std::string>&) {
     Entity* camera;
     if (m_scene.findEntity("camera1", camera)) {
         static size_t n = 0;
@@ -234,12 +255,14 @@ string Demo::cmdFireSphere(std::deque<std::string>&) {
         model->setOrientationAbs(camera->getOrientationAbs());
 
         string modelName = "assets/meshes/materialtest.dae";
-        RenderableMesh* cubeMesh = new RenderableMesh(model, &m_renderer);
-        cubeMesh->loadFromFile(modelName);
+        RenderableMesh* modelMesh = new RenderableMesh(model, &m_renderer);
+        modelMesh->loadFromFile(modelName);
+        for (size_t i = 0; i < modelMesh->getModel()->getTotalMeshes(); ++i)
+            modelMesh->assignMaterial(i, g_materials[rand() % g_materials.size()]);
 
-        RigidBody* cubeBody = new RigidBody(model, &m_physicsWorld);
-        cubeBody->addConvexHull(1.0, modelName);
-        cubeBody->setLinearVelocity(orientationUnit * FIRE_SPEED);
+        RigidBody* modelBody = new RigidBody(model, &m_physicsWorld);
+        modelBody->addConvexHull(1.0, modelName);
+        modelBody->setLinearVelocity(orientationUnit * FIRE_SPEED);
     }
     return "";
 }

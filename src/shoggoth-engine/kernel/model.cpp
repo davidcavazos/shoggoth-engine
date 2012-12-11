@@ -40,22 +40,38 @@ void Model::generateBox(const double lengthX, const double lengthY, const double
     float x = float(lengthX * 0.5);
     float y = float(lengthY * 0.5);
     float z = float(lengthZ * 0.5);
+    //    v6----- v5
+    //   /|      /|
+    //  v1------v0|
+    //  | |     | |
+    //  | |v7---|-|v4
+    //  |/      |/
+    //  v2------v3
     float vertices[][12] = {
-        { x,  y,  z,  -x,  y,  z,  -x, -y,  z,   x, -y,  z}, // front
-        { x,  y,  z,   x,  y, -z,  -x,  y, -z,  -x,  y,  z}, // top
-        {-x, -y, -z,   x, -y, -z,   x, -y,  z,  -x, -y,  z}, // bottom
-        { x,  y,  z,   x, -y,  z,   x, -y, -z,   x,  y, -z}, // right
-        {-x,  y,  z,  -x,  y, -z,  -x, -y, -z,  -x, -y,  z}, // left
-        { x, -y, -z,  -x, -y, -z,  -x,  y, -z,   x,  y, -z}  // back
+        { x,  y,  z,  -x,  y,  z,  -x, -y,  z,   x, -y,  z}, // v0,v1,v2,v3 front
+        { x,  y,  z,   x,  y, -z,  -x,  y, -z,  -x,  y,  z}, // v0,v5,v6,v1 top
+        {-x, -y, -z,   x, -y, -z,   x, -y,  z,  -x, -y,  z}, // v7,v4,v3,v2 bottom
+        { x,  y,  z,   x, -y,  z,   x, -y, -z,   x,  y, -z}, // v0,v3,v4,v5 right
+        {-x,  y,  z,  -x,  y, -z,  -x, -y, -z,  -x, -y,  z}, // v1,v6,v7,v2 left
+        { x, -y, -z,  -x, -y, -z,  -x,  y, -z,   x,  y, -z}  // v4,v7,v6,v5 back
     };
 
     float normals[][12] = {
-        { 0,  0,  1,   0,  0,  1,   0,  0,  1,   0,  0,  1}, // front
-        { 0,  1,  0,   0,  1,  0,   0,  1,  0,   0,  1,  0}, // top
-        { 0, -1,  0,   0, -1,  0,   0, -1,  0,   0, -1,  0}, // bottom
-        { 1,  0,  0,   1,  0,  0,   1,  0,  0,   1,  0,  0}, // right
-        {-1,  0,  0,  -1,  0,  0,  -1,  0,  0,  -1,  0,  0}, // left
-        { 0,  0, -1,   0,  0, -1,   0,  0, -1,   0,  0, -1}  // back
+        { 0,  0,  1,   0,  0,  1,   0,  0,  1,   0,  0,  1}, // v0,v1,v2,v3 front
+        { 0,  1,  0,   0,  1,  0,   0,  1,  0,   0,  1,  0}, // v0,v5,v6,v1 top
+        { 0, -1,  0,   0, -1,  0,   0, -1,  0,   0, -1,  0}, // v7,v4,v3,v2 bottom
+        { 1,  0,  0,   1,  0,  0,   1,  0,  0,   1,  0,  0}, // v0,v3,v4,v5 right
+        {-1,  0,  0,  -1,  0,  0,  -1,  0,  0,  -1,  0,  0}, // v1,v6,v7,v2 left
+        { 0,  0, -1,   0,  0, -1,   0,  0, -1,   0,  0, -1}  // v4,v7,v6,v5 back
+    };
+
+    float uvCoords[][8] = {
+        {1, 1,  0, 1,  0, 0,  1, 0}, // v0,v1,v2,v3 front
+        {1, 1,  0, 1,  0, 0,  1, 0}, // v0,v5,v6,v1 top
+        {1, 1,  0, 1,  0, 0,  1, 0}, // v7,v4,v3,v2 bottom
+        {1, 1,  0, 1,  0, 0,  1, 0}, // v0,v3,v4,v5 right
+        {1, 1,  0, 1,  0, 0,  1, 0}, // v1,v6,v7,v2 left
+        {1, 1,  0, 1,  0, 0,  1, 0}  // v4,v7,v6,v5 back
     };
 
     unsigned int indices[] = {0,  1,  2,   2,  3,  0};
@@ -64,6 +80,7 @@ void Model::generateBox(const double lengthX, const double lengthY, const double
     for (size_t i = 0; i < m_meshes.size(); ++i) {
         mesh(i)->setVertices(vertices[i], 12);
         mesh(i)->setNormals(normals[i], 12);
+        mesh(i)->setUvCoords(uvCoords[i], 8);
         mesh(i)->setIndices(indices, 6);
     }
 }

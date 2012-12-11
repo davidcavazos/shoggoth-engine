@@ -59,7 +59,7 @@ Scene::Scene(const std::string& objectName,
 }
 
 Scene::~Scene() {
-    cout << "Removing all entities and their components" << endl;
+    cout << "Removing all entities and their components from scene" << endl;
     m_root->removeAllChildren();
 
     unregisterAllCommands();

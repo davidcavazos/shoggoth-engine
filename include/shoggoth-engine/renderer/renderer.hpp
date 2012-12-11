@@ -53,8 +53,8 @@ public:
     void unregisterCamera(Camera* camera);
     void registerLight(Light* light);
     void unregisterLight(Light* light);
-    void registerRenderableMesh(RenderableMesh* model);
-    void unregisterRenderableMesh(RenderableMesh* model);
+    void registerRenderableMesh(RenderableMesh* renderable);
+    void unregisterRenderableMesh(RenderableMesh* renderable);
 
     void registerModel(Model* model);
     void unregisterModel(Model* model);
@@ -118,12 +118,12 @@ inline void Renderer::unregisterLight(Light* light) {
     initLighting();
 }
 
-inline void Renderer::registerRenderableMesh(RenderableMesh* model) {
-    m_renderableMeshes.insert(model);
+inline void Renderer::registerRenderableMesh(RenderableMesh* renderable) {
+    m_renderableMeshes.insert(renderable);
 }
 
-inline void Renderer::unregisterRenderableMesh(RenderableMesh* model) {
-    m_renderableMeshes.erase(model);
+inline void Renderer::unregisterRenderableMesh(RenderableMesh* renderable) {
+    m_renderableMeshes.erase(renderable);
 }
 
 #endif // RENDERER_HPP

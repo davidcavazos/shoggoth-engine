@@ -52,6 +52,12 @@ private:
     unsigned int m_fragmentShaderId;
     unsigned int m_shaderProgramId;
 
+    int m_viewMatrixLocation;
+    int m_modelMatrixLocation;
+    int m_modelViewMatrixLocation;
+    int m_projectionMatrixLocation;
+    int m_modelViewProjectionMatrixLocation;
+
     std::map<int, float*> m_uniform1;
     std::map<int, float*> m_uniform2;
     std::map<int, float*> m_uniform3;

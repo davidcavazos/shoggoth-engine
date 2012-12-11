@@ -59,26 +59,27 @@ Renderer::Renderer(const string& objectName, const Device* device):
     registerAttribute("anisotropy", boost::bind(&Renderer::cmdAnisotropy, this, _1));
 
     OpenGL::detectCapabilities();
+    m_defaultMaterial->loadFromFile("assets/materials/default.material");
     Culling::initialize();
 }
 
 Renderer::~Renderer() {
     Culling::shutdown();
 
-    cout << "Destroying all textures and unloading from the GPU" << endl;
+    cout << "Destroying all textures: " << m_textures.size() << endl;
     boost::unordered_map<string, Texture*>::const_iterator itTexture;
     for (itTexture = m_textures.begin(); itTexture != m_textures.end(); ++itTexture) {
         deleteTextureFromGPU(*itTexture->second);
         delete itTexture->second;
     }
 
-    cout << "Destroying all materials and unloading from the GPU" << endl;
+    cout << "Destroying all materials: " << m_materials.size() << endl;
     delete m_defaultMaterial;
     boost::unordered_map<string, Material*>::const_iterator itMat;
     for (itMat = m_materials.begin(); itMat != m_materials.end(); ++itMat)
         delete itMat->second; // automatically destroys and frees its shader program
 
-    cout << "Destroying all models and unloading from the GPU" << endl;
+    cout << "Destroying all models: " << m_models.size() << endl;
     boost::unordered_map<string, Model*>::const_iterator itModel;
     for (itModel = m_models.begin(); itModel != m_models.end(); ++itModel) {
         for (size_t i = 0; i < itModel->second->getTotalMeshes(); ++i)
@@ -86,20 +87,20 @@ Renderer::~Renderer() {
         delete itModel->second;
     }
 
-    cout << "Destroying all renderable meshes" << endl;
-    set<RenderableMesh*>::const_iterator itRend;
-    for (itRend = m_renderableMeshes.begin(); itRend != m_renderableMeshes.end(); ++itRend)
-        delete *itRend;
-
-    cout << "Destroying all lights" << endl;
-    set<Light*>::const_iterator itLight;
-    for (itLight = m_lights.begin(); itLight != m_lights.end(); ++itLight)
-        delete *itLight;
-
-    cout << "Destroying all cameras" << endl;
-    set<Camera*>::const_iterator itCam;
-    for (itCam = m_cameras.begin(); itCam != m_cameras.end(); ++itCam)
-        delete *itCam;
+//     cout << "Destroying all renderable meshes: " << m_renderableMeshes.size() << endl;
+//     set<RenderableMesh*>::const_iterator itRend;
+//     for (itRend = m_renderableMeshes.begin(); itRend != m_renderableMeshes.end(); ++itRend)
+//         delete *itRend;
+//
+//     cout << "Destroying all lights: " << m_lights.size() << endl;
+//     set<Light*>::const_iterator itLight;
+//     for (itLight = m_lights.begin(); itLight != m_lights.end(); ++itLight)
+//         delete *itLight;
+//
+//     cout << "Destroying all cameras: " << m_cameras.size() << endl;
+//     set<Camera*>::const_iterator itCam;
+//     for (itCam = m_cameras.begin(); itCam != m_cameras.end(); ++itCam)
+//         delete *itCam;
 
     unregisterAllCommands();
     unregisterAllAttributes();
@@ -112,21 +113,19 @@ void Renderer::draw() {
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLoadIdentity();
-
-    float m[16];
 
     // set camera
     const Entity* cam = m_activeCamera->getEntity();
-    Transform(cam->getOrientationAbs(), cam->getPositionAbs()).inverse().getOpenGLMatrix(m);
-    glMultMatrixf(m);
-
-    // set lights
-    displayLegacyLights();
+    Transform(cam->getOrientationAbs(), cam->getPositionAbs()).inverse().getOpenGLMatrix(OpenGL::ms_viewMatrix);
+    if (!OpenGL::areShadersSupported()) {
+        glLoadIdentity();
+        glMultMatrixf(OpenGL::ms_viewMatrix);
+        displayLegacyLights();
+    }
 
     // frustum culling
     set<RenderableMesh*> modelsInFrustum;
-    Culling::performFrustumCulling(OpenGL::projectionMatrix(), m_activeCamera->getEntity(), modelsInFrustum);
+    Culling::performFrustumCulling(OpenGL::ms_projectionMatrix, m_activeCamera->getEntity(), modelsInFrustum);
 
     // set meshes
     set<RenderableMesh*>::const_iterator it;
@@ -134,9 +133,13 @@ void Renderer::draw() {
         const Model* model = (*it)->getModel();
         const Entity* entity = (*it)->getEntity();
 
-        glPushMatrix();
-        Transform(entity->getOrientationAbs(), entity->getPositionAbs()).getOpenGLMatrix(m);
-        glMultMatrixf(m);
+        Transform(entity->getOrientationAbs(), entity->getPositionAbs()).getOpenGLMatrix(OpenGL::ms_modelMatrix);
+        OpenGL::multMatrix(OpenGL::ms_modelViewMatrix, OpenGL::ms_modelMatrix, OpenGL::ms_viewMatrix);
+        OpenGL::multMatrix(OpenGL::ms_modelViewProjectionMatrix, OpenGL::ms_projectionMatrix, OpenGL::ms_modelViewMatrix);
+//         if (!OpenGL::areShadersSupported()) {
+            glLoadIdentity();
+            glMultMatrixf(OpenGL::ms_modelViewMatrix);
+//         }
         for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
             const Mesh* mesh = model->getMesh(n);
             const Material* material = (*it)->getMaterial(n);
@@ -175,7 +178,6 @@ void Renderer::draw() {
                 glDrawElements(GL_TRIANGLES, GLsizei(mesh->getIndicesSize()), GL_UNSIGNED_INT, mesh->getIndicesPtr());
             }
         }
-        glPopMatrix();
     }
     m_device->swapBuffers();
 }
@@ -543,7 +545,7 @@ void Renderer::initCamera() {
     default:
         cerr << "Error: invalid camera_t: " << m_activeCamera->getCameraType() << endl;
     }
-    glMultMatrixf(OpenGL::projectionMatrix());
+    glMultMatrixf(OpenGL::ms_projectionMatrix);
     glMatrixMode(GL_MODELVIEW);
 }
 

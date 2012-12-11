@@ -68,9 +68,6 @@ const unsigned int UVCOORDS_ARRAY_INDEX = 2;
 
 class OpenGL {
 public:
-    static float* projectionMatrix();
-    static float* modelViewMatrix();
-    static float* modelViewProjectionMatrix();
     static float version();
     static float shaderLanguageVersion();
     static data_upload_t& dataUploadMode();
@@ -87,13 +84,18 @@ public:
     static void setAnisotropy(const float anisotropy);
 
     static void detectCapabilities();
+    static void multMatrix(float* result, const float* a, const float* b);
     static void projectionMatrixOrthographic(float width, float height, float near, float far);
     static void projectionMatrixPerspective(float perspectiveFOV, float aspectRatio, float near, float far);
 
-private:
+public:
     static float ms_projectionMatrix[16];
+    static float ms_viewMatrix[16];
+    static float ms_modelMatrix[16];
     static float ms_modelViewMatrix[16];
     static float ms_modelViewProjectionMatrix[16];
+
+private:
     static float ms_openGLVersion;
     static float ms_shaderLanguageVersion;
     static data_upload_t ms_dataUploadMode;
@@ -149,18 +151,6 @@ namespace gl {
 }
 
 
-
-inline float* OpenGL::projectionMatrix() {
-    return ms_projectionMatrix;
-}
-
-inline float* OpenGL::modelViewMatrix() {
-    return ms_modelViewMatrix;
-}
-
-inline float* OpenGL::modelViewProjectionMatrix() {
-    return ms_modelViewProjectionMatrix;
-}
 
 inline float OpenGL::version() {
     return ms_openGLVersion;

@@ -60,7 +60,7 @@ private:
     std::string cmdPrint(std::deque<std::string>& args);
     std::string cmdOnMouseMotion(std::deque<std::string>&);
     std::string cmdFireCube(std::deque<std::string>&);
-    std::string cmdFireSphere(std::deque<std::string>&);
+    std::string cmdFireModel(std::deque<std::string>&);
 };
 
 #endif // GAME_HPP

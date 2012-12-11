@@ -133,8 +133,8 @@ Material::Material(Renderer* renderer):
     m_renderer(renderer),
     m_fileName(),
     m_shader(),
-    m_vertexShaderFile(),
-    m_fragmentShaderFile(),
+    m_vertexShaderFile(MATERIAL_DEFAULT_VERTEX_SHADER),
+    m_fragmentShaderFile(MATERIAL_DEFAULT_FRAGMENT_SHADER),
     m_diffuseColor(0.8f, 0.8f, 0.8f, 1.0f),
     m_ambientColor(0.2f, 0.2f, 0.2f, 1.0f),
     m_emissiveColor(COLOR_BLACK),
@@ -223,11 +223,11 @@ bool Material::loadFromFile(const std::string& fileName) {
     ptree tree;
     read_xml(m_fileName, tree, xml_parser::trim_whitespace);
 
+    string subdirectory = m_fileName.substr(0, m_fileName.find_last_of("/\\") + 1);
     if (OpenGL::areShadersSupported()) {
         m_vertexShaderFile = tree.get<string>(MATERIAL_CUSTOM_VERTEX_SHADER, MATERIAL_DEFAULT_VERTEX_SHADER);
         m_fragmentShaderFile = tree.get<string>(MATERIAL_CUSTOM_FRAGMENT_SHADER, MATERIAL_DEFAULT_FRAGMENT_SHADER);
 
-        string subdirectory = m_fileName.substr(0, m_fileName.find_last_of("/\\") + 1);
         m_vertexShaderFile = subdirectory + m_vertexShaderFile;
         m_fragmentShaderFile = subdirectory + m_fragmentShaderFile;
         m_shader.loadShaderProgram(m_vertexShaderFile, m_fragmentShaderFile);
@@ -237,9 +237,21 @@ bool Material::loadFromFile(const std::string& fileName) {
         cerr << "Error loading material: <material> root node not found" << endl;
         return false;
     }
+
+    // set attributes
+    string mapFile;
     BOOST_FOREACH(ptree::value_type v, tree.get_child(XML_ROOT_NODE)) {
         if (v.first.compare(XML_COMMENT) == 0)
             continue;
+        else if (v.first.compare(MATERIAL_DIFFUSE_MAP) == 0) {
+            mapFile = subdirectory + tree.get<string>(XML_ROOT_NODE + "." + MATERIAL_DIFFUSE_MAP);
+            m_diffuseMap = m_renderer->findTexture(mapFile);
+            if (m_diffuseMap == 0) {
+                m_diffuseMap = new Texture(mapFile, m_renderer);
+                m_diffuseMap->loadToGPU();
+                m_renderer->registerTexture(m_diffuseMap);
+            }
+        }
         else if (v.first.compare(MATERIAL_DIFFUSE_COLOR) == 0) {
             m_diffuseColor = tree.get<Color4>(XML_ROOT_NODE + "." + MATERIAL_DIFFUSE_COLOR);
             if (OpenGL::areShadersSupported())
@@ -337,7 +349,11 @@ void Material::useMaterial() const {
         glMaterialfv(GL_FRONT, GL_EMISSION, m_emissiveColor.getRGBA());
         glMaterialf(GL_FRONT, GL_SHININESS, m_shininess);
 
-        // set textures
+        // set diffuse texture
+        if (m_diffuseMap != 0)
+            glBindTexture(GL_TEXTURE_2D, m_diffuseMap->getId());
+        else
+            glBindTexture(GL_TEXTURE_2D, 0);
 //         if (mtl->getTextureMap(MATERIAL_DIFFUSE_MAP) != 0)
 //             glBindTexture(GL_TEXTURE_2D, mtl->getTextureMap(MATERIAL_DIFFUSE_MAP)->getId());
 //         else

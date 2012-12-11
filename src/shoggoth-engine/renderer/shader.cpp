@@ -33,12 +33,13 @@
 
 using namespace std;
 
+const string GLSL_VIEW_MATRIX = "_viewMatrix";
+const string GLSL_MODEL_MATRIX = "_modelMatrix";
 const string GLSL_MODEL_VIEW_MATRIX = "_modelViewMatrix";
-const string GLSL_MODEL_VIEW_PROJECTION_MATRIX = "_modelViewProjectionMatrix";
 const string GLSL_PROJECTION_MATRIX = "_projectionMatrix";
+const string GLSL_MODEL_VIEW_PROJECTION_MATRIX = "_modelViewProjectionMatrix";
 const string GLSL_VERTEX = "_vertex";
 const string GLSL_NORMAL = "_normal";
-
 
 
 Shader::Shader():
@@ -46,6 +47,11 @@ Shader::Shader():
     m_vertexShaderId(0),
     m_fragmentShaderId(0),
     m_shaderProgramId(0),
+    m_viewMatrixLocation(-1),
+    m_modelMatrixLocation(-1),
+    m_modelViewMatrixLocation(-1),
+    m_projectionMatrixLocation(-1),
+    m_modelViewProjectionMatrixLocation(-1),
     m_uniform1(),
     m_uniform2(),
     m_uniform3(),
@@ -124,6 +130,14 @@ bool Shader::loadShaderProgram(const string& vertexFile, const string& fragmentF
         return false;
     }
     m_isShaderCreated = true;
+
+    // find input locations
+    m_viewMatrixLocation = gl::getUniformLocation(m_shaderProgramId, GLSL_VIEW_MATRIX);
+    m_modelMatrixLocation = gl::getUniformLocation(m_shaderProgramId, GLSL_MODEL_MATRIX);
+    m_modelViewMatrixLocation = gl::getUniformLocation(m_shaderProgramId, GLSL_MODEL_VIEW_MATRIX);
+    m_projectionMatrixLocation = gl::getUniformLocation(m_shaderProgramId, GLSL_PROJECTION_MATRIX);
+    m_modelViewProjectionMatrixLocation = gl::getUniformLocation(m_shaderProgramId, GLSL_MODEL_VIEW_PROJECTION_MATRIX);
+
     return true;
 }
 
@@ -144,6 +158,8 @@ void Shader::useShader() const {
         gl::useUniform3x3(it->first, it->second);
     for (it = m_uniform4x4.begin(); it != m_uniform4x4.end(); ++it)
         gl::useUniform4x4(it->first, it->second);
+
+    gl::useUniform4x4(m_modelViewProjectionMatrixLocation, OpenGL::ms_modelViewProjectionMatrix);
 }
 
 
@@ -152,7 +168,7 @@ void Shader::setUniform1(const string& name, const float value) {
     int location;
     float* val = new float[1];
     val[0] = value;
-    location = gl::getUniformLocation(m_shaderProgramId, name.c_str());
+    location = gl::getUniformLocation(m_shaderProgramId, name);
     m_uniform1.insert(pair<int, float*>(location, val));
 }
 
@@ -161,7 +177,7 @@ void Shader::setUniform2(const string& name, const float* value) {
     float* val = new float[2];
     val[0] = value[0];
     val[0] = value[1];
-    location = gl::getUniformLocation(m_shaderProgramId, name.c_str());
+    location = gl::getUniformLocation(m_shaderProgramId, name);
     m_uniform2.insert(pair<int, float*>(location, val));
 }
 
@@ -170,7 +186,7 @@ void Shader::setUniform3(const string& name, const float* value) {
     float* val = new float[3];
     for (size_t i = 0; i < 3; ++i)
         val[i] = value[i];
-    location = gl::getUniformLocation(m_shaderProgramId, name.c_str());
+    location = gl::getUniformLocation(m_shaderProgramId, name);
     m_uniform3.insert(pair<int, float*>(location, val));
 }
 
@@ -179,7 +195,7 @@ void Shader::setUniform4(const string& name, const float* value) {
     float* val = new float[4];
     for (size_t i = 0; i < 4; ++i)
         val[i] = value[i];
-    location = gl::getUniformLocation(m_shaderProgramId, name.c_str());
+    location = gl::getUniformLocation(m_shaderProgramId, name);
     m_uniform4.insert(pair<int, float*>(location, val));
 }
 
@@ -188,7 +204,7 @@ void Shader::setUniformMatrix2x2(const string& name, const float* value) {
     float* val = new float[4];
     for (size_t i = 0; i < 4; ++i)
         val[i] = value[i];
-    location = gl::getUniformLocation(m_shaderProgramId, name.c_str());
+    location = gl::getUniformLocation(m_shaderProgramId, name);
     m_uniform2x2.insert(pair<int, float*>(location, val));
 }
 
@@ -197,7 +213,7 @@ void Shader::setUniformMatrix3x3(const string& name, const float* value) {
     float* val = new float[9];
     for (size_t i = 0; i < 9; ++i)
         val[i] = value[i];
-    location = gl::getUniformLocation(m_shaderProgramId, name.c_str());
+    location = gl::getUniformLocation(m_shaderProgramId, name);
     m_uniform3x3.insert(pair<int, float*>(location, val));
 }
 
@@ -206,7 +222,7 @@ void Shader::setUniformMatrix4x4(const string& name, const float* value) {
     float* val = new float[16];
     for (size_t i = 0; i < 16; ++i)
         val[i] = value[i];
-    location = gl::getUniformLocation(m_shaderProgramId, name.c_str());
+    location = gl::getUniformLocation(m_shaderProgramId, name);
     m_uniform4x4.insert(pair<int, float*>(location, val));
 }
 
