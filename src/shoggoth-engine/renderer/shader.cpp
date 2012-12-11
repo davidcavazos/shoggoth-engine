@@ -159,6 +159,10 @@ void Shader::useShader() const {
     for (it = m_uniform4x4.begin(); it != m_uniform4x4.end(); ++it)
         gl::useUniform4x4(it->first, it->second);
 
+    gl::useUniform4x4(m_viewMatrixLocation, OpenGL::ms_viewMatrix);
+    gl::useUniform4x4(m_modelMatrixLocation, OpenGL::ms_modelMatrix);
+    gl::useUniform4x4(m_modelViewMatrixLocation, OpenGL::ms_modelViewMatrix);
+    gl::useUniform4x4(m_projectionMatrixLocation, OpenGL::ms_projectionMatrix);
     gl::useUniform4x4(m_modelViewProjectionMatrixLocation, OpenGL::ms_modelViewProjectionMatrix);
 }
 

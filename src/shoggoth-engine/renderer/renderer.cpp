@@ -135,11 +135,11 @@ void Renderer::draw() {
 
         Transform(entity->getOrientationAbs(), entity->getPositionAbs()).getOpenGLMatrix(OpenGL::ms_modelMatrix);
         OpenGL::multMatrix(OpenGL::ms_modelViewMatrix, OpenGL::ms_modelMatrix, OpenGL::ms_viewMatrix);
-        OpenGL::multMatrix(OpenGL::ms_modelViewProjectionMatrix, OpenGL::ms_projectionMatrix, OpenGL::ms_modelViewMatrix);
-//         if (!OpenGL::areShadersSupported()) {
+        OpenGL::multMatrix(OpenGL::ms_modelViewProjectionMatrix, OpenGL::ms_modelViewMatrix, OpenGL::ms_projectionMatrix);
+        if (!OpenGL::areShadersSupported()) {
             glLoadIdentity();
             glMultMatrixf(OpenGL::ms_modelViewMatrix);
-//         }
+        }
         for (size_t n = 0; n < model->getTotalMeshes(); ++n) {
             const Mesh* mesh = model->getMesh(n);
             const Material* material = (*it)->getMaterial(n);

@@ -182,8 +182,8 @@ void OpenGL::detectCapabilities() {
     {
         ms_renderingMethod = RENDERING_METHOD_SHADERS_EXT;
     }
-    cout << "NOTE: OpenGL.detectCapabilities: Forcing Fixed Pipeline" << endl;
-    ms_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
+//     cout << "NOTE: OpenGL.detectCapabilities: Forcing Fixed Pipeline" << endl;
+//     ms_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
 
     switch (ms_dataUploadMode) {
     case DATA_UPLOAD_VERTEX_ARRAY:
