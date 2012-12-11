@@ -136,6 +136,8 @@ void Renderer::draw() {
         Transform(entity->getOrientationAbs(), entity->getPositionAbs()).getOpenGLMatrix(OpenGL::ms_modelMatrix);
         OpenGL::multMatrix(OpenGL::ms_modelViewMatrix, OpenGL::ms_modelMatrix, OpenGL::ms_viewMatrix);
         OpenGL::multMatrix(OpenGL::ms_modelViewProjectionMatrix, OpenGL::ms_modelViewMatrix, OpenGL::ms_projectionMatrix);
+        OpenGL::inverseMatrix(OpenGL::ms_normalMatrix, OpenGL::ms_modelViewMatrix);
+        OpenGL::transposeMatrix(OpenGL::ms_normalMatrix);
         if (!OpenGL::areShadersSupported()) {
             glLoadIdentity();
             glMultMatrixf(OpenGL::ms_modelViewMatrix);

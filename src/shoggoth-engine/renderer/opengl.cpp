@@ -36,6 +36,7 @@ float OpenGL::ms_viewMatrix[16] = {0};
 float OpenGL::ms_modelMatrix[16] = {0};
 float OpenGL::ms_modelViewMatrix[16] = {0};
 float OpenGL::ms_modelViewProjectionMatrix[16] = {0};
+float OpenGL::ms_normalMatrix[16] = {0};
 float OpenGL::ms_openGLVersion = 1.1f;
 float OpenGL::ms_shaderLanguageVersion = 1.0f;
 data_upload_t OpenGL::ms_dataUploadMode = DATA_UPLOAD_VERTEX_ARRAY;
@@ -289,6 +290,14 @@ void OpenGL::multMatrix(float* result, const float* a, const float* b) {
     result[13] = a[12] * b[ 1] + a[13] * b[ 5] + a[14] * b[ 9] + a[15] * b[13];
     result[14] = a[12] * b[ 2] + a[13] * b[ 6] + a[14] * b[10] + a[15] * b[14];
     result[15] = a[12] * b[ 3] + a[13] * b[ 7] + a[14] * b[11] + a[15] * b[15];
+}
+
+void OpenGL::inverseMatrix(float* result, const float* a) {
+
+}
+
+void OpenGL::transposeMatrix(float* m) {
+
 }
 
 void OpenGL::projectionMatrixOrthographic(float width, float height, float near, float far) {

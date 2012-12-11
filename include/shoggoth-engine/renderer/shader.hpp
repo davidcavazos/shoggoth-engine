@@ -57,6 +57,7 @@ private:
     int m_modelViewMatrixLocation;
     int m_projectionMatrixLocation;
     int m_modelViewProjectionMatrixLocation;
+    int m_normalMatrix;
 
     std::map<int, float*> m_uniform1;
     std::map<int, float*> m_uniform2;

@@ -38,6 +38,7 @@ const string GLSL_MODEL_MATRIX = "_modelMatrix";
 const string GLSL_MODEL_VIEW_MATRIX = "_modelViewMatrix";
 const string GLSL_PROJECTION_MATRIX = "_projectionMatrix";
 const string GLSL_MODEL_VIEW_PROJECTION_MATRIX = "_modelViewProjectionMatrix";
+const string GLSL_NORMAL_MATRIX = "_normalMatrix";
 const string GLSL_VERTEX = "_vertex";
 const string GLSL_NORMAL = "_normal";
 const string GLSL_UVCOORD = "_uvcoord";
@@ -53,6 +54,7 @@ Shader::Shader():
     m_modelViewMatrixLocation(-1),
     m_projectionMatrixLocation(-1),
     m_modelViewProjectionMatrixLocation(-1),
+    m_normalMatrix(-1),
     m_uniform1(),
     m_uniform2(),
     m_uniform3(),
@@ -144,6 +146,7 @@ bool Shader::loadShaderProgram(const string& vertexFile, const string& fragmentF
     m_modelViewMatrixLocation = gl::getUniformLocation(m_shaderProgramId, GLSL_MODEL_VIEW_MATRIX);
     m_projectionMatrixLocation = gl::getUniformLocation(m_shaderProgramId, GLSL_PROJECTION_MATRIX);
     m_modelViewProjectionMatrixLocation = gl::getUniformLocation(m_shaderProgramId, GLSL_MODEL_VIEW_PROJECTION_MATRIX);
+    m_normalMatrix = gl::getUniformLocation(m_shaderProgramId, GLSL_NORMAL_MATRIX);
 
     return true;
 }
@@ -171,6 +174,7 @@ void Shader::useShader() const {
     gl::useUniform4x4(m_modelViewMatrixLocation, OpenGL::ms_modelViewMatrix);
     gl::useUniform4x4(m_projectionMatrixLocation, OpenGL::ms_projectionMatrix);
     gl::useUniform4x4(m_modelViewProjectionMatrixLocation, OpenGL::ms_modelViewProjectionMatrix);
+    gl::useUniform4x4(m_normalMatrix, OpenGL::ms_normalMatrix);
 }
 
 

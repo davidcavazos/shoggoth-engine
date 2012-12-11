@@ -1,7 +1,7 @@
 #version 110
 
-uniform vec4 _diffuseColor;
+varying vec4 g_color;
 
 void main() {
-    gl_FragColor = _diffuseColor;
+    gl_FragColor = g_color;
 }
