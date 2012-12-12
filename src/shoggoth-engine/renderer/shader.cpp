@@ -129,6 +129,7 @@ bool Shader::loadShaderProgram(const string& vertexFile, const string& fragmentF
     gl::bindAttribLocation(m_shaderProgramId, NORMALS_ARRAY_INDEX, GLSL_NORMAL);
     gl::bindAttribLocation(m_shaderProgramId, UVCOORDS_ARRAY_INDEX, GLSL_UVCOORD);
 
+    // link program
     bool linkedSuccesfully = gl::linkProgram(m_shaderProgramId);
     gl::deleteShader(m_fragmentShaderId);
     gl::deleteShader(m_vertexShaderId);

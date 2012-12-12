@@ -91,6 +91,7 @@ public:
     static void setAnisotropy(const float anisotropy);
 
     static void detectCapabilities();
+    static void forceFixedPipeline(const bool useFixedPipeline = true);
     static void multMatrix(float* result, const float* a, const float* b);
     static void inverseMatrix(float* result, const float* a);
     static void transposeMatrix(float* m);

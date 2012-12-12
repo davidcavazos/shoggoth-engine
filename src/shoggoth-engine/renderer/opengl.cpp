@@ -183,8 +183,6 @@ void OpenGL::detectCapabilities() {
     {
         ms_renderingMethod = RENDERING_METHOD_SHADERS_EXT;
     }
-//     cout << "NOTE: OpenGL.detectCapabilities: Forcing Fixed Pipeline" << endl;
-//     ms_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
 
     switch (ms_dataUploadMode) {
     case DATA_UPLOAD_VERTEX_ARRAY:
@@ -270,6 +268,36 @@ void OpenGL::detectCapabilities() {
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 }
 
+void OpenGL::forceFixedPipeline(const bool useFixedPipeline) {
+    if (!useFixedPipeline)
+        return;
+    cout << "NOTE: OpenGL.detectCapabilities: Forcing Fixed Pipeline" << endl;
+    ms_renderingMethod = RENDERING_METHOD_FIXED_PIPELINE;
+    switch (ms_renderingMethod) {
+    case RENDERING_METHOD_FIXED_PIPELINE:
+        // already in fixed pipeline, no change
+        break;
+    case RENDERING_METHOD_SHADERS_EXT:
+        glDisableVertexAttribArrayARB(VERTEX_ARRAY_INDEX);
+        glDisableVertexAttribArrayARB(NORMALS_ARRAY_INDEX);
+        glDisableVertexAttribArrayARB(UVCOORDS_ARRAY_INDEX);
+        break;
+    case RENDERING_METHOD_SHADERS:
+        glDisableVertexAttribArray(VERTEX_ARRAY_INDEX);
+        glDisableVertexAttribArray(NORMALS_ARRAY_INDEX);
+        glDisableVertexAttribArray(UVCOORDS_ARRAY_INDEX);
+        break;
+    default:
+        cerr << "Error: invalid rendering_method_t: " << ms_renderingMethod << endl;
+    }
+    glEnable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    ms_areShadersSupported = false;
+}
+
 void OpenGL::multMatrix(float* result, const float* a, const float* b) {
     result[ 0] = a[ 0] * b[ 0] + a[ 1] * b[ 4] + a[ 2] * b[ 8] + a[ 3] * b[12];
     result[ 1] = a[ 0] * b[ 1] + a[ 1] * b[ 5] + a[ 2] * b[ 9] + a[ 3] * b[13];
@@ -293,11 +321,59 @@ void OpenGL::multMatrix(float* result, const float* a, const float* b) {
 }
 
 void OpenGL::inverseMatrix(float* result, const float* a) {
+    float s0 = a[0] * a[5] - a[4] * a[1];
+    float s1 = a[0] * a[6] - a[4] * a[2];
+    float s2 = a[0] * a[7] - a[4] * a[3];
+    float s3 = a[1] * a[6] - a[5] * a[2];
+    float s4 = a[1] * a[7] - a[5] * a[3];
+    float s5 = a[2] * a[7] - a[6] * a[3];
 
+    float c5 = a[10] * a[15] - a[14] * a[11];
+    float c4 = a[ 9] * a[15] - a[13] * a[11];
+    float c3 = a[ 9] * a[14] - a[13] * a[10];
+    float c2 = a[ 8] * a[15] - a[12] * a[11];
+    float c1 = a[ 8] * a[14] - a[12] * a[10];
+    float c0 = a[ 8] * a[13] - a[12] * a[ 9];
+
+    // Should check for 0 determinant
+    float invdet = 1.0f / (s0 * c5 - s1 * c4 + s2 * c3 + s3 * c2 - s4 * c1 + s5 * c0);
+
+    result[ 0] = ( a[ 5] * c5 - a[ 6] * c4 + a[ 7] * c3) * invdet;
+    result[ 1] = (-a[ 1] * c5 + a[ 2] * c4 - a[ 3] * c3) * invdet;
+    result[ 2] = ( a[13] * s5 - a[14] * s4 + a[15] * s3) * invdet;
+    result[ 3] = (-a[ 9] * s5 + a[10] * s4 - a[11] * s3) * invdet;
+
+    result[ 4] = (-a[ 4] * c5 + a[ 6] * c2 - a[ 7] * c1) * invdet;
+    result[ 5] = ( a[ 0] * c5 - a[ 2] * c2 + a[ 3] * c1) * invdet;
+    result[ 6] = (-a[12] * s5 + a[14] * s2 - a[15] * s1) * invdet;
+    result[ 7] = ( a[ 8] * s5 - a[10] * s2 + a[11] * s1) * invdet;
+
+    result[ 8] = ( a[ 4] * c4 - a[ 5] * c2 + a[ 7] * c0) * invdet;
+    result[ 9] = (-a[ 0] * c4 + a[ 1] * c2 - a[ 3] * c0) * invdet;
+    result[10] = ( a[12] * s4 - a[13] * s2 + a[15] * s0) * invdet;
+    result[11] = (-a[ 8] * s4 + a[ 9] * s2 - a[11] * s0) * invdet;
+
+    result[12] = (-a[ 4] * c3 + a[ 5] * c1 - a[ 6] * c0) * invdet;
+    result[13] = ( a[ 0] * c3 - a[ 1] * c1 + a[ 2] * c0) * invdet;
+    result[14] = (-a[12] * s3 + a[13] * s1 - a[14] * s0) * invdet;
+    result[15] = ( a[ 8] * s3 - a[ 9] * s1 + a[10] * s0) * invdet;
 }
 
 void OpenGL::transposeMatrix(float* m) {
+    float temp[6] = {m[1], m[2], m[3], m[6], m[7], m[11]};
+    m[ 1] = m[ 4];
+    m[ 2] = m[ 8];
+    m[ 3] = m[12];
+    m[ 6] = m[ 9];
+    m[ 7] = m[13];
+    m[11] = m[14];
 
+    m[ 4] = temp[0];
+    m[ 8] = temp[1];
+    m[ 9] = temp[3];
+    m[12] = temp[2];
+    m[13] = temp[4];
+    m[14] = temp[5];
 }
 
 void OpenGL::projectionMatrixOrthographic(float width, float height, float near, float far) {

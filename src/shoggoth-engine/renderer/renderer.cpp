@@ -87,20 +87,7 @@ Renderer::~Renderer() {
         delete itModel->second;
     }
 
-//     cout << "Destroying all renderable meshes: " << m_renderableMeshes.size() << endl;
-//     set<RenderableMesh*>::const_iterator itRend;
-//     for (itRend = m_renderableMeshes.begin(); itRend != m_renderableMeshes.end(); ++itRend)
-//         delete *itRend;
-//
-//     cout << "Destroying all lights: " << m_lights.size() << endl;
-//     set<Light*>::const_iterator itLight;
-//     for (itLight = m_lights.begin(); itLight != m_lights.end(); ++itLight)
-//         delete *itLight;
-//
-//     cout << "Destroying all cameras: " << m_cameras.size() << endl;
-//     set<Camera*>::const_iterator itCam;
-//     for (itCam = m_cameras.begin(); itCam != m_cameras.end(); ++itCam)
-//         delete *itCam;
+    // renderablemeshes, lights and cameras destroyed when destroying root scene node
 
     unregisterAllCommands();
     unregisterAllAttributes();

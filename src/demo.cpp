@@ -90,6 +90,7 @@ Demo::Demo(const string& objectName,
     g_materials.push_back("assets/materials/yellow.material");
 
     m_device.setResolution(800, 600);
+    OpenGL::forceFixedPipeline(false);
     OpenGL::setTextureFilteringMode(TEXTURE_FILTERING_ANISOTROPIC);
     OpenGL::setAnisotropy(4.0f);
 }
