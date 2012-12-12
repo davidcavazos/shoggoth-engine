@@ -48,6 +48,9 @@ using namespace std;
 const unsigned int FRAMERATE_LIMIT = 60;
 const unsigned int MILLISECONDS_LIMIT = 1000 / FRAMERATE_LIMIT;
 
+const size_t MAX_CUBES = 30;
+const size_t MAX_MODELS = 3;
+
 const double FIRE_SPEED = 50.0;
 const double MISSILE_SIZE = 0.5;
 
@@ -225,20 +228,30 @@ string Demo::cmdFireCube(std::deque<std::string>&) {
     Entity* camera;
     if (m_scene.findEntity("camera1", camera)) {
         static size_t n = 0;
-        string name = string("missile-cube-") + boost::lexical_cast<string>(++n);
-
-        Entity* cube = m_scene.root()->addChild(name);
+        ++n;
+        if (n >= MAX_CUBES)
+            n = 1;
+        string name = string("missile-cube-") + boost::lexical_cast<string>(n);
         Vector3 orientationUnit = VECTOR3_UNIT_Z_NEG.rotate(camera->getOrientationAbs());
+
+        Entity* cube;
+        RenderableMesh* cubeMesh;
+        RigidBody* cubeBody;
+        if (!m_scene.findEntity(name, cube)) {
+            cube = m_scene.root()->addChild(name);
+
+            cubeMesh = new RenderableMesh(cube, &m_renderer);
+            cubeMesh->loadBox(MISSILE_SIZE, MISSILE_SIZE, MISSILE_SIZE);
+
+            cubeBody = new RigidBody(cube, &m_physicsWorld);
+            cubeBody->addBox(1.0, MISSILE_SIZE, MISSILE_SIZE, MISSILE_SIZE);
+        }
         cube->setPositionAbs(camera->getPositionAbs() + orientationUnit);
         cube->setOrientationAbs(camera->getOrientationAbs());
-
-        RenderableMesh* cubeMesh = new RenderableMesh(cube, &m_renderer);
-        cubeMesh->loadBox(MISSILE_SIZE, MISSILE_SIZE, MISSILE_SIZE);
+        cubeMesh = dynamic_cast<RenderableMesh*>(cube->component(COMPONENT_RENDERABLEMESH));
+        cubeBody = dynamic_cast<RigidBody*>(cube->component(COMPONENT_RIGIDBODY));
         for (size_t i = 0; i < cubeMesh->getModel()->getTotalMeshes(); ++i)
             cubeMesh->assignMaterial(i, g_materials[rand() % g_materials.size()]);
-
-        RigidBody* cubeBody = new RigidBody(cube, &m_physicsWorld);
-        cubeBody->addBox(1.0, MISSILE_SIZE, MISSILE_SIZE, MISSILE_SIZE);
         cubeBody->setLinearVelocity(orientationUnit * FIRE_SPEED);
     }
     return "";
@@ -248,21 +261,31 @@ string Demo::cmdFireModel(std::deque<std::string>&) {
     Entity* camera;
     if (m_scene.findEntity("camera1", camera)) {
         static size_t n = 0;
-        string name = string("missile-model-") + boost::lexical_cast<string>(++n);
-
-        Entity* model = m_scene.root()->addChild(name);
+        ++n;
+        if (n >= MAX_MODELS)
+            n = 1;
+        string name = string("missile-model-") + boost::lexical_cast<string>(n);
         Vector3 orientationUnit = VECTOR3_UNIT_Z_NEG.rotate(camera->getOrientationAbs());
+
+        Entity* model;
+        RenderableMesh* modelMesh;
+        RigidBody* modelBody;
+        if (!m_scene.findEntity(name, model)) {
+            model = m_scene.root()->addChild(name);
+
+            string modelName = "assets/meshes/materialtest.dae";
+            modelMesh = new RenderableMesh(model, &m_renderer);
+            modelMesh->loadFromFile(modelName);
+
+            modelBody = new RigidBody(model, &m_physicsWorld);
+            modelBody->addConvexHull(1.0, modelName);
+        }
         model->setPositionAbs(camera->getPositionAbs() + orientationUnit);
         model->setOrientationAbs(camera->getOrientationAbs());
-
-        string modelName = "assets/meshes/materialtest.dae";
-        RenderableMesh* modelMesh = new RenderableMesh(model, &m_renderer);
-        modelMesh->loadFromFile(modelName);
+        modelMesh = dynamic_cast<RenderableMesh*>(model->component(COMPONENT_RENDERABLEMESH));
+        modelBody = dynamic_cast<RigidBody*>(model->component(COMPONENT_RIGIDBODY));
         for (size_t i = 0; i < modelMesh->getModel()->getTotalMeshes(); ++i)
             modelMesh->assignMaterial(i, g_materials[rand() % g_materials.size()]);
-
-        RigidBody* modelBody = new RigidBody(model, &m_physicsWorld);
-        modelBody->addConvexHull(1.0, modelName);
         modelBody->setLinearVelocity(orientationUnit * FIRE_SPEED);
     }
     return "";
